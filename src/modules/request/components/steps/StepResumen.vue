@@ -1,197 +1,130 @@
 <template>
-  <div class="step-form">
-    <h2 class="step-form__title">Resumen y confirmación</h2>
-    
-    <div class="step-form__content">
-      <div class="confirmation-message">
-        <h3 class="confirmation-title">¡Solicitud Registrada!</h3>
-        <p class="confirmation-text">
-          Nos comunicaremos con usted en la brevedad posible.
-        </p>
-      </div>
-
-      <div class="summary-section">
-        <h4 class="summary-title">Resumen de la solicitud</h4>
-        
-        <div class="summary-item">
-          <strong>Datos del solicitante:</strong>
-          <p>{{ formData.nombre }} {{ formData.apellido }}</p>
-          <p>{{ formData.tipoDocumento }}: {{ formData.numeroDocumento }}</p>
-          <p>Tel: {{ formData.telefono }}</p>
-          <p>Email: {{ formData.email }}</p>
+  <div class="step">
+    <Card class="panel">
+      <template #content>
+        <div class="title">
+          <div class="title-icon ok"><i class="pi pi-check"></i></div>
+          <h2>¡Solicitud Registrada!</h2>
+          <p>Su solicitud ha sido registrada exitosamente</p>
         </div>
 
-        <div class="summary-item">
-          <strong>Fecha / hora:</strong>
-          <p>{{ formData.fechaCelebracion }} - {{ formData.hora }}</p>
+        <div class="sections">
+          <Card class="section">
+            <template #content>
+              <div class="section-title">
+                <i class="pi pi-user"></i><span>Datos del Solicitante</span>
+              </div>
+              <div class="kv">
+                <div><b>Nombre:</b> {{ formData.nombre }} {{ formData.apellido }}</div>
+                <div><b>Documento:</b> {{ formData.tipoDocumento }}: {{ formData.numeroDocumento }}</div>
+                <div><b>Teléfono:</b> {{ formData.telefono }}</div>
+                <div><b>Correo:</b> {{ formData.email }}</div>
+              </div>
+            </template>
+          </Card>
+
+          <Card class="section">
+            <template #content>
+              <div class="section-title">
+                <i class="pi pi-calendar"></i><span>Datos de la Celebración</span>
+              </div>
+              <div class="kv">
+                <div><b>Fecha:</b> {{ formData.fechaCelebracion }}</div>
+                <div><b>Tipo:</b> {{ formData.tipoCelebracion }}</div>
+                <div><b>Misa:</b> {{ formData.misa }}</div>
+                <div><b>Hora:</b> {{ formData.hora }}</div>
+                <div><b>Intención:</b> {{ formData.intencion }}</div>
+              </div>
+            </template>
+          </Card>
+
+          <Card class="section">
+            <template #content>
+              <div class="section-title">
+                <i class="pi pi-file-edit"></i><span>Menciones ({{ formData.menciones?.length ?? 0 }})</span>
+              </div>
+              <ol class="mentions">
+                <li v-for="(m, i) in (formData.menciones ?? [])" :key="i">{{ m }}</li>
+              </ol>
+            </template>
+          </Card>
+
+          <Card class="section">
+            <template #content>
+              <div class="section-title">
+                <i class="pi pi-wallet"></i><span>Información de Pago</span>
+              </div>
+              <div class="pay-row">
+                <div>
+                  <div class="muted">Total Pagado</div>
+                  <div class="total">S/ {{ formData.total }}</div>
+                </div>
+                <Tag value="Menciones: Gratis" severity="success" />
+              </div>
+            </template>
+          </Card>
+
+          <Message severity="success" :closable="false" class="msg">
+            Confirmación enviada. Por favor revise su bandeja de entrada o spam.
+          </Message>
         </div>
 
-        <div class="summary-item">
-          <strong>Tipo de misa:</strong>
-          <p>{{ formData.tipoCelebracion }} - {{ formData.misa }}</p>
+        <div class="footer">
+          <Button label="Volver al Inicio" class="btn-next" @click="$emit('inicio')" />
+          <small class="bless">Que Dios los bendiga 🙏</small>
         </div>
-
-        <div class="summary-item">
-          <strong>Menciones:</strong>
-          <ul>
-            <li v-for="(mencion, index) in formData.menciones" :key="index">
-              {{ mencion || '(Sin descripción)' }}
-            </li>
-          </ul>
-        </div>
-
-        <div class="summary-item">
-          <strong>Total:</strong>
-          <p>{{ formData.total }}</p>
-        </div>
-
-        <div class="summary-item">
-          <strong>Voucher adjuntado:</strong>
-          <p>{{ formData.voucher ? formData.voucher.name : 'No adjuntado' }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step-form__footer">
-      <button class="btn btn--purple btn--large" @click="handleInicio">
-        Inicio
-      </button>
-    </div>
+      </template>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-interface Props {
-  formData: {
-    nombre: string;
-    apellido: string;
-    tipoDocumento: string;
-    numeroDocumento: string;
-    telefono: string;
-    email: string;
-    fechaCelebracion: string;
-    hora: string;
-    tipoCelebracion: string;
-    misa: string;
-    menciones: string[];
-    total: number;
-    voucher: File | null;
-  };
-}
+import Card from "primevue/card";
+import Button from "primevue/button";
+import Message from "primevue/message";
+import Tag from "primevue/tag";
 
-const props = defineProps<Props>();
-
-const emit = defineEmits<{
-  'inicio': [];
+defineProps<{
+  formData: any;
 }>();
 
-const handleInicio = () => {
-  emit('inicio');
-};
+defineEmits<{
+  inicio: [];
+}>();
 </script>
 
 <style scoped>
-.step-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
+.step{ padding: 2rem 1rem; display:flex; justify-content:center; }
+.panel{ width: 100%; max-width: 980px; border-radius: 16px; }
 
-.step-form__title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  color: #1f2937;
+.title{ text-align:center; margin-bottom: 1.25rem; }
+.title-icon{
+  width:64px; height:64px; border-radius:50%;
+  display:grid; place-items:center; margin:0 auto .75rem;
+  border: 1px solid #c7f9d5;
+  background:#eafff0;
+  color:#0a7a2a;
 }
+.title-icon.ok i{ font-size: 1.4rem; }
+.title h2{ margin:0; font-family: Georgia, serif; color: var(--church-brown-600); }
+.title p{ margin:.4rem 0 0; color:#6b7280; }
 
-.step-form__content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+.sections{ display:flex; flex-direction:column; gap: 1rem; }
+.section{ border-radius: 14px; }
+.section-title{
+  display:flex; gap:.5rem; align-items:center;
+  font-weight:700; color: var(--church-brown-600); margin-bottom: .75rem;
 }
+.kv{ display:grid; gap:.35rem; color:#111827; }
+.mentions{ margin:0; padding-left: 1.2rem; display:grid; gap:.35rem; }
 
-.confirmation-message {
-  text-align: center;
-  padding: 2rem;
-  background: #f0fdf4;
-  border: 2px solid #86efac;
-  border-radius: 0.5rem;
-}
+.pay-row{ display:flex; justify-content:space-between; align-items:center; gap: 1rem; }
+.muted{ color:#6b7280; font-size:.9rem; }
+.total{ font-size: 2rem; font-weight:800; color: var(--church-brown-600); }
 
-.confirmation-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #166534;
-  margin-bottom: 0.5rem;
-}
+.msg{ margin-top: .5rem; }
 
-.confirmation-text {
-  color: #15803d;
-  margin: 0;
-}
-
-.summary-section {
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-}
-
-.summary-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-}
-
-.summary-item {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.summary-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.summary-item strong {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #374151;
-}
-
-.summary-item p {
-  margin: 0.25rem 0;
-  color: #6b7280;
-}
-
-.summary-item ul {
-  margin: 0.5rem 0 0 1.5rem;
-  padding: 0;
-  color: #6b7280;
-}
-
-.step-form__footer {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.btn--purple {
-  background: #9333ea;
-  color: #fff;
-  border-color: #9333ea;
-  padding: 0.75rem 1.5rem;
-}
-
-.btn--purple:hover {
-  background: #7e22ce;
-}
-
-.btn--large {
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  min-width: 200px;
-}
+.footer{ margin-top: 1.5rem; display:flex; flex-direction:column; align-items:center; gap:.75rem; }
+.btn-next{ background: var(--church-brown-400); border: 1px solid var(--church-brown-400); }
+.bless{ color:#6b7280; }
 </style>

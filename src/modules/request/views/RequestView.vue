@@ -90,7 +90,6 @@ const currentStep = computed(() => {
   return routeToStepMap[route.path] ?? 0;
 });
 
-// Observar cambios en la ruta y eliminar hash si aparece
 watch(() => route.fullPath, (newPath) => {
   if (window.location.hash && window.location.hash !== '#') {
     // Si hay un hash que no sea solo '#', reemplazar la URL sin hash
@@ -101,28 +100,38 @@ watch(() => route.fullPath, (newPath) => {
   }
 }, { immediate: true });
 
-const formData = reactive({
-  // Datos del solicitante
-  tipoDocumento: "",
+interface RequestFormData {
+  tipoDocumento: number | null;
+  numeroDocumento: string;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  email: string;
+  fechaCelebracion: string;
+  tipoCelebracion: string;
+  misa: string;
+  hora: string;
+  intencion: string;
+  menciones: string[];
+  total: number;
+  voucher: File | null;
+}
+
+const formData = reactive<RequestFormData>({
+  tipoDocumento: null,
   numeroDocumento: "",
   nombre: "",
   apellido: "",
   telefono: "",
   email: "",
-  
-  // Datos de la celebración
   fechaCelebracion: "",
   tipoCelebracion: "",
   misa: "",
   hora: "",
   intencion: "",
-  
-  // Menciones
-  menciones: [] as string[],
+  menciones: [],
   total: 0,
-  
-  // Pago
-  voucher: null as File | null,
+  voucher: null,
 });
 
 const goToStep = (step: number) => {
@@ -176,65 +185,130 @@ const handleConsultar = () => {
 </script>
 
 <style scoped>
+/* =========================
+   Layout base
+========================= */
 .request-view {
-  min-height: 100vh;
-  padding: 2rem;
-  position: relative;
+  min-height: 100svh;
+  padding: clamp(1rem, 2vw, 2rem);
+  display: grid;
+  place-items: center;
+  background: var(--church-surface);
 }
 
+@media (max-width: 640px) {
+  .request-view {
+    padding: 1rem;
+  }
+}
+
+/* Paso inicio: full screen sin “saltos” */
 .request-view :deep(.step-inicio) {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  width: 100vw;
-  height: 100vh;
+  padding: 0;
 }
 
+/* =========================
+   Botones (base)
+========================= */
 .btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  --btn-bg: #ffffff;
+  --btn-fg: #111827;
+  --btn-br: #d1d5db;
+  --btn-bg-hover: #f3f4f6;
+  --btn-bg-active: #e5e7eb;
+
+  appearance: none;
+  border: 1px solid var(--btn-br);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+
+  padding: 0.65rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: background-color 0.2s;
+  user-select: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 120ms ease,
+    box-shadow 150ms ease;
 }
 
+.btn:hover {
+  background: var(--btn-bg-hover);
+}
+
+.btn:active {
+  background: var(--btn-bg-active);
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Focus accesible (teclado) */
+.btn:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(200, 100, 10, 0.25);
+  border-color: var(--church-brown-400);
+}
+
+/* =========================
+   Variantes
+========================= */
 .btn--primary {
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
-}
-
-.btn--primary:hover {
-  background: #1d4ed8;
+  --btn-bg: #2563eb;
+  --btn-fg: #ffffff;
+  --btn-br: #2563eb;
+  --btn-bg-hover: #1d4ed8;
+  --btn-bg-active: #1e40af;
 }
 
 .btn--secondary {
-  background: #fff;
-  color: #374151;
-  border-color: #d1d5db;
-}
-
-.btn--secondary:hover {
-  background: #f3f4f6;
+  --btn-bg: #ffffff;
+  --btn-fg: #374151;
+  --btn-br: #d1d5db;
+  --btn-bg-hover: #f9fafb;
+  --btn-bg-active: #f3f4f6;
 }
 
 .btn--purple {
-  background: #9333ea;
-  color: #fff;
-  border-color: #9333ea;
+  --btn-bg: #9333ea;
+  --btn-fg: #ffffff;
+  --btn-br: #9333ea;
+  --btn-bg-hover: #7e22ce;
+  --btn-bg-active: #6b21a8;
 }
 
-.btn--purple:hover {
-  background: #7e22ce;
-}
-
+/* Tamaños */
 .btn--large {
-  padding: 1rem 2rem;
+  padding: 0.9rem 1.25rem;
   font-size: 1rem;
+  border-radius: 0.9rem;
+}
+
+/* Opcional: botón ancho completo para móvil */
+@media (max-width: 640px) {
+  .btn--large {
+    width: 100%;
+  }
 }
 </style>

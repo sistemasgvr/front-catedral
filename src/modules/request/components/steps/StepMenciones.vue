@@ -1,192 +1,126 @@
 <template>
-  <div class="step-form">
-    <h2 class="step-form__title">Menciones</h2>
-    
-    <div class="step-form__content">
-      <div class="menciones-header">
-        <button class="btn btn--primary" @click="addMencion">
-          + Nuevo
-        </button>
-      </div>
-
-      <div class="menciones-list">
-        <div 
-          v-for="(mencion, index) in localData.menciones" 
-          :key="index"
-          class="mencion-card"
-        >
-          <div class="mencion-card__header">
-            <span>DESCRIPCIÓN</span>
-            <button 
-              class="btn-close"
-              @click="removeMencion(index)"
-            >
-              Cerrar
-            </button>
-          </div>
-          <textarea 
-            v-model="localData.menciones[index]"
-            class="mencion-card__textarea"
-            rows="4"
-            placeholder="Ingrese la descripción..."
-          />
+  <div class="step">
+    <Card class="panel">
+      <template #content>
+        <div class="title">
+          <div class="title-icon"><i class="pi pi-file-edit"></i></div>
+          <h2>Menciones</h2>
+          <p>Las menciones no tienen costo adicional</p>
         </div>
-      </div>
 
-      <div class="total-section">
-        <strong>Total: {{ localData.total }}</strong>
-      </div>
-    </div>
+        <div class="add-row">
+          <InputText
+            v-model="mencionInput"
+            class="w-full"
+            placeholder="Escribe una mención (Ej: Por la salud de María)"
+            @keyup.enter="addMencion"
+          />
+          <Button label="Agregar" icon="pi pi-plus" class="btn-add" @click="addMencion" />
+        </div>
 
-    <div class="step-form__footer">
-      <button class="btn btn--purple" @click="handlePrevious">Anterior</button>
-      <button class="btn btn--purple" @click="handleNext">Siguiente paso</button>
-    </div>
+        <div class="list">
+          <div v-for="(m, i) in local.menciones" :key="i" class="item">
+            <Tag :value="`Mención ${i + 1}`" class="tag" />
+            <div class="text">{{ m }}</div>
+            <Button
+              icon="pi pi-times"
+              severity="danger"
+              text
+              rounded
+              aria-label="Eliminar"
+              @click="removeMencion(i)"
+            />
+          </div>
+        </div>
+
+        <Message severity="info" :closable="false" class="msg">
+          Las menciones se incluyen sin costo adicional en su solicitud de misa
+        </Message>
+
+        <div class="footer">
+          <Button label="Anterior" icon="pi pi-arrow-left" severity="secondary" outlined @click="$emit('previous')" />
+          <Button label="Siguiente" icon="pi pi-arrow-right" iconPos="right" class="btn-next" @click="$emit('next')" />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import Card from "primevue/card";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Message from "primevue/message";
+import Tag from "primevue/tag";
 
 interface Props {
   formData: {
     menciones: string[];
-    total: number;
   };
 }
-
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:form-data': [data: Partial<Props['formData']>];
-  'previous': [];
-  'next': [];
+  "update:form-data": [data: Partial<Props["formData"]>];
+  previous: [];
+  next: [];
 }>();
 
-const localData = ref({
-  menciones: [...props.formData.menciones],
-  total: props.formData.total,
-});
+const local = ref({ ...props.formData });
+const mencionInput = ref("");
 
-watch(localData, (newData) => {
-  emit('update:form-data', newData);
-}, { deep: true });
+watch(() => props.formData, (v) => (local.value = { ...v }), { deep: true });
+watch(local, (v) => emit("update:form-data", v), { deep: true });
 
 const addMencion = () => {
-  localData.value.menciones.push("");
-  localData.value.total += 10;
+  const text = mencionInput.value.trim();
+  if (!text) return;
+  local.value.menciones = [...(local.value.menciones ?? []), text];
+  mencionInput.value = "";
 };
 
 const removeMencion = (index: number) => {
-  localData.value.menciones.splice(index, 1);
-  if (localData.value.total > 0) {
-    localData.value.total -= 10;
-  }
-};
-
-const handlePrevious = () => {
-  emit('previous');
-};
-
-const handleNext = () => {
-  emit('next');
+  local.value.menciones = local.value.menciones.filter((_, i) => i !== index);
 };
 </script>
 
 <style scoped>
-.step-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
+.step{ padding: 2rem 1rem; display:flex; justify-content:center; }
+.panel{ width: 100%; max-width: 980px; border-radius: 16px; }
 
-.step-form__title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  color: #1f2937;
+.title{ text-align:center; margin-bottom: 1.25rem; }
+.title-icon{
+  width:54px; height:54px; border-radius:50%;
+  background: var(--church-brown-100); color: var(--church-brown-500);
+  display:grid; place-items:center; margin:0 auto .75rem;
+  border: 1px solid var(--church-border);
 }
+.title h2{ margin:0; font-family: Georgia, serif; color: var(--church-brown-600); }
+.title p{ margin:.4rem 0 0; color:#6b7280; }
 
-.step-form__content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.add-row{
+  display:flex; gap:.75rem; align-items:center;
+  margin: 1rem 0 1.25rem;
 }
+.btn-add{ background:#c8640a; border:1px solid #c8640a; white-space:nowrap; }
 
-.menciones-header {
-  display: flex;
-  justify-content: flex-start;
+.list{ display:flex; flex-direction:column; gap:.85rem; }
+.item{
+  border: 1px solid var(--church-border);
+  background: var(--church-brown-50);
+  border-radius: 12px;
+  padding: .9rem 1rem;
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  gap: .75rem;
+  align-items:center;
 }
+.tag{ background: var(--church-brown-200); color: var(--church-brown-600); }
+.text{ color:#111827; }
 
-.menciones-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+.msg{ margin-top: 1.25rem; }
 
-.mencion-card {
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  overflow: hidden;
-}
-
-.mencion-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: #f3f4f6;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-.btn-close {
-  background: transparent;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  font-size: 0.875rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.btn-close:hover {
-  color: #374151;
-}
-
-.mencion-card__textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: none;
-  resize: vertical;
-  font-family: inherit;
-  font-size: 1rem;
-}
-
-.mencion-card__textarea:focus {
-  outline: none;
-}
-
-.total-section {
-  padding: 1rem;
-  text-align: right;
-  font-size: 1.125rem;
-}
-
-.step-form__footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
-}
-
-.btn--purple {
-  background: #9333ea;
-  color: #fff;
-  border-color: #9333ea;
-  padding: 0.75rem 1.5rem;
-}
-
-.btn--purple:hover {
-  background: #7e22ce;
-}
+.footer{ display:flex; justify-content:space-between; gap: .75rem; margin-top: 1.5rem; }
+.btn-next{ background: var(--church-brown-400); border: 1px solid var(--church-brown-400); }
 </style>

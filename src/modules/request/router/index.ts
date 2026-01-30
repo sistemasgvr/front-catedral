@@ -1,5 +1,5 @@
 import RequestView from "../views/RequestView.vue";
-
+import DebugMisasView from "../views/DebugMisasView.vue";
 const routes = [
   {
     path: "/",
@@ -36,6 +36,11 @@ const routes = [
     name: "Resumen",
     component: RequestView,
     props: { step: 5 },
+  },
+  {
+    path: "/debug-misas-menciones",
+    name: "debug-misas-menciones",
+    component: DebugMisasView,
   },
 ];
 
