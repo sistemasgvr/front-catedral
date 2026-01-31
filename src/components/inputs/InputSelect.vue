@@ -8,7 +8,14 @@
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
-    <div class="relative">
+    
+    <!-- Skeleton Loading -->
+    <div v-if="loading" class="animate-pulse">
+      <div class="h-[50px] bg-gray-200 rounded-lg"></div>
+    </div>
+
+    <!-- Select -->
+    <div v-else class="relative">
       <select
         :id="name"
         :name="name"
@@ -39,7 +46,8 @@
         </svg>
       </div>
     </div>
-    <p v-if="errorMessage" class="mt-1 text-sm text-red-500">
+    
+    <p v-if="errorMessage && !loading" class="mt-1 text-sm text-red-500">
       {{ errorMessage }}
     </p>
   </div>
@@ -60,6 +68,7 @@ defineProps<{
   options: Option[];
   required?: boolean;
   disabled?: boolean;
+  loading?: boolean;
   errorMessage?: string;
 }>();
 

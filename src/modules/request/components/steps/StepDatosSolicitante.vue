@@ -17,7 +17,8 @@
             name="idTipoDocumento"
             label="Tipo de Documento"
             placeholder="Seleccionar"
-            :options="store.tiposDocumento"
+            :options="tiposDocumento"
+            :loading="loadingTiposDocumento"
             :required="true"
             :error-message="getFieldError('idTipoDocumento')"
             @blur="validateField('idTipoDocumento')"
@@ -100,10 +101,34 @@ import { ref, watch, onMounted } from 'vue';
 import { useField, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { useSolicitudStore } from '../../stores/solicitud.store';
-import InputText from '../inputs/InputText.vue';
-import InputSelect from '../inputs/InputSelect.vue';
+import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
+import { mapOpcionToSelect, type ISelectOption } from '../../interfaces/opcionLista.interface';
+import { InputText, InputSelect } from '@/components/inputs';
 
 const store = useSolicitudStore();
+
+// Estado para tipos de documento
+const tiposDocumento = ref<ISelectOption[]>([]);
+const loadingTiposDocumento = ref(true);
+
+// Cargar tipos de documento desde la API
+const cargarTiposDocumento = async () => {
+  try {
+    loadingTiposDocumento.value = true;
+    const opciones = await getOpcionesLista(1); // ID 1 = Tipos de Documento
+    tiposDocumento.value = opciones.map(mapOpcionToSelect);
+  } catch (error) {
+    console.error('Error al cargar tipos de documento:', error);
+    // Fallback a datos estáticos en caso de error
+    tiposDocumento.value = [
+      { id: 1, nombre: 'DNI' },
+      { id: 2, nombre: 'Carnet de Extranjería' },
+      { id: 3, nombre: 'Pasaporte' },
+    ];
+  } finally {
+    loadingTiposDocumento.value = false;
+  }
+};
 
 // Schema de validación con Yup
 const validationSchema = yup.object({
@@ -146,7 +171,7 @@ const { errors, validate, validateField: validateFieldForm } = useForm<Record<Fo
     celular: store.solicitud.celular,
     correo: store.solicitud.correo,
   },
-  validateOnMount: false, // No validar al montar
+  validateOnMount: false,
 });
 
 // Campos del formulario
@@ -157,10 +182,8 @@ const { value: apellidos } = useField<string>('apellidos');
 const { value: celular } = useField<string>('celular');
 const { value: correo } = useField<string>('correo');
 
-const isValid = ref(true); // Iniciar como válido para no mostrar mensaje
-const hasInteracted = ref(false); // Rastrear si el usuario ha interactuado
-
-// Rastrear campos tocados
+const isValid = ref(true);
+const hasInteracted = ref(false);
 const touchedFields = ref<Set<FormFields>>(new Set());
 
 // Validar un campo específico solo si fue tocado
@@ -186,8 +209,12 @@ watch(
   { deep: true }
 );
 
-// Cargar datos del store al montar
-onMounted(() => {
+// Cargar datos al montar
+onMounted(async () => {
+  // Cargar tipos de documento
+  await cargarTiposDocumento();
+  
+  // Cargar datos del store
   idTipoDocumento.value = store.solicitud.idTipoDocumento;
   nroDocumento.value = store.solicitud.nroDocumento;
   nombres.value = store.solicitud.nombres;
@@ -214,7 +241,6 @@ const getFieldError = (fieldName: FormFields): string | undefined => {
 // Exponer método de validación para el wizard
 defineExpose({
   validate: async () => {
-    // Marcar todos los campos como tocados para mostrar errores
     const allFields: FormFields[] = ['idTipoDocumento', 'nroDocumento', 'nombres', 'apellidos', 'celular', 'correo'];
     allFields.forEach(field => touchedFields.value.add(field));
     hasInteracted.value = true;
