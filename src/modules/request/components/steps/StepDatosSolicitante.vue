@@ -1,6 +1,6 @@
 <template>
   <div class="step-content">
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-2xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
       
       <!-- Title -->
       <h2 class="text-2xl font-serif font-bold text-[#C88A2A] mb-2 text-center">
