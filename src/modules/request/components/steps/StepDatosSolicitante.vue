@@ -19,7 +19,7 @@
             placeholder="Seleccionar"
             :options="store.tiposDocumento"
             :required="true"
-            :error-message="errors.idTipoDocumento"
+            :error-message="getFieldError('idTipoDocumento')"
             @blur="validateField('idTipoDocumento')"
           />
           <InputText
@@ -29,7 +29,7 @@
             placeholder="12345678"
             :required="true"
             :maxlength="12"
-            :error-message="errors.nroDocumento"
+            :error-message="getFieldError('nroDocumento')"
             @blur="validateField('nroDocumento')"
           />
         </div>
@@ -42,7 +42,7 @@
             label="Nombres"
             placeholder="Juan Carlos"
             :required="true"
-            :error-message="errors.nombres"
+            :error-message="getFieldError('nombres')"
             @blur="validateField('nombres')"
           />
           <InputText
@@ -51,7 +51,7 @@
             label="Apellidos"
             placeholder="Pérez García"
             :required="true"
-            :error-message="errors.apellidos"
+            :error-message="getFieldError('apellidos')"
             @blur="validateField('apellidos')"
           />
         </div>
@@ -65,7 +65,7 @@
             placeholder="987654321"
             :required="true"
             :maxlength="9"
-            :error-message="errors.celular"
+            :error-message="getFieldError('celular')"
             @blur="validateField('celular')"
           />
           <InputText
@@ -75,14 +75,14 @@
             label="Correo Electrónico"
             placeholder="correo@ejemplo.com"
             :required="true"
-            :error-message="errors.correo"
+            :error-message="getFieldError('correo')"
             @blur="validateField('correo')"
           />
         </div>
 
-        <!-- Validation Message -->
+        <!-- Validation Message - Solo mostrar si ha interactuado y hay errores -->
         <div 
-          v-if="!isValid && Object.keys(errors).length > 0" 
+          v-if="hasInteracted && !isValid && touchedFields.size > 0" 
           class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -146,6 +146,7 @@ const { errors, validate, validateField: validateFieldForm } = useForm<Record<Fo
     celular: store.solicitud.celular,
     correo: store.solicitud.correo,
   },
+  validateOnMount: false, // No validar al montar
 });
 
 // Campos del formulario
@@ -156,18 +157,17 @@ const { value: apellidos } = useField<string>('apellidos');
 const { value: celular } = useField<string>('celular');
 const { value: correo } = useField<string>('correo');
 
-const isValid = ref(false);
+const isValid = ref(true); // Iniciar como válido para no mostrar mensaje
+const hasInteracted = ref(false); // Rastrear si el usuario ha interactuado
 
-// Validar un campo específico
+// Rastrear campos tocados
+const touchedFields = ref<Set<FormFields>>(new Set());
+
+// Validar un campo específico solo si fue tocado
 const validateField = async (fieldName: FormFields) => {
+  touchedFields.value.add(fieldName);
+  hasInteracted.value = true;
   await validateFieldForm(fieldName);
-  await checkValidity();
-};
-
-// Verificar validez general
-const checkValidity = async () => {
-  const result = await validate();
-  isValid.value = result.valid;
 };
 
 // Watch para guardar en store cuando cambien los valores
@@ -194,7 +194,6 @@ onMounted(() => {
   apellidos.value = store.solicitud.apellidos;
   celular.value = store.solicitud.celular;
   correo.value = store.solicitud.correo;
-  checkValidity();
 });
 
 const onSubmit = async () => {
@@ -204,10 +203,24 @@ const onSubmit = async () => {
   }
 };
 
+// Obtener error solo si el campo fue tocado
+const getFieldError = (fieldName: FormFields): string | undefined => {
+  if (touchedFields.value.has(fieldName)) {
+    return errors.value[fieldName];
+  }
+  return undefined;
+};
+
 // Exponer método de validación para el wizard
 defineExpose({
   validate: async () => {
+    // Marcar todos los campos como tocados para mostrar errores
+    const allFields: FormFields[] = ['idTipoDocumento', 'nroDocumento', 'nombres', 'apellidos', 'celular', 'correo'];
+    allFields.forEach(field => touchedFields.value.add(field));
+    hasInteracted.value = true;
+    
     const result = await validate();
+    isValid.value = result.valid;
     return result.valid;
   },
 });
