@@ -1,5 +1,5 @@
 <template>
-  Nueva Solicitud
+    Consultar Solicitudes
 </template>
 <script setup lang="ts">
 
