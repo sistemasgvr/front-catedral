@@ -15,54 +15,54 @@
 
       <!-- Wizard Container -->
       <main class="flex-1 flex flex-col px-4 py-6">
-      <div class="w-full max-w-4xl mx-auto">
-        <FormWizard
-          @complete="onComplete"
-          color="#C88A2A"
-          title=""
-          subtitle=""
-          step-size="sm"
-          back-button-text="Anterior"
-          next-button-text="Siguiente"
-          finish-button-text="Finalizar"
-        >
-          <TabContent 
-            title="Solicitante"
-            :before-change="() => true"
+        <div class="w-full max-w-4xl mx-auto">
+          <FormWizard
+            @complete="onComplete"
+            color="#C88A2A"
+            title=""
+            subtitle=""
+            step-size="sm"
+            back-button-text="Anterior"
+            next-button-text="Siguiente"
+            finish-button-text="Finalizar"
           >
-            <StepDatosSolicitante />
-          </TabContent>
+            <TabContent 
+              title="Solicitante"
+              :before-change="validateStep1"
+            >
+              <StepDatosSolicitante ref="step1Ref" />
+            </TabContent>
 
-          <TabContent 
-            title="Celebración"
-            :before-change="() => true"
-          >
-            <StepDatosCelebracion />
-          </TabContent>
+            <TabContent 
+              title="Celebración"
+              :before-change="validateStep2"
+            >
+              <StepDatosCelebracion ref="step2Ref" />
+            </TabContent>
 
-          <TabContent 
-            title="Menciones"
-            :before-change="() => true"
-          >
-            <StepMenciones />
-          </TabContent>
+            <TabContent 
+              title="Menciones"
+              :before-change="validateStep3"
+            >
+              <StepMenciones ref="step3Ref" />
+            </TabContent>
 
-          <TabContent 
-            title="Pago"
-            :before-change="() => true"
-          >
-            <StepPago />
-          </TabContent>
+            <TabContent 
+              title="Pago"
+              :before-change="validateStep4"
+            >
+              <StepPago ref="step4Ref" />
+            </TabContent>
 
-          <TabContent 
-            title="Confirmación"
-            :before-change="() => true"
-          >
-            <StepResumen />
-          </TabContent>
-        </FormWizard>
-      </div>
-    </main>
+            <TabContent 
+              title="Confirmación"
+              :before-change="() => true"
+            >
+              <StepResumen ref="step5Ref" />
+            </TabContent>
+          </FormWizard>
+        </div>
+      </main>
 
       <!-- Footer -->
       <FooterSolicitud />
@@ -71,6 +71,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { FormWizard, TabContent } from 'vue3-form-wizard';
 import 'vue3-form-wizard/dist/style.css';
 
@@ -81,9 +82,52 @@ import StepDatosCelebracion from '../components/steps/StepDatosCelebracion.vue';
 import StepMenciones from '../components/steps/StepMenciones.vue';
 import StepPago from '../components/steps/StepPago.vue';
 import StepResumen from '../components/steps/StepResumen.vue';
+import { useSolicitudStore } from '../stores/solicitud.store';
+
+const store = useSolicitudStore();
+
+// Referencias a los componentes de pasos
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step1Ref = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step2Ref = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step3Ref = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step4Ref = ref<any>(null);
+
+// Validaciones por paso
+const validateStep1 = async (): Promise<boolean> => {
+  if (step1Ref.value?.validate) {
+    return await step1Ref.value.validate();
+  }
+  return true;
+};
+
+const validateStep2 = async (): Promise<boolean> => {
+  if (step2Ref.value?.validate) {
+    return await step2Ref.value.validate();
+  }
+  return true;
+};
+
+const validateStep3 = async (): Promise<boolean> => {
+  if (step3Ref.value?.validate) {
+    return await step3Ref.value.validate();
+  }
+  return true;
+};
+
+const validateStep4 = async (): Promise<boolean> => {
+  if (step4Ref.value?.validate) {
+    return await step4Ref.value.validate();
+  }
+  return true;
+};
 
 const onComplete = () => {
   console.log('Formulario completado');
+  console.log('Datos de la solicitud:', store.getSolicitudJSON());
 };
 </script>
 

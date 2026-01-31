@@ -10,11 +10,15 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@vee-validate/yup": "^4.15.1",
     "axios": "^1.13.4",
+    "pinia": "^3.0.4",
     "tailwindcss": "^4.1.18",
+    "vee-validate": "^4.15.1",
     "vue": "^3.5.24",
     "vue-router": "^4.6.4",
-    "vue3-form-wizard": "^0.3.5"
+    "vue3-form-wizard": "^0.3.5",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
