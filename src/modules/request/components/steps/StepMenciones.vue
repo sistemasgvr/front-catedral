@@ -9,7 +9,7 @@
       <div class="w-12 h-1 bg-[#C88A2A] rounded mx-auto mb-6"></div>
 
       <!-- Descripción -->
-      <p class="text-sm text-[#7A7A7A] text-center mb-6">
+       <p class="text-sm text-[#7A7A7A] text-center mb-6">
         Agregue las menciones que desea incluir en la misa. Cada mención tiene un costo de 
         <span class="font-semibold text-[#C88A2A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
       </p>
@@ -177,11 +177,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
-import { COSTO_MENCION, type IMencion } from '../../interfaces/solicitud.interface';
+import { type IMencion } from '../../interfaces/solicitud.interface';
 
 const store = useSolicitudStore();
+
+const COSTO_MENCION = computed(() => store.solicitud.costoMencion || 0);
 
 // Modal
 const modalVisible = ref(false);

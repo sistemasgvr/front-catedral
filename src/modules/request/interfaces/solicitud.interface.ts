@@ -28,6 +28,7 @@ export interface ISolicitud {
   fechaMisaDeseada: string;
   estado: boolean;
   idUsuarioCreacion: number | null;
+  costoMencion: number;
 }
 
 // Interface para menciones
@@ -76,4 +77,5 @@ export const solicitudInicial: ISolicitud = {
   fechaMisaDeseada: '',
   estado: true,
   idUsuarioCreacion: null,
+  costoMencion: 5,
 };

@@ -15,5 +15,5 @@ export interface ISelectOption {
 export const mapOpcionToSelect = (opcion: IOpcionLista): ISelectOption => ({
   id: opcion.idopcionlista,
   nombre: opcion.nombre,
-  descripcion: opcion.descripcion,
+  descripcion: opcion.descripcion ?? "",
 });

@@ -1,13 +1,14 @@
 <template>
   <div class="step-content">
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
-      
+    <div
+      class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto"
+    >
       <!-- Title -->
       <h2 class="text-2xl font-serif font-bold text-[#C88A2A] mb-2 text-center">
         Datos de la Celebración
       </h2>
       <div class="w-12 h-1 bg-[#C88A2A] rounded mx-auto mb-6"></div>
-      
+
       <!-- Form -->
       <form @submit.prevent class="space-y-4">
         <!-- Tipo de Misa -->
@@ -31,12 +32,26 @@
             <div class="bg-[#FFF5E6] rounded-lg p-4 border border-[#D39E3A]/30">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <svg class="w-5 h-5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    class="w-5 h-5 text-[#C88A2A]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
-                  <span class="text-[#4A4A4A] font-medium">Costo de Misa Privada</span>
+                  <span class="text-[#4A4A4A] font-medium"
+                    >Costo de Misa Privada</span
+                  >
                 </div>
-                <span class="text-[#C88A2A] font-bold text-xl">S/ {{ PRECIO_MISA_PRIVADA.toFixed(2) }}</span>
+                <span class="text-[#C88A2A] font-bold text-xl"
+                  >S/ {{ precioTipoMisa.toFixed(2) }}</span
+                >
               </div>
             </div>
 
@@ -85,7 +100,7 @@
               <label class="block text-sm font-medium text-[#4A4A4A]">
                 Misas Disponibles <span class="text-red-500">*</span>
               </label>
-              
+
               <!-- Skeleton loading -->
               <div v-if="loadingMisas" class="space-y-3">
                 <div v-for="i in 3" :key="i" class="animate-pulse">
@@ -94,7 +109,10 @@
               </div>
 
               <!-- Lista de misas -->
-              <div v-else-if="misasDisponibles.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
+              <div
+                v-else-if="misasDisponibles.length > 0"
+                class="space-y-3 max-h-64 overflow-y-auto"
+              >
                 <div
                   v-for="misa in misasDisponibles"
                   :key="misa.id"
@@ -103,26 +121,50 @@
                   :class="[
                     idMisaSeleccionada === misa.id
                       ? 'border-[#C88A2A] bg-[#FFF5E6]'
-                      : 'border-[#E0D5C5] hover:border-[#C88A2A]/50 bg-white'
+                      : 'border-[#E0D5C5] hover:border-[#C88A2A]/50 bg-white',
                   ]"
                 >
                   <div class="flex justify-between items-start">
                     <div>
-                      <h4 class="font-semibold text-[#4A4A4A]">{{ misa.titulo }}</h4>
+                      <h4 class="font-semibold text-[#4A4A4A]">
+                        {{ misa.titulo }}
+                      </h4>
                       <p class="text-sm text-gray-500">{{ misa.tipoMisa }}</p>
                     </div>
-                    <span class="text-[#C88A2A] font-bold">S/ {{ misa.precio.toFixed(2) }}</span>
+                    <span class="text-[#C88A2A] font-bold"
+                      >S/ {{ misa.precio.toFixed(2) }}</span
+                    >
                   </div>
                   <div class="mt-2 flex gap-4 text-sm text-gray-600">
                     <span class="flex items-center gap-1">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                       </svg>
                       {{ formatDate(misa.fecha) }}
                     </span>
                     <span class="flex items-center gap-1">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                       {{ misa.horario }}
                     </span>
@@ -132,21 +174,37 @@
 
               <!-- Sin misas disponibles -->
               <div v-else class="text-center py-8 text-gray-500">
-                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  class="w-12 h-12 mx-auto mb-2 text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <p>No hay misas comunitarias disponibles</p>
               </div>
 
-              <p v-if="fieldErrors.idMisaSeleccionada" class="text-sm text-red-500">
+              <p
+                v-if="fieldErrors.idMisaSeleccionada"
+                class="text-sm text-red-500"
+              >
                 {{ fieldErrors.idMisaSeleccionada }}
               </p>
             </div>
 
             <!-- Mostrar fecha y horario seleccionados -->
-            <div v-if="idMisaSeleccionada" class="bg-[#FFF5E6] rounded-lg p-4 border border-[#D39E3A]/30">
+            <div
+              v-if="idMisaSeleccionada"
+              class="bg-[#FFF5E6] rounded-lg p-4 border border-[#D39E3A]/30"
+            >
               <p class="text-sm text-[#4A4A4A]">
-                <strong>Fecha:</strong> {{ formatDate(fechaCelebracion) }} | 
+                <strong>Fecha:</strong> {{ formatDate(fechaCelebracion) }} |
                 <strong>Horario:</strong> {{ horarioMisaSeleccionada }}
               </p>
             </div>
@@ -154,14 +212,27 @@
         </template>
 
         <!-- Validation Message -->
-        <div 
-          v-if="hasInteracted && hasErrors" 
+        <div
+          v-if="hasInteracted && hasErrors"
           class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 text-amber-500 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
           </svg>
-          <p class="text-amber-700 text-sm">Complete todos los campos para continuar</p>
+          <p class="text-amber-700 text-sm">
+            Complete todos los campos para continuar
+          </p>
         </div>
       </form>
     </div>
@@ -169,40 +240,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed, reactive } from 'vue';
-import { useSolicitudStore } from '../../stores/solicitud.store';
-import { getMisas } from '../../actions/getMisas.action';
-import { type ISelectOption } from '../../interfaces/opcionLista.interface';
-import { mapMisaToListItem, type IMisaListItem } from '../../interfaces/misa.interface';
-import { InputSelect, InputDate, InputTextarea } from '@/components/inputs';
-
-import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
-import { mapOpcionToSelect } from '../../interfaces/opcionLista.interface';
+import { ref, watch, onMounted, computed, reactive } from "vue";
+import { useSolicitudStore } from "../../stores/solicitud.store";
+import { getMisas } from "../../actions/getMisas.action";
+import { type ISelectOption } from "../../interfaces/opcionLista.interface";
+import {
+  mapMisaToListItem,
+  type IMisaListItem,
+} from "../../interfaces/misa.interface";
+import { InputSelect, InputDate, InputTextarea } from "@/components/inputs";
+import { getOpcionesLista } from "../../actions/getOpcionesLista.action";
+import { mapOpcionToSelect } from "../../interfaces/opcionLista.interface";
+import { getTiposMisa } from "../../actions/getTiposMisa.action";
+import {
+  mapTipoMisaToSelect,
+  type ITipomisa,
+} from "../../interfaces/tipoMisa.interface";
 
 const store = useSolicitudStore();
 
-// IDs de listas en opcioneslista (tabla listas)
-const ID_LISTA_TIPOS_MISA = 6;
+// IDs de listas en opcioneslista
 const ID_LISTA_HORARIOS = 5;
-const PRECIO_MISA_PRIVADA = 50.00; // Precio estático para misa privada
 
 // Estados de carga
 const loadingTiposMisa = ref(false);
 const loadingHorarios = ref(true);
 const loadingMisas = ref(false);
 
-// Opciones - cargadas desde opcioneslista
+// Opciones
 const tiposMisa = ref<ISelectOption[]>([]);
+const tiposMisaOriginales = ref<ITipomisa[]>([]); // Guardar datos originales
 const horarios = ref<ISelectOption[]>([]);
 const misasDisponibles = ref<IMisaListItem[]>([]);
 
 // Valores del formulario
 const idTipoMisa = ref<number | null>(null);
-const fechaCelebracion = ref('');
+const fechaCelebracion = ref("");
 const idHorario = ref<number | null>(null);
-const intencion = ref('');
+const intencion = ref("");
 const idMisaSeleccionada = ref<number | null>(null);
-const horarioMisaSeleccionada = ref('');
+const horarioMisaSeleccionada = ref("");
 
 // Estado de validación
 const hasInteracted = ref(false);
@@ -210,39 +287,48 @@ const touchedFields = ref<Set<string>>(new Set());
 const fieldErrors = reactive<Record<string, string | undefined>>({});
 
 // Fecha mínima (hoy)
-const fechaMinima = computed(() => new Date().toISOString().split('T')[0]);
+const fechaMinima = computed(() => new Date().toISOString().split("T")[0]);
 
-// Determinar si es misa privada (por nombre, ya que los IDs vienen de opcioneslista)
+// Determinar si es misa privada
 const esMisaPrivada = computed(() => {
-  const tipo = tiposMisa.value.find(t => t.id === idTipoMisa.value);
-  return tipo?.nombre?.toLowerCase().includes('privada') ?? false;
+  const tipo = tiposMisa.value.find((t) => t.id === idTipoMisa.value);
+  return tipo?.nombre?.toLowerCase().includes("privada") ?? false;
+});
+
+// Obtener precio del tipo de misa seleccionado
+const precioTipoMisa = computed(() => {
+  const tipo = tiposMisaOriginales.value.find(
+    (t) => t.idtipomisa === idTipoMisa.value,
+  );
+  return tipo?.precio ?? 0;
 });
 
 // Verificar si hay errores
-const hasErrors = computed(() => Object.values(fieldErrors).some(e => e));
+const hasErrors = computed(() => Object.values(fieldErrors).some((e) => e));
 
-// Cargar tipos de misa desde opcioneslista (idlista=6)
+// Cargar tipos de misa
 const cargarTiposMisa = async () => {
   try {
     loadingTiposMisa.value = true;
-    const opciones = await getOpcionesLista(ID_LISTA_TIPOS_MISA);
-    tiposMisa.value = opciones.map(mapOpcionToSelect);
+    const opciones = await getTiposMisa();
+    tiposMisaOriginales.value = opciones; // Guardar originales
+    tiposMisa.value = opciones.map(mapTipoMisaToSelect);
   } catch (error) {
-    console.error('Error al cargar tipos de misa:', error);
+    console.error("Error al cargar tipos de misa:", error);
     tiposMisa.value = [];
   } finally {
     loadingTiposMisa.value = false;
   }
 };
 
-// Cargar horarios desde opcioneslista (idlista=5)
+// Cargar horarios
 const cargarHorarios = async () => {
   try {
     loadingHorarios.value = true;
     const opciones = await getOpcionesLista(ID_LISTA_HORARIOS);
     horarios.value = opciones.map(mapOpcionToSelect);
   } catch (error) {
-    console.error('Error al cargar horarios:', error);
+    console.error("Error al cargar horarios:", error);
     horarios.value = [];
   } finally {
     loadingHorarios.value = false;
@@ -253,11 +339,10 @@ const cargarHorarios = async () => {
 const cargarMisas = async () => {
   try {
     loadingMisas.value = true;
-    // Filtrar misas activas (el filtro se puede ajustar según necesidades)
-    const misas = await getMisas('estado=eq.true');
+    const misas = await getMisas("estado=eq.true");
     misasDisponibles.value = misas.map(mapMisaToListItem);
   } catch (error) {
-    console.error('Error al cargar misas:', error);
+    console.error("Error al cargar misas:", error);
     misasDisponibles.value = [];
   } finally {
     loadingMisas.value = false;
@@ -274,31 +359,38 @@ const touchField = (fieldName: string) => {
 // Validar un campo específico
 const validateField = (fieldName: string) => {
   switch (fieldName) {
-    case 'idTipoMisa':
-      fieldErrors.idTipoMisa = !idTipoMisa.value ? 'Seleccione un tipo de misa' : undefined;
+    case "idTipoMisa":
+      fieldErrors.idTipoMisa = !idTipoMisa.value
+        ? "Seleccione un tipo de misa"
+        : undefined;
       break;
-    case 'fechaCelebracion':
+    case "fechaCelebracion":
       if (esMisaPrivada.value) {
-        fieldErrors.fechaCelebracion = !fechaCelebracion.value ? 'La fecha es requerida' : undefined;
+        fieldErrors.fechaCelebracion = !fechaCelebracion.value
+          ? "La fecha es requerida"
+          : undefined;
       }
       break;
-    case 'idHorario':
+    case "idHorario":
       if (esMisaPrivada.value) {
-        fieldErrors.idHorario = !idHorario.value ? 'Seleccione un horario' : undefined;
+        fieldErrors.idHorario = !idHorario.value
+          ? "Seleccione un horario"
+          : undefined;
       }
       break;
-    case 'idMisaSeleccionada':
+    case "idMisaSeleccionada":
       if (!esMisaPrivada.value && idTipoMisa.value) {
-        fieldErrors.idMisaSeleccionada = !idMisaSeleccionada.value ? 'Seleccione una misa' : undefined;
+        fieldErrors.idMisaSeleccionada = !idMisaSeleccionada.value
+          ? "Seleccione una misa"
+          : undefined;
       }
       break;
-    case 'intencion':
-      // Solo validar intención para misa privada
+    case "intencion":
       if (esMisaPrivada.value) {
         if (!intencion.value) {
-          fieldErrors.intencion = 'La intención es requerida';
+          fieldErrors.intencion = "La intención es requerida";
         } else if (intencion.value.length < 10) {
-          fieldErrors.intencion = 'Mínimo 10 caracteres';
+          fieldErrors.intencion = "Mínimo 10 caracteres";
         } else {
           fieldErrors.intencion = undefined;
         }
@@ -309,39 +401,38 @@ const validateField = (fieldName: string) => {
 
 // Validar todo el formulario
 const validateAll = (): boolean => {
-  // Limpiar errores previos
-  Object.keys(fieldErrors).forEach(key => {
+  Object.keys(fieldErrors).forEach((key) => {
     fieldErrors[key] = undefined;
   });
 
-  // Validar tipo de misa (siempre requerido)
   if (!idTipoMisa.value) {
-    fieldErrors.idTipoMisa = 'Seleccione un tipo de misa';
+    fieldErrors.idTipoMisa = "Seleccione un tipo de misa";
   }
 
-  // Validar según tipo de misa
   if (esMisaPrivada.value) {
     // Misa privada: fecha, horario e intención requeridos
     if (!fechaCelebracion.value) {
-      fieldErrors.fechaCelebracion = 'La fecha es requerida';
+      fieldErrors.fechaCelebracion = "La fecha es requerida";
     }
     if (!idHorario.value) {
-      fieldErrors.idHorario = 'Seleccione un horario';
+      fieldErrors.idHorario = "Seleccione un horario";
     }
     if (!intencion.value) {
-      fieldErrors.intencion = 'La intención es requerida';
+      fieldErrors.intencion = "La intención es requerida";
     } else if (intencion.value.length < 10) {
-      fieldErrors.intencion = 'Mínimo 10 caracteres';
+      fieldErrors.intencion = "Mínimo 10 caracteres";
     }
-    
-    // Asignar precio de misa privada
-    store.solicitud.montoTotal = PRECIO_MISA_PRIVADA;
+
+    // Asignar precio de misa privada desde el tipo de misa
+    store.solicitud.montoTotal = precioTipoMisa.value;
   } else if (idTipoMisa.value) {
     // Misa comunitaria: solo requiere seleccionar una misa
     if (!idMisaSeleccionada.value) {
-      fieldErrors.idMisaSeleccionada = 'Seleccione una misa';
+      fieldErrors.idMisaSeleccionada = "Seleccione una misa";
     }
-    // La intención NO es requerida para misa comunitaria
+
+    // Guardar el precio del tipo de misa como costo de mención
+    store.solicitud.costoMencion = precioTipoMisa.value;
   }
 
   return !hasErrors.value;
@@ -352,46 +443,41 @@ const seleccionarMisa = (misa: IMisaListItem) => {
   idMisaSeleccionada.value = misa.id;
   fechaCelebracion.value = misa.fecha;
   horarioMisaSeleccionada.value = misa.horario;
-  // Buscar idHorario en opcioneslista por coincidencia de hora (ej: "07:00" en "07:00 AM")
-  const hhmm = misa.horainicio?.slice(0, 5) || '';
-  const horarioMatch = horarios.value.find(h => h.nombre?.includes(hhmm));
+  const hhmm = misa.horainicio?.slice(0, 5) || "";
+  const horarioMatch = horarios.value.find((h) => h.nombre?.includes(hhmm));
   idHorario.value = horarioMatch?.id ?? horarios.value[0]?.id ?? null;
   fieldErrors.idMisaSeleccionada = undefined;
 
-  // Actualizar monto en el store
-  store.solicitud.montoTotal = misa.precio;
+  // NO actualizar montoTotal aquí, se calcula dinámicamente desde las menciones
 };
 
 // Formatear fecha
 const formatDate = (dateStr: string): string => {
-  if (!dateStr) return '';
-  const date = new Date(dateStr + 'T00:00:00');
-  return date.toLocaleDateString('es-PE', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  if (!dateStr) return "";
+  const date = new Date(dateStr + "T00:00:00");
+  return date.toLocaleDateString("es-PE", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
 // Watch para cambios en tipo de misa
 watch(idTipoMisa, async (newValue, oldValue) => {
   if (newValue !== oldValue && oldValue !== null) {
-    // Resetear valores al cambiar tipo de misa
-    fechaCelebracion.value = '';
+    fechaCelebracion.value = "";
     idHorario.value = null;
     idMisaSeleccionada.value = null;
-    horarioMisaSeleccionada.value = '';
-    intencion.value = '';
-    
-    // Limpiar errores
+    horarioMisaSeleccionada.value = "";
+    intencion.value = "";
+
     fieldErrors.fechaCelebracion = undefined;
     fieldErrors.idHorario = undefined;
     fieldErrors.idMisaSeleccionada = undefined;
     fieldErrors.intencion = undefined;
   }
-  
-  // Cargar misas si es comunitaria (no privada)
+
   if (newValue && !esMisaPrivada.value) {
     await cargarMisas();
   }
@@ -405,39 +491,35 @@ watch(
       idTipoMisa: idTipoMisa.value,
       fechaCelebracion: fechaCelebracion.value,
       idHorario: idHorario.value,
-      intencion: esMisaPrivada.value ? intencion.value : '',
+      intencion: esMisaPrivada.value ? intencion.value : "",
       esMisaPrivada: esMisaPrivada.value,
     });
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Cargar datos al montar
 onMounted(async () => {
   await Promise.all([cargarTiposMisa(), cargarHorarios()]);
-  
-  // Cargar datos del store
+
   idTipoMisa.value = store.solicitud.idTipoMisa;
   fechaCelebracion.value = store.solicitud.fechaCelebracion;
   idHorario.value = store.solicitud.idHorario;
   intencion.value = store.solicitud.intencion;
-  
-  // Si ya había un tipo de misa comunitaria seleccionado, cargar misas
+
   if (idTipoMisa.value && !esMisaPrivada.value) {
     await cargarMisas();
   }
 });
 
-// Exponer método de validación y estado para el wizard
 defineExpose({
   validate: async () => {
     hasInteracted.value = true;
     const isValid = validateAll();
     return isValid;
   },
-  esMisaPrivada, // Exponer para que RequestView pueda decidir el flujo
+  esMisaPrivada,
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
