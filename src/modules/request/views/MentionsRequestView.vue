@@ -13,7 +13,7 @@
       <HeaderSolicitud />
 
       <!-- Content -->
-      <main class="flex-1 px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+      <main class="flex-1 flex items-center px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <div class="w-full max-w-7xl mx-auto">
           <!-- Calendar Card -->
           <section

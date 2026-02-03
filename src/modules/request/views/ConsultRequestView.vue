@@ -13,7 +13,7 @@
       <HeaderSolicitud />
 
       <!-- Content -->
-      <main class="flex-1 px-4 py-4 md:py-6">
+      <main class="flex-1 flex items-center px-4 py-4 md:py-6">
         <div class="w-full max-w-7xl mx-auto space-y-4">
           <!-- Search Card - Más compacto -->
           <section class="bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-[#E0D5C5] p-5">
@@ -109,11 +109,11 @@
             </div>
 
             <!-- Results list -->
-            <div v-else class="divide-y divide-[#E0D5C5]">
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-5">
               <article
                 v-for="solicitud in solicitudes"
                 :key="solicitud.idsolicitud"
-                class="p-5 hover:bg-[#FFF9F5] transition-colors duration-150"
+                class="p-5 bg-white rounded-xl border border-[#E0D5C5] shadow-sm hover:shadow-md transition-shadow duration-150"
               >
                 <!-- Header compacto -->
                 <div class="flex items-center justify-between mb-3">

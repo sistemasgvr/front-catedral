@@ -14,8 +14,8 @@
       <HeaderSolicitud />
 
       <!-- Wizard Container -->
-      <main class="flex-1 flex flex-col px-4 py-6">
-        <div class="w-full max-w-7xl mx-auto">
+      <main class="flex-1 flex items-center px-4 py-6">
+        <div class="w-full max-w-5xl mx-auto">
           <FormWizard
             ref="wizardRef"
             @complete="onComplete"
