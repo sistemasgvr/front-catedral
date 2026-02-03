@@ -57,18 +57,25 @@ export const useSolicitudStore = defineStore('solicitud', () => {
     return tiposMisa.value.find(t => t.id === solicitud.value.idTipoMisa);
   });
 
-  // Verificar si es misa privada (ID 1)
-  const esMisaPrivada = computed(() => solicitud.value.idTipoMisa === 1);
+  // Verificar si es misa privada (por flag o por nombre del tipo)
+  const esMisaPrivada = computed(() => {
+    if (solicitud.value.esMisaPrivada === true) return true;
+    const tipo = tiposMisa.value.find(t => t.id === solicitud.value.idTipoMisa);
+    return tipo?.nombre?.toLowerCase().includes('privada') ?? false;
+  });
 
   // Actions
   const updateDatosSolicitante = (datos: Partial<ISolicitud>) => {
     solicitud.value = { ...solicitud.value, ...datos };
   };
 
-  const updateDatosCelebracion = (datos: Partial<ISolicitud>) => {
+  const updateDatosCelebracion = (datos: Partial<ISolicitud> & { esMisaPrivada?: boolean }) => {
     solicitud.value = { ...solicitud.value, ...datos };
-    // Actualizar monto total según tipo de misa
-    if (datos.idTipoMisa) {
+    // Si es misa privada: limpiar menciones y usar solo costo privada
+    if (datos.esMisaPrivada === true) {
+      solicitud.value.menciones = [];
+      solicitud.value.montoTotal = 50; // PRECIO_MISA_PRIVADA
+    } else if (datos.idTipoMisa) {
       const tipoMisa = tiposMisa.value.find(t => t.id === datos.idTipoMisa);
       if (tipoMisa) {
         solicitud.value.montoTotal = tipoMisa.precio;

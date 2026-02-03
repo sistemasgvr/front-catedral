@@ -30,6 +30,7 @@ export interface IMisaListItem {
   titulo: string;
   fecha: string;
   horario: string;
+  horainicio?: string;
   tipoMisa: string;
   precio: number;
 }
@@ -40,6 +41,7 @@ export const mapMisaToListItem = (misa: IMisa): IMisaListItem => ({
   titulo: misa.titulo,
   fecha: misa.fechacelebracion,
   horario: `${misa.horainicio} - ${misa.horafin}`,
+  horainicio: misa.horainicio,
   tipoMisa: misa.tipomisa.nombre,
   precio: misa.tipomisa.precio,
 });

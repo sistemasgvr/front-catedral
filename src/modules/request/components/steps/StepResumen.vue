@@ -169,13 +169,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
+import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
+import { mapOpcionToSelect } from '../../interfaces/opcionLista.interface';
 
 const store = useSolicitudStore();
 const router = useRouter();
+
+const ID_LISTA_TIPOS_DOCUMENTO = 1;
+const ID_LISTA_HORARIOS = 5;
+
+const tiposDocumento = ref<{ id: number; nombre: string }[]>([]);
+const horarios = ref<{ id: number; nombre: string }[]>([]);
+
+onMounted(async () => {
+  try {
+    const [docs, hors] = await Promise.all([
+      getOpcionesLista(ID_LISTA_TIPOS_DOCUMENTO).then(opts => opts.map(mapOpcionToSelect)),
+      getOpcionesLista(ID_LISTA_HORARIOS).then(opts => opts.map(mapOpcionToSelect)),
+    ]);
+    tiposDocumento.value = docs;
+    horarios.value = hors;
+  } catch {
+    // Fallback estático si falla la carga
+    tiposDocumento.value = [{ id: 1, nombre: 'DNI' }, { id: 2, nombre: 'CE' }, { id: 3, nombre: 'Pasaporte' }];
+    horarios.value = [
+      { id: 1, nombre: '07:00 AM' }, { id: 2, nombre: '09:00 AM' }, { id: 3, nombre: '11:00 AM' },
+      { id: 4, nombre: '05:00 PM' }, { id: 5, nombre: '07:00 PM' },
+    ];
+  }
+});
 
 // Computed
 const totalPagado = computed(() => {
@@ -186,23 +212,13 @@ const totalPagado = computed(() => {
 });
 
 const tipoDocumentoNombre = computed(() => {
-  const tipos: Record<number, string> = {
-    1: 'DNI',
-    2: 'CE',
-    3: 'Pasaporte',
-  };
-  return tipos[store.solicitud.idTipoDocumento || 1] || 'DNI';
+  const tipo = tiposDocumento.value.find(t => t.id === store.solicitud.idTipoDocumento);
+  return tipo?.nombre || '';
 });
 
 const horarioNombre = computed(() => {
-  const horarios: Record<number, string> = {
-    1: '07:00 AM',
-    2: '09:00 AM',
-    3: '11:00 AM',
-    4: '05:00 PM',
-    5: '07:00 PM',
-  };
-  return horarios[store.solicitud.idHorario || 1] || '';
+  const h = horarios.value.find(h => h.id === store.solicitud.idHorario);
+  return h?.nombre || '';
 });
 
 // Formatear fecha

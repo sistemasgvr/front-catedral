@@ -1,7 +1,7 @@
 export interface IOpcionLista {
   idopcionlista: number;
   nombre: string;
-  descripcion: string;
+  descripcion?: string | null;
 }
 
 // Alias para compatibilidad con el componente InputSelect

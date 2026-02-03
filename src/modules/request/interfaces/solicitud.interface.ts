@@ -16,6 +16,9 @@ export interface ISolicitud {
   // Menciones (Paso 3)
   menciones: IMencion[];
 
+  // Flag para misa privada (salta menciones, solo costo privada)
+  esMisaPrivada?: boolean;
+
   // Pago (Paso 4)
   voucherPago: string;
   montoTotal: number;

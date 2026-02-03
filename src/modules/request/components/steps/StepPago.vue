@@ -195,6 +195,17 @@
         </svg>
         <p class="text-amber-700 text-sm">Debe subir el comprobante de pago para continuar</p>
       </div>
+
+      <!-- Error de registro -->
+      <div 
+        v-if="submitError" 
+        class="mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+      >
+        <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-red-700 text-sm">{{ submitError }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -203,6 +214,7 @@
 import { ref, computed, reactive } from 'vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
+import { registrarSolicitudCompleta } from '../../actions/registrarSolicitudCompleta.action';
 
 const store = useSolicitudStore();
 
@@ -212,6 +224,8 @@ const archivoSeleccionado = ref<File | null>(null);
 const previewUrl = ref<string | null>(null);
 const isDragging = ref(false);
 const hasInteracted = ref(false);
+const isSubmitting = ref(false);
+const submitError = ref<string | null>(null);
 const fieldErrors = reactive<Record<string, string | undefined>>({});
 
 // Computed
@@ -297,49 +311,41 @@ const validateForm = (): boolean => {
   return true;
 };
 
-// Registrar solicitud (por ahora en consola)
-const registrarSolicitud = async () => {
-  console.log('='.repeat(50));
-  console.log('REGISTRO DE SOLICITUD');
-  console.log('='.repeat(50));
-  console.log('Datos del Solicitante:', {
-    tipoDocumento: store.solicitud.idTipoDocumento,
-    nroDocumento: store.solicitud.nroDocumento,
-    nombres: store.solicitud.nombres,
-    apellidos: store.solicitud.apellidos,
-    celular: store.solicitud.celular,
-    correo: store.solicitud.correo,
-  });
-  console.log('Datos de la Celebración:', {
-    tipoMisa: store.esMisaPrivada ? 'Misa Privada' : 'Misa Comunitaria',
-    fechaCelebracion: store.solicitud.fechaCelebracion,
-    idHorario: store.solicitud.idHorario,
-    intencion: store.solicitud.intencion,
-  });
-  if (!store.esMisaPrivada) {
-    console.log('Menciones:', store.solicitud.menciones);
+// Registrar solicitud en Supabase
+const registrarSolicitud = async (): Promise<boolean> => {
+  if (!archivoSeleccionado.value) return false;
+
+  isSubmitting.value = true;
+  submitError.value = null;
+
+  try {
+    await registrarSolicitudCompleta(
+      { ...store.solicitud, montoTotal: totalPagar.value },
+      archivoSeleccionado.value
+    );
+    return true;
+  } catch (err) {
+    submitError.value =
+      err instanceof Error ? err.message : 'Error al registrar la solicitud';
+    return false;
+  } finally {
+    isSubmitting.value = false;
   }
-  console.log('Pago:', {
-    voucher: store.solicitud.voucherPago,
-    montoTotal: totalPagar.value,
-  });
-  console.log('JSON Completo:', store.getSolicitudJSON());
-  console.log('='.repeat(50));
 };
 
 // Exponer método de validación
 defineExpose({
   validate: async () => {
     hasInteracted.value = true;
+    submitError.value = null;
     const isValid = validateForm();
-    
-    if (isValid) {
-      // Registrar solicitud antes de pasar al resumen
-      await registrarSolicitud();
-    }
-    
-    return isValid;
+
+    if (!isValid) return false;
+
+    const registered = await registrarSolicitud();
+    return registered;
   },
+  isSubmitting,
 });
 </script>
 

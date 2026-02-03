@@ -176,16 +176,14 @@ import { type ISelectOption } from '../../interfaces/opcionLista.interface';
 import { mapMisaToListItem, type IMisaListItem } from '../../interfaces/misa.interface';
 import { InputSelect, InputDate, InputTextarea } from '@/components/inputs';
 
-// Para carga dinámica futura, descomentar:
-// import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
-// import { mapOpcionToSelect } from '../../interfaces/opcionLista.interface';
+import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
+import { mapOpcionToSelect } from '../../interfaces/opcionLista.interface';
 
 const store = useSolicitudStore();
 
-// IDs y constantes
-// Para carga dinámica: const ID_LISTA_TIPO_MISA = 2; const ID_LISTA_HORARIOS = 3;
-const ID_TIPO_MISA_PRIVADA = 1;
-const ID_TIPO_MISA_COMUNITARIA = 2;
+// IDs de listas en opcioneslista (tabla listas)
+const ID_LISTA_TIPOS_MISA = 6;
+const ID_LISTA_HORARIOS = 5;
 const PRECIO_MISA_PRIVADA = 50.00; // Precio estático para misa privada
 
 // Estados de carga
@@ -193,11 +191,8 @@ const loadingTiposMisa = ref(false);
 const loadingHorarios = ref(true);
 const loadingMisas = ref(false);
 
-// Opciones - Estáticas por ahora
-const tiposMisa = ref<ISelectOption[]>([
-  { id: ID_TIPO_MISA_PRIVADA, nombre: 'Misa Privada' },
-  { id: ID_TIPO_MISA_COMUNITARIA, nombre: 'Misa Comunitaria' },
-]);
+// Opciones - cargadas desde opcioneslista
+const tiposMisa = ref<ISelectOption[]>([]);
 const horarios = ref<ISelectOption[]>([]);
 const misasDisponibles = ref<IMisaListItem[]>([]);
 
@@ -217,44 +212,41 @@ const fieldErrors = reactive<Record<string, string | undefined>>({});
 // Fecha mínima (hoy)
 const fechaMinima = computed(() => new Date().toISOString().split('T')[0]);
 
-// Determinar si es misa privada
-const esMisaPrivada = computed(() => idTipoMisa.value === ID_TIPO_MISA_PRIVADA);
+// Determinar si es misa privada (por nombre, ya que los IDs vienen de opcioneslista)
+const esMisaPrivada = computed(() => {
+  const tipo = tiposMisa.value.find(t => t.id === idTipoMisa.value);
+  return tipo?.nombre?.toLowerCase().includes('privada') ?? false;
+});
 
 // Verificar si hay errores
 const hasErrors = computed(() => Object.values(fieldErrors).some(e => e));
 
-// Cargar tipos de misa (manteniendo la lógica dinámica para futuro)
+// Cargar tipos de misa desde opcioneslista (idlista=6)
 const cargarTiposMisa = async () => {
-  // Por ahora usamos datos estáticos, pero mantenemos la estructura para futuro
-  // Para habilitar carga dinámica, descomentar y agregar: const ID_LISTA_TIPO_MISA = 2;
-  /*
   try {
     loadingTiposMisa.value = true;
-    const opciones = await getOpcionesLista(ID_LISTA_TIPO_MISA);
+    const opciones = await getOpcionesLista(ID_LISTA_TIPOS_MISA);
     tiposMisa.value = opciones.map(mapOpcionToSelect);
   } catch (error) {
     console.error('Error al cargar tipos de misa:', error);
-    tiposMisa.value = [
-      { id: 1, nombre: 'Misa Privada' },
-      { id: 2, nombre: 'Misa Comunitaria' },
-    ];
+    tiposMisa.value = [];
   } finally {
     loadingTiposMisa.value = false;
   }
-  */
 };
 
-// Cargar horarios (estático por ahora)
-const cargarHorarios = () => {
-  // Para carga dinámica futura, usar getOpcionesLista(ID_LISTA_HORARIOS)
-  horarios.value = [
-    { id: 1, nombre: '07:00 AM' },
-    { id: 2, nombre: '09:00 AM' },
-    { id: 3, nombre: '11:00 AM' },
-    { id: 4, nombre: '05:00 PM' },
-    { id: 5, nombre: '07:00 PM' },
-  ];
-  loadingHorarios.value = false;
+// Cargar horarios desde opcioneslista (idlista=5)
+const cargarHorarios = async () => {
+  try {
+    loadingHorarios.value = true;
+    const opciones = await getOpcionesLista(ID_LISTA_HORARIOS);
+    horarios.value = opciones.map(mapOpcionToSelect);
+  } catch (error) {
+    console.error('Error al cargar horarios:', error);
+    horarios.value = [];
+  } finally {
+    loadingHorarios.value = false;
+  }
 };
 
 // Cargar misas comunitarias
@@ -360,8 +352,12 @@ const seleccionarMisa = (misa: IMisaListItem) => {
   idMisaSeleccionada.value = misa.id;
   fechaCelebracion.value = misa.fecha;
   horarioMisaSeleccionada.value = misa.horario;
+  // Buscar idHorario en opcioneslista por coincidencia de hora (ej: "07:00" en "07:00 AM")
+  const hhmm = misa.horainicio?.slice(0, 5) || '';
+  const horarioMatch = horarios.value.find(h => h.nombre?.includes(hhmm));
+  idHorario.value = horarioMatch?.id ?? horarios.value[0]?.id ?? null;
   fieldErrors.idMisaSeleccionada = undefined;
-  
+
   // Actualizar monto en el store
   store.solicitud.montoTotal = misa.precio;
 };
@@ -395,8 +391,8 @@ watch(idTipoMisa, async (newValue, oldValue) => {
     fieldErrors.intencion = undefined;
   }
   
-  // Cargar misas si es comunitaria
-  if (newValue && newValue !== ID_TIPO_MISA_PRIVADA) {
+  // Cargar misas si es comunitaria (no privada)
+  if (newValue && !esMisaPrivada.value) {
     await cargarMisas();
   }
 });
@@ -409,7 +405,8 @@ watch(
       idTipoMisa: idTipoMisa.value,
       fechaCelebracion: fechaCelebracion.value,
       idHorario: idHorario.value,
-      intencion: esMisaPrivada.value ? intencion.value : '', // Solo guardar intención si es privada
+      intencion: esMisaPrivada.value ? intencion.value : '',
+      esMisaPrivada: esMisaPrivada.value,
     });
   },
   { deep: true }
@@ -426,7 +423,7 @@ onMounted(async () => {
   intencion.value = store.solicitud.intencion;
   
   // Si ya había un tipo de misa comunitaria seleccionado, cargar misas
-  if (idTipoMisa.value && idTipoMisa.value !== ID_TIPO_MISA_PRIVADA) {
+  if (idTipoMisa.value && !esMisaPrivada.value) {
     await cargarMisas();
   }
 });

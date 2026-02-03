@@ -19,9 +19,9 @@
       <select
         :id="name"
         :name="name"
-        :value="modelValue"
+        :value="modelValue === null || modelValue === undefined ? '' : modelValue"
         :disabled="disabled"
-        @change="$emit('update:modelValue', Number(($event.target as HTMLSelectElement).value))"
+        @change="onChange($event)"
         @blur="$emit('blur')"
         class="w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 outline-none appearance-none cursor-pointer pr-10"
         :class="[
@@ -72,10 +72,15 @@ defineProps<{
   errorMessage?: string;
 }>();
 
-defineEmits<{
-  (e: 'update:modelValue', value: number): void;
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number | null): void;
   (e: 'blur'): void;
 }>();
+
+const onChange = (event: Event) => {
+  const val = (event.target as HTMLSelectElement).value;
+  emit('update:modelValue', val === '' ? null : Number(val));
+};
 </script>
 
 <style scoped>
