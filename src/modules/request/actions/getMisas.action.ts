@@ -4,15 +4,15 @@ import type { IMisa } from "../interfaces/misa.interface";
 
 /**
  * Obtiene las misas
- * @param filters - Filtros opcionales para la consulta (ej: "estado=eq.true")
+ * @param idTipoMisa - ID del tipo de misa para filtrar (opcional)
  * @returns Array de misas
  */
-export const getMisas = async (filters?: string): Promise<IMisa[]> => {
+export const getMisas = async (idTipoMisa?: number): Promise<IMisa[]> => {
   try {
     let url = "/misas?select=*,tipomisa(nombre,precio),usuario_creador:authusuarios!misas_idusuariocreacion_fkey(nombre,correo)";
     
-    if (filters) {
-      url += `&${filters}`;
+    if (idTipoMisa) {
+      url += `&idtipomisa=eq.${idTipoMisa}`;
     }
     
     const { data } = await apiClient.get<IMisa[]>(url);

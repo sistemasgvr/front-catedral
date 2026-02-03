@@ -339,7 +339,7 @@ const cargarHorarios = async () => {
 const cargarMisas = async () => {
   try {
     loadingMisas.value = true;
-    const misas = await getMisas("estado=eq.true");
+    const misas = await getMisas(1);
     misasDisponibles.value = misas.map(mapMisaToListItem);
   } catch (error) {
     console.error("Error al cargar misas:", error);
