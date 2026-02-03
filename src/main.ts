@@ -1,18 +1,24 @@
 import { createApp } from "vue";
-import PrimeVue from "primevue/config";
-import Aura from "@primevue/themes/aura";
-import KeyFilter from "primevue/keyfilter";
+import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
 import "primeicons/primeicons.css";
 import "./main.css";
 
 const app = createApp(App);
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-  },
+const pinia = createPinia();
+
+// Plugin para persistir el estado en localStorage
+pinia.use(({ store }) => {
+  const storedState = localStorage.getItem(store.$id);
+  if (storedState) {
+    store.$patch(JSON.parse(storedState));
+  }
+  store.$subscribe((_, state) => {
+    localStorage.setItem(store.$id, JSON.stringify(state));
+  });
 });
-app.directive("keyfilter", KeyFilter);
+
+app.use(pinia);
 app.use(router);
 app.mount("#app");

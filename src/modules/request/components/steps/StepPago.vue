@@ -1,384 +1,353 @@
 <template>
-  <div class="step">
-    <Card class="panel">
-      <template #content>
-        <!-- Título -->
-        <div class="title">
-          <div class="title-icon"><i class="pi pi-wallet"></i></div>
-          <h2>Pago y Comprobante</h2>
-          <div class="title-line"></div>
-        </div>
-
-        <!-- Resumen pago -->
-        <div class="pay-summary">
-          <div class="left">
-            <div class="label">Concepto:</div>
-            <div class="concept">
-              <i class="pi pi-bookmark"></i>
-              <span>{{ conceptoLabel }}</span>
-            </div>
-            <small class="hint">(Menciones sin costo adicional)</small>
+  <div class="step-content">
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
+      
+      <!-- Resumen del Concepto -->
+      <div class="bg-gradient-to-r from-[#C88A2A] to-[#D39E3A] rounded-xl p-5 text-white mb-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-sm opacity-90">Concepto:</p>
+            <h3 class="text-xl font-bold">
+              {{ store.esMisaPrivada ? 'Misa Privada' : `Menciones (${store.solicitud.menciones.length})` }}
+            </h3>
+            <p v-if="!store.esMisaPrivada && store.solicitud.menciones.length > 0" class="text-sm opacity-80 mt-1">
+              S/ {{ COSTO_MENCION.toFixed(2) }} por mención
+            </p>
+            <p v-if="store.esMisaPrivada" class="text-sm opacity-80 mt-1">
+              {{ store.solicitud.intencion ? store.solicitud.intencion.substring(0, 50) + '...' : '' }}
+            </p>
           </div>
-
-          <div class="right">
-            <div class="label">Total a pagar:</div>
-            <div class="total">S/ {{ totalPagar }}</div>
+          <div class="text-right">
+            <p class="text-sm opacity-90">Total a pagar:</p>
+            <p class="text-3xl font-bold">S/ {{ totalPagar.toFixed(0) }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- Instrucciones + QR -->
-        <div class="grid">
-          <Card class="box">
-            <template #content>
-              <div class="box-title">
-                <i class="pi pi-info-circle"></i>
-                <span>Instrucciones de Pago</span>
-              </div>
-
-              <ol class="steps">
-                <li>Realice el pago mediante transferencia o depósito bancario</li>
-                <li>Escanee el código QR para obtener los datos bancarios</li>
-                <li>Suba el comprobante de pago usando el botón inferior</li>
-              </ol>
-            </template>
-          </Card>
-
-          <Card class="box qr">
-            <template #content>
-              <div class="qr-wrap">
-                <!-- Si tienes imagen real, reemplaza src -->
-                <img
-                  class="qr-img"
-                  :src="qrImageSrc"
-                  alt="QR"
-                />
-              </div>
-
-              <div class="qr-info">
-                <div><b>Banco:</b> {{ bankName }}</div>
-                <div class="cci"><b>CCI:</b> {{ cci }}</div>
-              </div>
-            </template>
-          </Card>
+      <!-- Contenido Principal -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Instrucciones -->
+        <div class="bg-[#FFF5E6] rounded-xl p-5 border border-[#D39E3A]/30">
+          <div class="flex items-center gap-2 mb-4">
+            <!-- Yape Icon -->
+            <div class="w-8 h-8 bg-[#742284] rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold text-sm">Y</span>
+            </div>
+            <h4 class="font-semibold text-[#4A4A4A]">Pagar con Yape</h4>
+          </div>
+          <ol class="space-y-4 text-sm text-[#4A4A4A]">
+            <li class="flex gap-3">
+              <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+              <span>Abre tu aplicación de <strong>Yape</strong> en tu celular</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+              <span>Selecciona <strong>"Escanear QR"</strong> y apunta al código</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+              <span>Ingresa el monto: <strong class="text-[#C88A2A]">S/ {{ totalPagar.toFixed(2) }}</strong></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span>
+              <span>Confirma el pago y <strong>toma una captura de pantalla</strong></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">5</span>
+              <span><strong>Sube la captura</strong> en el botón de abajo</span>
+            </li>
+          </ol>
         </div>
 
-        <!-- Subir comprobante -->
-        <Card class="upload">
-          <template #content>
-            <div class="upload-head">
-              <div class="upload-icon"><i class="pi pi-upload"></i></div>
-              <div>
-                <div class="upload-title">Subir Comprobante</div>
-                <div class="upload-sub">Adjunte una imagen o PDF del pago</div>
-              </div>
-            </div>
-
-            <FileUpload
-              mode="basic"
-              name="voucher"
-              chooseLabel="Seleccionar archivo"
-              :auto="false"
-              :customUpload="true"
-              accept="image/*,application/pdf"
-              :maxFileSize="5_000_000"
-              @select="onSelect"
-              class="file-btn"
-            />
-
-            <div v-if="local.voucher" class="file-preview">
-              <i class="pi pi-file"></i>
-              <div class="file-meta">
-                <div class="file-name">{{ local.voucher.name }}</div>
-                <small class="file-size">{{ prettySize(local.voucher.size) }}</small>
-              </div>
-
-              <Button
-                icon="pi pi-times"
-                severity="danger"
-                text
-                rounded
-                @click="removeFile"
-                aria-label="Quitar archivo"
-              />
-            </div>
-
-            <Message
-              v-if="showNoFileWarning"
-              severity="warn"
-              :closable="false"
-              class="msg"
-            >
-              Debe subir el comprobante para continuar.
-            </Message>
-          </template>
-        </Card>
-
-        <!-- Footer -->
-        <div class="footer">
-          <Button
-            label="Anterior"
-            icon="pi pi-arrow-left"
-            severity="secondary"
-            outlined
-            @click="$emit('previous')"
-          />
-
-          <Button
-            label="Confirmar pago"
-            icon="pi pi-check"
-            class="btn-next"
-            @click="confirm"
+        <!-- QR Code -->
+        <div class="bg-[#742284] rounded-xl p-4 flex items-center justify-center">
+          <img 
+            src="/images/qr_yape.jpeg" 
+            alt="QR Yape" 
+            class="w-full h-full max-h-64 object-contain rounded-lg"
           />
         </div>
-      </template>
-    </Card>
+      </div>
+
+      <!-- Datos Bancarios -->
+      <div class="bg-[#4A4A4A] rounded-xl p-4 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+              <span class="text-[#0033A0] font-bold text-sm">BCP</span>
+            </div>
+            <div>
+              <p class="text-white font-semibold">Banco de Crédito del Perú</p>
+              <p class="text-gray-300 text-sm">Iglesia San Pedro de Lambayeque</p>
+            </div>
+          </div>
+          <div class="text-left md:text-right">
+            <p class="text-gray-400 text-xs">Cuenta Corriente</p>
+            <p class="text-white font-mono text-lg">XXX-XXXXXXX-X-XX</p>
+            <p class="text-gray-400 text-xs mt-1">CCI: 002-XXX-XXXXXXX-X-XX</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload y Resumen en fila -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Upload Zone -->
+        <div 
+          class="border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer"
+          :class="[
+            archivoSeleccionado 
+              ? 'border-green-400 bg-green-50' 
+              : fieldErrors.voucher 
+                ? 'border-red-300 bg-red-50'
+                : 'border-[#C88A2A] bg-[#FFF5E6] hover:bg-[#FFF0D9]'
+          ]"
+          @click="triggerFileInput"
+          @drop.prevent="handleDrop"
+          @dragover.prevent="isDragging = true"
+          @dragleave="isDragging = false"
+        >
+          <input 
+            ref="fileInput"
+            type="file" 
+            accept=".jpg,.jpeg,.png,.pdf"
+            class="hidden"
+            @change="handleFileSelect"
+          />
+          
+          <!-- Icono -->
+          <div class="flex justify-center mb-3">
+            <div v-if="archivoSeleccionado" class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div v-else class="w-12 h-12 bg-[#C88A2A]/20 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Texto -->
+          <p class="font-semibold text-[#4A4A4A]">
+            {{ archivoSeleccionado ? archivoSeleccionado.name : 'Subir Comprobante' }}
+          </p>
+          <p class="text-sm text-gray-500 mt-1">
+            {{ archivoSeleccionado ? 'Click para cambiar' : 'Click o arrastra archivo' }}
+          </p>
+          <p class="text-xs text-gray-400 mt-2">JPG, PNG, PDF (Máx. 5MB)</p>
+          
+          <!-- Error Message -->
+          <p v-if="fieldErrors.voucher" class="text-sm text-red-500 mt-2">
+            {{ fieldErrors.voucher }}
+          </p>
+
+          <!-- Preview del archivo si es imagen -->
+          <div v-if="previewUrl" class="mt-3 flex justify-center">
+            <div class="relative">
+              <img :src="previewUrl" alt="Preview" class="max-h-24 rounded-lg border border-gray-200" />
+              <button 
+                @click.stop="eliminarArchivo"
+                class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen de precios -->
+        <div class="bg-[#FFF5E6] rounded-xl p-5 border border-[#D39E3A]/30">
+          <h4 class="font-semibold text-[#4A4A4A] mb-4">Resumen de Pago</h4>
+          <div class="space-y-3">
+            <div v-if="store.esMisaPrivada" class="flex justify-between text-[#4A4A4A]">
+              <span>Misa Privada</span>
+              <span>S/ {{ store.solicitud.montoTotal.toFixed(2) }}</span>
+            </div>
+            <div v-else-if="store.solicitud.menciones.length > 0">
+              <div class="flex justify-between text-[#4A4A4A] mb-2">
+                <span>Menciones ({{ store.solicitud.menciones.length }})</span>
+                <span>S/ {{ store.totalMenciones.toFixed(2) }}</span>
+              </div>
+              <div class="text-xs text-gray-500 pl-2 space-y-1 max-h-20 overflow-y-auto">
+                <p v-for="(m, i) in store.solicitud.menciones" :key="m.id">
+                  {{ i + 1 }}. {{ m.descripcion.substring(0, 30) }}{{ m.descripcion.length > 30 ? '...' : '' }}
+                </p>
+              </div>
+            </div>
+            <div class="flex justify-between text-xl font-bold text-[#C88A2A] pt-3 border-t border-[#D39E3A]/30">
+              <span>Total</span>
+              <span>S/ {{ totalPagar.toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Message -->
+      <div 
+        v-if="hasInteracted && hasErrors" 
+        class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3"
+      >
+        <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p class="text-amber-700 text-sm">Debe subir el comprobante de pago para continuar</p>
+      </div>
+
+      <!-- Error de registro -->
+      <div 
+        v-if="submitError" 
+        class="mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+      >
+        <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-red-700 text-sm">{{ submitError }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import Card from "primevue/card";
-import Button from "primevue/button";
-import Message from "primevue/message";
-import FileUpload, { type FileUploadSelectEvent } from "primevue/fileupload";
+import { ref, computed, reactive } from 'vue';
+import { useSolicitudStore } from '../../stores/solicitud.store';
+import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
+import { registrarSolicitudCompleta } from '../../actions/registrarSolicitudCompleta.action';
 
-interface Props {
-  formData: {
-    // lo que ya manejas en tu flujo
-    total: number;
-    misa: string; // o id
-    tipoCelebracion: string;
-    menciones: string[];
-    voucher: File | null;
-  };
-}
+const store = useSolicitudStore();
 
-const props = defineProps<Props>();
+// Refs
+const fileInput = ref<HTMLInputElement | null>(null);
+const archivoSeleccionado = ref<File | null>(null);
+const previewUrl = ref<string | null>(null);
+const isDragging = ref(false);
+const hasInteracted = ref(false);
+const isSubmitting = ref(false);
+const submitError = ref<string | null>(null);
+const fieldErrors = reactive<Record<string, string | undefined>>({});
 
-const emit = defineEmits<{
-  "update:form-data": [data: Partial<Props["formData"]>];
-  previous: [];
-  "confirm-payment": [];
-}>();
-
-const local = ref({ ...props.formData });
-const showNoFileWarning = ref(false);
-
-watch(
-  () => props.formData,
-  (v) => (local.value = { ...v }),
-  { deep: true }
-);
-
-watch(
-  local,
-  (v) => emit("update:form-data", v),
-  { deep: true }
-);
-
-// ---- UI computed (ajusta a tus datos reales) ----
-const conceptoLabel = computed(() => {
-  // Si en tu formData ya guardas "tipo misa" o "misa", cámbialo aquí
-  return local.value.misa || "Por los Difuntos";
-});
-
+// Computed
 const totalPagar = computed(() => {
-  return local.value.total || 60; // si viene de tipomisa.precio, úsalo aquí
+  if (store.esMisaPrivada) {
+    return store.solicitud.montoTotal;
+  }
+  return store.totalMenciones;
 });
 
-// QR + banco (puedes llevarlo luego desde config)
-const qrImageSrc = "/images/qr-placeholder.png"; // reemplaza con tu imagen real
-const bankName = "BCP";
-const cci = "002-XXXX-XXXX-XXXX";
+const hasErrors = computed(() => Object.values(fieldErrors).some(e => e));
 
-// ---- File upload ----
-const onSelect = (event: FileUploadSelectEvent) => {
-  showNoFileWarning.value = false;
-  const file = event.files?.[0];
-  if (!file) return;
-  local.value.voucher = file;
+// Métodos
+const triggerFileInput = () => {
+  fileInput.value?.click();
 };
 
-const removeFile = () => {
-  local.value.voucher = null;
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (file) {
+    processFile(file);
+  }
 };
 
-const confirm = () => {
-  if (!local.value.voucher) {
-    showNoFileWarning.value = true;
+const handleDrop = (event: DragEvent) => {
+  isDragging.value = false;
+  const file = event.dataTransfer?.files?.[0];
+  if (file) {
+    processFile(file);
+  }
+};
+
+const processFile = (file: File) => {
+  // Validar tipo
+  const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+  if (!validTypes.includes(file.type)) {
+    fieldErrors.voucher = 'Formato no válido. Use JPG, PNG o PDF';
     return;
   }
-  emit("confirm-payment");
+
+  // Validar tamaño (5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    fieldErrors.voucher = 'El archivo excede el tamaño máximo de 5MB';
+    return;
+  }
+
+  archivoSeleccionado.value = file;
+  fieldErrors.voucher = undefined;
+
+  // Crear preview si es imagen
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewUrl.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    previewUrl.value = null;
+  }
+
+  // Guardar nombre en store
+  store.solicitud.voucherPago = file.name;
 };
 
-// util
-const prettySize = (bytes: number) => {
-  if (bytes < 1024) return `${bytes} B`;
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  return `${(kb / 1024).toFixed(1)} MB`;
+const eliminarArchivo = () => {
+  archivoSeleccionado.value = null;
+  previewUrl.value = null;
+  store.solicitud.voucherPago = '';
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
 };
+
+const validateForm = (): boolean => {
+  fieldErrors.voucher = undefined;
+
+  if (!archivoSeleccionado.value) {
+    fieldErrors.voucher = 'Debe subir el comprobante de pago';
+    return false;
+  }
+
+  return true;
+};
+
+// Registrar solicitud en Supabase
+const registrarSolicitud = async (): Promise<boolean> => {
+  if (!archivoSeleccionado.value) return false;
+
+  isSubmitting.value = true;
+  submitError.value = null;
+
+  try {
+    await registrarSolicitudCompleta(
+      { ...store.solicitud, montoTotal: totalPagar.value },
+      archivoSeleccionado.value
+    );
+    return true;
+  } catch (err) {
+    submitError.value =
+      err instanceof Error ? err.message : 'Error al registrar la solicitud';
+    return false;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// Exponer método de validación
+defineExpose({
+  validate: async () => {
+    hasInteracted.value = true;
+    submitError.value = null;
+    const isValid = validateForm();
+
+    if (!isValid) return false;
+
+    const registered = await registrarSolicitud();
+    return registered;
+  },
+  isSubmitting,
+});
 </script>
 
 <style scoped>
-.step {
-  padding: 2rem 1rem;
-  display: flex;
-  justify-content: center;
-}
-.panel {
-  width: 100%;
-  max-width: 980px;
-  border-radius: 16px;
-}
-
-/* title */
-.title {
-  text-align: center;
-  margin-bottom: 1.25rem;
-}
-.title-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--church-brown-100);
-  color: var(--church-brown-500);
-  display: grid;
-  place-items: center;
-  margin: 0 auto 0.6rem;
-  border: 1px solid var(--church-border);
-}
-.title-icon i { font-size: 1.4rem; }
-.title h2 {
-  margin: 0;
-  font-family: Georgia, serif;
-  color: var(--church-brown-600);
-}
-.title-line{
-  width: 80px;
-  height: 3px;
-  margin: .6rem auto 0;
-  background: linear-gradient(90deg, transparent, var(--church-brown-400), transparent);
-  border-radius: 99px;
-}
-
-/* summary */
-.pay-summary {
-  background: var(--church-brown-500);
-  border-radius: 14px;
-  color: #fff;
-  padding: 1.25rem 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-  margin: 1.2rem 0 1.5rem;
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
-}
-.pay-summary .label { opacity: .9; font-size: .9rem; }
-.concept { display:flex; align-items:center; gap:.5rem; font-weight: 700; }
-.hint { opacity: .9; }
-.total { font-size: 2rem; font-weight: 900; }
-
-/* grid */
-.grid{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-@media(min-width: 900px){
-  .grid{ grid-template-columns: 1fr 1fr; }
-}
-.box { border-radius: 14px; }
-.box-title{
-  display:flex; align-items:center; gap:.5rem;
-  font-weight: 800;
-  color: var(--church-brown-600);
-  margin-bottom: .75rem;
-}
-.steps{
-  margin: 0;
-  padding-left: 1.2rem;
-  display:grid;
-  gap:.6rem;
-  color:#374151;
-}
-.steps li::marker{ color: var(--church-brown-400); font-weight: 800; }
-
-/* qr */
-.qr{
-  background: var(--church-brown-500);
-  color:#fff;
-}
-.qr-wrap{
-  display:flex;
-  justify-content:center;
-  margin-bottom: 1rem;
-}
-.qr-img{
-  width: 220px;
-  height: 220px;
-  object-fit: cover;
-  border-radius: 14px;
-  background: #fff;
-  padding: 12px;
-}
-.qr-info{
-  text-align:center;
-  display:grid;
-  gap:.5rem;
-  opacity: .95;
-}
-.cci{ opacity:.95; }
-
-/* upload */
-.upload{
-  margin-top: 1rem;
-  border-radius: 14px;
-  border: 2px dashed var(--church-brown-300);
-}
-.upload-head{
-  display:flex; align-items:center; gap:.75rem;
-  margin-bottom: .75rem;
-}
-.upload-icon{
-  width: 44px; height: 44px; border-radius: 12px;
-  background: var(--church-brown-100); color: var(--church-brown-500);
-  display:grid; place-items:center;
-  border: 1px solid var(--church-border);
-}
-.upload-title{ font-weight: 900; color: var(--church-brown-600); }
-.upload-sub{ font-size: .9rem; color:#6b7280; }
-
-.file-btn :deep(.p-button){
-  background:#c8640a;
-  border:1px solid #c8640a;
-}
-.file-preview{
-  margin-top: .9rem;
-  display:flex; align-items:center; justify-content:space-between;
-  gap: .75rem;
-  padding: .75rem 1rem;
-  border-radius: 12px;
-  background: #fffaf0;
-  border: 1px solid #fde7c7;
-}
-.file-preview i{ font-size: 1.15rem; color:#c8640a; }
-.file-meta{ flex:1; min-width:0; }
-.file-name{ font-weight: 800; color:#111827; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.file-size{ color:#6b7280; }
-
-.msg{ margin-top: .85rem; }
-
-/* footer */
-.footer{
-  margin-top: 1.5rem;
-  display:flex;
-  justify-content: space-between;
-  gap:.75rem;
-}
-.btn-next{
-  background: var(--church-brown-400);
-  border: 1px solid var(--church-brown-400);
-}
 </style>

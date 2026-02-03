@@ -1,11 +1,11 @@
 import { isAxiosError } from "axios";
 import apiClient from "../../../api/apiClient";
-import type { Misa } from "../interfaces/listMisas.interface";
+import type { ITipomisa } from "../interfaces/tipoMisa.interface";
 
-export const getListMisasAction = async (): Promise<Misa[]> => {
+export const getTiposMisa = async (): Promise<ITipomisa[]> => {
   try {
-    const { data } = await apiClient.get<Misa[]>(
-      "/misas?select=*,tipomisa(nombre,precio),usuario_creador:authusuarios!misas_idusuariocreacion_fkey(nombre,correo)",
+    const { data } = await apiClient.get<ITipomisa[]>(
+      `/tipomisa?select=*&order=nombre.asc`,
     );
     return Array.isArray(data) ? data : [];
   } catch (error) {

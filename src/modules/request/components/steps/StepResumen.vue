@@ -1,130 +1,243 @@
 <template>
-  <div class="step">
-    <Card class="panel">
-      <template #content>
-        <div class="title">
-          <div class="title-icon ok"><i class="pi pi-check"></i></div>
-          <h2>¡Solicitud Registrada!</h2>
-          <p>Su solicitud ha sido registrada exitosamente</p>
+  <div class="step-content">
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
+      
+      <!-- Success Header -->
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-serif font-bold text-[#C88A2A]">
+          ¡Solicitud Registrada!
+        </h2>
+        <p class="text-[#4A4A4A] mt-2">Su solicitud ha sido registrada exitosamente</p>
+        <p class="text-gray-500 text-sm">Nos comunicaremos con usted a la brevedad posible</p>
+      </div>
+
+      <!-- Secciones de Resumen en grid para desktop -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <!-- Datos del Solicitante -->
+        <div class="bg-[#FFF5E6] rounded-xl p-4 border border-[#D39E3A]/20">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 bg-[#C88A2A]/20 rounded-full flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-[#4A4A4A] text-sm">Datos del Solicitante</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <p class="text-gray-500">Nombre</p>
+              <p class="font-medium text-[#4A4A4A]">{{ store.solicitud.nombres }} {{ store.solicitud.apellidos }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Documento</p>
+              <p class="font-medium text-[#4A4A4A]">{{ tipoDocumentoNombre }}: {{ store.solicitud.nroDocumento }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Teléfono</p>
+              <p class="font-medium text-[#4A4A4A]">{{ store.solicitud.celular }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Correo</p>
+              <p class="font-medium text-[#4A4A4A] truncate">{{ store.solicitud.correo }}</p>
+            </div>
+          </div>
         </div>
 
-        <div class="sections">
-          <Card class="section">
-            <template #content>
-              <div class="section-title">
-                <i class="pi pi-user"></i><span>Datos del Solicitante</span>
-              </div>
-              <div class="kv">
-                <div><b>Nombre:</b> {{ formData.nombre }} {{ formData.apellido }}</div>
-                <div><b>Documento:</b> {{ formData.tipoDocumento }}: {{ formData.numeroDocumento }}</div>
-                <div><b>Teléfono:</b> {{ formData.telefono }}</div>
-                <div><b>Correo:</b> {{ formData.email }}</div>
-              </div>
-            </template>
-          </Card>
+        <!-- Datos de la Celebración -->
+        <div class="bg-[#FFF5E6] rounded-xl p-4 border border-[#D39E3A]/20">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 bg-[#C88A2A]/20 rounded-full flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-[#4A4A4A] text-sm">Datos de la Celebración</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <p class="text-gray-500">Fecha</p>
+              <p class="font-medium text-[#4A4A4A]">{{ formatDate(store.solicitud.fechaCelebracion) }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Horario</p>
+              <p class="font-medium text-[#4A4A4A]">{{ horarioNombre }}</p>
+            </div>
+            <div class="col-span-2">
+              <p class="text-gray-500">Tipo de Misa</p>
+              <p class="font-medium text-[#4A4A4A]">{{ store.esMisaPrivada ? 'Misa Privada' : 'Misa Comunitaria' }}</p>
+            </div>
+            <div v-if="store.esMisaPrivada && store.solicitud.intencion" class="col-span-2">
+              <p class="text-gray-500">Intención</p>
+              <p class="font-medium text-[#4A4A4A] line-clamp-2">{{ store.solicitud.intencion }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <Card class="section">
-            <template #content>
-              <div class="section-title">
-                <i class="pi pi-calendar"></i><span>Datos de la Celebración</span>
+      <!-- Segunda fila: Menciones y Pago -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <!-- Menciones (solo si hay) -->
+        <div v-if="!store.esMisaPrivada && store.solicitud.menciones.length > 0" class="bg-[#FFF5E6] rounded-xl p-4 border border-[#D39E3A]/20">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-[#C88A2A]/20 rounded-full flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
               </div>
-              <div class="kv">
-                <div><b>Fecha:</b> {{ formData.fechaCelebracion }}</div>
-                <div><b>Tipo:</b> {{ formData.tipoCelebracion }}</div>
-                <div><b>Misa:</b> {{ formData.misa }}</div>
-                <div><b>Hora:</b> {{ formData.hora }}</div>
-                <div><b>Intención:</b> {{ formData.intencion }}</div>
-              </div>
-            </template>
-          </Card>
-
-          <Card class="section">
-            <template #content>
-              <div class="section-title">
-                <i class="pi pi-file-edit"></i><span>Menciones ({{ formData.menciones?.length ?? 0 }})</span>
-              </div>
-              <ol class="mentions">
-                <li v-for="(m, i) in (formData.menciones ?? [])" :key="i">{{ m }}</li>
-              </ol>
-            </template>
-          </Card>
-
-          <Card class="section">
-            <template #content>
-              <div class="section-title">
-                <i class="pi pi-wallet"></i><span>Información de Pago</span>
-              </div>
-              <div class="pay-row">
-                <div>
-                  <div class="muted">Total Pagado</div>
-                  <div class="total">S/ {{ formData.total }}</div>
-                </div>
-                <Tag value="Menciones: Gratis" severity="success" />
-              </div>
-            </template>
-          </Card>
-
-          <Message severity="success" :closable="false" class="msg">
-            Confirmación enviada. Por favor revise su bandeja de entrada o spam.
-          </Message>
+              <h3 class="font-semibold text-[#4A4A4A] text-sm">Menciones ({{ store.solicitud.menciones.length }})</h3>
+            </div>
+            <span class="text-xs text-[#C88A2A] font-medium">S/ {{ COSTO_MENCION.toFixed(2) }} c/u</span>
+          </div>
+          <div class="space-y-1 max-h-24 overflow-y-auto">
+            <div 
+              v-for="(mencion, index) in store.solicitud.menciones" 
+              :key="mencion.id"
+              class="flex justify-between items-center text-xs py-1 border-b border-[#D39E3A]/10 last:border-0"
+            >
+              <span class="text-[#4A4A4A] truncate mr-2">{{ index + 1 }}. {{ mencion.descripcion }}</span>
+              <span class="text-gray-500 shrink-0">S/ {{ mencion.costo.toFixed(2) }}</span>
+            </div>
+          </div>
         </div>
 
-        <div class="footer">
-          <Button label="Volver al Inicio" class="btn-next" @click="$emit('inicio')" />
-          <small class="bless">Que Dios los bendiga 🙏</small>
+        <!-- Información de Pago -->
+        <div class="bg-[#FFF5E6] rounded-xl p-4 border border-[#D39E3A]/20" :class="{ 'md:col-span-2': store.esMisaPrivada || store.solicitud.menciones.length === 0 }">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 bg-[#C88A2A]/20 rounded-full flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-[#4A4A4A] text-sm">Información de Pago</h3>
+              <p class="text-xs text-gray-500">Comprobante: {{ store.solicitud.voucherPago }}</p>
+            </div>
+          </div>
+          
+          <div class="space-y-2 text-xs">
+            <div v-if="store.esMisaPrivada" class="flex justify-between">
+              <span class="text-[#4A4A4A]">Misa Privada</span>
+              <span class="text-[#4A4A4A]">S/ {{ store.solicitud.montoTotal.toFixed(2) }}</span>
+            </div>
+            <div v-else class="flex justify-between">
+              <span class="text-[#4A4A4A]">Menciones ({{ store.solicitud.menciones.length }} x S/ {{ COSTO_MENCION.toFixed(2) }})</span>
+              <span class="text-[#4A4A4A]">S/ {{ store.totalMenciones.toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-[#D39E3A]/20">
+              <span class="font-bold text-[#4A4A4A]">Total Pagado</span>
+              <span class="font-bold text-lg text-[#C88A2A]">S/ {{ totalPagado.toFixed(2) }}</span>
+            </div>
+          </div>
         </div>
-      </template>
-    </Card>
+      </div>
+
+      <!-- Confirmación enviada -->
+      <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold text-blue-800 text-sm">Confirmación enviada</p>
+            <p class="text-xs text-blue-600">
+              Hemos enviado un correo de confirmación a <strong>{{ store.solicitud.correo }}</strong>
+            </p>
+            <p class="text-xs text-blue-500 mt-1">Por favor revise su bandeja de entrada o spam</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Nueva Solicitud -->
+      <div class="mt-8 text-center">
+        <button
+          @click="nuevaSolicitud"
+          class="px-6 py-3 bg-[#C88A2A] hover:bg-[#B6791F] text-white rounded-lg font-medium transition-colors"
+        >
+          Realizar Nueva Solicitud
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Card from "primevue/card";
-import Button from "primevue/button";
-import Message from "primevue/message";
-import Tag from "primevue/tag";
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useSolicitudStore } from '../../stores/solicitud.store';
+import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
+import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
+import { mapOpcionToSelect } from '../../interfaces/opcionLista.interface';
 
-defineProps<{
-  formData: any;
-}>();
+const store = useSolicitudStore();
+const router = useRouter();
 
-defineEmits<{
-  inicio: [];
-}>();
+const ID_LISTA_TIPOS_DOCUMENTO = 1;
+const ID_LISTA_HORARIOS = 5;
+
+const tiposDocumento = ref<{ id: number; nombre: string }[]>([]);
+const horarios = ref<{ id: number; nombre: string }[]>([]);
+
+onMounted(async () => {
+  try {
+    const [docs, hors] = await Promise.all([
+      getOpcionesLista(ID_LISTA_TIPOS_DOCUMENTO).then(opts => opts.map(mapOpcionToSelect)),
+      getOpcionesLista(ID_LISTA_HORARIOS).then(opts => opts.map(mapOpcionToSelect)),
+    ]);
+    tiposDocumento.value = docs;
+    horarios.value = hors;
+  } catch {
+    // Fallback estático si falla la carga
+    tiposDocumento.value = [{ id: 1, nombre: 'DNI' }, { id: 2, nombre: 'CE' }, { id: 3, nombre: 'Pasaporte' }];
+    horarios.value = [
+      { id: 1, nombre: '07:00 AM' }, { id: 2, nombre: '09:00 AM' }, { id: 3, nombre: '11:00 AM' },
+      { id: 4, nombre: '05:00 PM' }, { id: 5, nombre: '07:00 PM' },
+    ];
+  }
+});
+
+// Computed
+const totalPagado = computed(() => {
+  if (store.esMisaPrivada) {
+    return store.solicitud.montoTotal;
+  }
+  return store.totalMenciones;
+});
+
+const tipoDocumentoNombre = computed(() => {
+  const tipo = tiposDocumento.value.find(t => t.id === store.solicitud.idTipoDocumento);
+  return tipo?.nombre || '';
+});
+
+const horarioNombre = computed(() => {
+  const h = horarios.value.find(h => h.id === store.solicitud.idHorario);
+  return h?.nombre || '';
+});
+
+// Formatear fecha
+const formatDate = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr + 'T00:00:00');
+  return date.toLocaleDateString('es-PE', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+// Nueva solicitud
+const nuevaSolicitud = () => {
+  store.resetSolicitud();
+  router.push('/');
+};
 </script>
 
 <style scoped>
-.step{ padding: 2rem 1rem; display:flex; justify-content:center; }
-.panel{ width: 100%; max-width: 980px; border-radius: 16px; }
-
-.title{ text-align:center; margin-bottom: 1.25rem; }
-.title-icon{
-  width:64px; height:64px; border-radius:50%;
-  display:grid; place-items:center; margin:0 auto .75rem;
-  border: 1px solid #c7f9d5;
-  background:#eafff0;
-  color:#0a7a2a;
-}
-.title-icon.ok i{ font-size: 1.4rem; }
-.title h2{ margin:0; font-family: Georgia, serif; color: var(--church-brown-600); }
-.title p{ margin:.4rem 0 0; color:#6b7280; }
-
-.sections{ display:flex; flex-direction:column; gap: 1rem; }
-.section{ border-radius: 14px; }
-.section-title{
-  display:flex; gap:.5rem; align-items:center;
-  font-weight:700; color: var(--church-brown-600); margin-bottom: .75rem;
-}
-.kv{ display:grid; gap:.35rem; color:#111827; }
-.mentions{ margin:0; padding-left: 1.2rem; display:grid; gap:.35rem; }
-
-.pay-row{ display:flex; justify-content:space-between; align-items:center; gap: 1rem; }
-.muted{ color:#6b7280; font-size:.9rem; }
-.total{ font-size: 2rem; font-weight:800; color: var(--church-brown-600); }
-
-.msg{ margin-top: .5rem; }
-
-.footer{ margin-top: 1.5rem; display:flex; flex-direction:column; align-items:center; gap:.75rem; }
-.btn-next{ background: var(--church-brown-400); border: 1px solid var(--church-brown-400); }
-.bless{ color:#6b7280; }
 </style>

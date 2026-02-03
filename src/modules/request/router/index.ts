@@ -1,46 +1,28 @@
+import HomeRequestView from "../views/HomeRequestView.vue";
 import RequestView from "../views/RequestView.vue";
-import DebugMisasView from "../views/DebugMisasView.vue";
+import ConsultRequestView from "../views/ConsultRequestView.vue";
+import MentionsRequestView from "../views/MentionsRequestView.vue";
+
 const routes = [
   {
     path: "/",
-    name: "Inicio",
-    component: RequestView,
-    props: { step: 0 },
+    name: "Home",
+    component: HomeRequestView,
   },
   {
-    path: "/datos-solicitante",
-    name: "DatosSolicitante",
+    path: "/nueva-solicitud",
+    name: "NuevaSolicitud",
     component: RequestView,
-    props: { step: 1 },
   },
   {
-    path: "/datos-celebracion",
-    name: "DatosCelebracion",
-    component: RequestView,
-    props: { step: 2 },
+    path: "/consultar",
+    name: "Consultar",
+    component: ConsultRequestView,
   },
   {
     path: "/menciones",
     name: "Menciones",
-    component: RequestView,
-    props: { step: 3 },
-  },
-  {
-    path: "/pago",
-    name: "Pago",
-    component: RequestView,
-    props: { step: 4 },
-  },
-  {
-    path: "/resumen",
-    name: "Resumen",
-    component: RequestView,
-    props: { step: 5 },
-  },
-  {
-    path: "/debug-misas-menciones",
-    name: "debug-misas-menciones",
-    component: DebugMisasView,
+    component: MentionsRequestView,
   },
 ];
 

@@ -1,314 +1,291 @@
 <template>
-  <div class="request-view">
-    
-    <!-- Paso 0: Inicio -->
-    <StepInicio 
-      v-if="currentStep === 0"
-      @nueva-solicitud="goToStep(1)"
-      @consultar-solicitud="handleConsultar"
-    />
+  <div class="min-h-screen flex flex-col relative">
+    <!-- Background Image with Overlay -->
+    <div 
+      class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+      :style="{ backgroundImage: `url('/images/FondoCatedral.jpeg')` }"
+    >
+      <div class="absolute inset-0 bg-black/40"></div>
+    </div>
 
-    <!-- Paso 1: Datos del solicitante -->
-    <StepDatosSolicitante
-      v-if="currentStep === 1"
-      :form-data="formData"
-      @update:form-data="updateFormData"
-      @next="goToStep(2)"
-    />
+    <!-- Content -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+      <!-- Header -->
+      <HeaderSolicitud />
 
-    <!-- Paso 2: Datos de la celebración -->
-    <StepDatosCelebracion
-      v-if="currentStep === 2"
-      :form-data="formData"
-      @update:form-data="updateFormData"
-      @previous="goToStep(1)"
-      @next="goToStep(3)"
-    />
+      <!-- Wizard Container -->
+      <main class="flex-1 flex flex-col px-4 py-6">
+        <div class="w-full max-w-4xl mx-auto">
+          <FormWizard
+            ref="wizardRef"
+            @complete="onComplete"
+            @on-change="onStepChange"
+            color="#C88A2A"
+            title=""
+            subtitle=""
+            step-size="sm"
+            back-button-text="Anterior"
+            next-button-text="Siguiente"
+            finish-button-text="Finalizar"
+          >
+            <TabContent 
+              title="Solicitante"
+              :before-change="validateStep1"
+            >
+              <StepDatosSolicitante ref="step1Ref" />
+            </TabContent>
 
-    <!-- Paso 3: Menciones -->
-    <StepMenciones
-      v-if="currentStep === 3"
-      :form-data="formData"
-      @update:form-data="updateFormData"
-      @previous="goToStep(2)"
-      @next="goToStep(4)"
-    />
+            <TabContent 
+              title="Celebración"
+              :before-change="validateStep2"
+            >
+              <StepDatosCelebracion ref="step2Ref" />
+            </TabContent>
 
-    <!-- Paso 4: Pago y subida de voucher -->
-    <StepPago
-      v-if="currentStep === 4"
-      :form-data="formData"
-      @update:form-data="updateFormData"
-      @previous="goToStep(3)"
-      @confirm-payment="goToStep(5)"
-    />
+            <TabContent 
+              title="Menciones"
+              :before-change="validateStep3"
+            >
+              <StepMenciones ref="step3Ref" />
+            </TabContent>
 
-    <!-- Paso 5: Resumen y confirmación -->
-    <StepResumen
-      v-if="currentStep === 5"
-      :form-data="formData"
-      @inicio="goToStep(0)"
-    />
+            <TabContent 
+              title="Pago"
+              :before-change="validateStep4"
+            >
+              <StepPago ref="step4Ref" />
+            </TabContent>
+
+            <TabContent 
+              title="Confirmación"
+              :before-change="() => true"
+            >
+              <StepResumen ref="step5Ref" />
+            </TabContent>
+          </FormWizard>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <FooterSolicitud />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted, onUnmounted, watch, computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import StepInicio from "../components/steps/StepInicio.vue";
-import StepDatosSolicitante from "../components/steps/StepDatosSolicitante.vue";
-import StepDatosCelebracion from "../components/steps/StepDatosCelebracion.vue";
-import StepMenciones from "../components/steps/StepMenciones.vue";
-import StepPago from "../components/steps/StepPago.vue";
-import StepResumen from "../components/steps/StepResumen.vue";
+import { ref, nextTick } from 'vue';
+import { FormWizard, TabContent } from 'vue3-form-wizard';
+import 'vue3-form-wizard/dist/style.css';
 
-const router = useRouter();
-const route = useRoute();
+import HeaderSolicitud from '../components/HeaderSolicitud.vue';
+import FooterSolicitud from '../components/FooterSolicitud.vue';
+import StepDatosSolicitante from '../components/steps/StepDatosSolicitante.vue';
+import StepDatosCelebracion from '../components/steps/StepDatosCelebracion.vue';
+import StepMenciones from '../components/steps/StepMenciones.vue';
+import StepPago from '../components/steps/StepPago.vue';
+import StepResumen from '../components/steps/StepResumen.vue';
+import { useSolicitudStore } from '../stores/solicitud.store';
 
-// Mapeo de rutas a pasos
-const routeToStepMap: Record<string, number> = {
-  '/': 0,
-  '/datos-solicitante': 1,
-  '/datos-celebracion': 2,
-  '/menciones': 3,
-  '/pago': 4,
-  '/resumen': 5,
-};
+const store = useSolicitudStore();
 
-// Mapeo de pasos a rutas
-const stepToRouteMap: Record<number, string> = {
-  0: '/',
-  1: '/datos-solicitante',
-  2: '/datos-celebracion',
-  3: '/menciones',
-  4: '/pago',
-  5: '/resumen',
-};
+// Referencia al FormWizard
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const wizardRef = ref<any>(null);
 
-// Obtener el paso actual desde la ruta
-const currentStep = computed(() => {
-  return routeToStepMap[route.path] ?? 0;
-});
+// Referencias a los componentes de pasos
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step1Ref = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step2Ref = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step3Ref = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const step4Ref = ref<any>(null);
 
-watch(() => route.fullPath, (newPath) => {
-  if (window.location.hash && window.location.hash !== '#') {
-    // Si hay un hash que no sea solo '#', reemplazar la URL sin hash
-    const cleanPath = newPath.split('#')[0] || '/';
-    if (cleanPath !== route.path) {
-      router.replace(cleanPath).catch(() => {});
-    }
+// Validaciones por paso
+const validateStep1 = async (): Promise<boolean> => {
+  if (step1Ref.value?.validate) {
+    return await step1Ref.value.validate();
   }
-}, { immediate: true });
+  return true;
+};
 
-interface RequestFormData {
-  tipoDocumento: number | null;
-  numeroDocumento: string;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  email: string;
-  fechaCelebracion: string;
-  tipoCelebracion: string;
-  misa: string;
-  hora: string;
-  intencion: string;
-  menciones: string[];
-  total: number;
-  voucher: File | null;
-}
+const validateStep2 = async (): Promise<boolean> => {
+  if (step2Ref.value?.validate) {
+    const isValid = await step2Ref.value.validate();
+    
+    if (isValid) {
+      // Verificar si es misa privada o comunitaria
+      const esMisaPrivada = step2Ref.value?.esMisaPrivada;
+      
+      if (esMisaPrivada) {
+        // Misa privada -> Saltar directamente a Pago (índice 3)
+        await nextTick();
+        setTimeout(() => {
+          if (wizardRef.value) {
+            wizardRef.value.changeTab(1, 3); // De Celebración (1) a Pago (3)
+          }
+        }, 50);
+        return false; // Retornar false para que no avance automáticamente
+      }
+      // Misa comunitaria -> Continuar a Menciones normalmente
+      return true;
+    }
+    return false;
+  }
+  return true;
+};
 
-const formData = reactive<RequestFormData>({
-  tipoDocumento: null,
-  numeroDocumento: "",
-  nombre: "",
-  apellido: "",
-  telefono: "",
-  email: "",
-  fechaCelebracion: "",
-  tipoCelebracion: "",
-  misa: "",
-  hora: "",
-  intencion: "",
-  menciones: [],
-  total: 0,
-  voucher: null,
-});
+const validateStep3 = async (): Promise<boolean> => {
+  if (step3Ref.value?.validate) {
+    return await step3Ref.value.validate();
+  }
+  return true;
+};
 
-const goToStep = (step: number) => {
-  const targetRoute = stepToRouteMap[step];
-  if (targetRoute) {
-    router.push(targetRoute).catch(() => {
-      // Ignorar errores de navegación si ya estamos en la misma ruta
+const validateStep4 = async (): Promise<boolean> => {
+  if (step4Ref.value?.validate) {
+    return await step4Ref.value.validate();
+  }
+  return true;
+};
+
+// Manejar cambios de paso (para navegación hacia atrás)
+const onStepChange = (prevIndex: number, nextIndex: number) => {
+  // Si estamos yendo hacia atrás desde Pago (3) a Menciones (2) y es misa privada
+  // Redirigir a Celebración (1)
+  if (prevIndex === 3 && nextIndex === 2 && store.esMisaPrivada) {
+    nextTick(() => {
+      setTimeout(() => {
+        if (wizardRef.value) {
+          wizardRef.value.changeTab(2, 1); // De Menciones (2) a Celebración (1)
+        }
+      }, 50);
     });
   }
 };
 
-// Limpiar hash de la URL al montar el componente y manejar navegación del navegador
-const handlePopState = () => {
-  // Usar setTimeout para asegurar que se ejecute después de que el router procese el cambio
-  setTimeout(() => {
-    // Si hay hash en la URL, reemplazarlo sin hash
-    if (window.location.hash && window.location.hash !== '#') {
-      const cleanPath = window.location.pathname;
-      router.replace(cleanPath).catch(() => {});
-    }
-    // Si estamos en el paso 0, asegurar que la URL esté limpia
-    const step = routeToStepMap[window.location.pathname] ?? 0;
-    if (step === 0 && window.location.pathname !== '/') {
-      router.replace('/').catch(() => {});
-    }
-  }, 0);
-};
-
-onMounted(() => {
-  // Eliminar hash si existe
-  if (window.location.hash) {
-    router.replace(window.location.pathname).catch(() => {});
-  }
-  
-  // Escuchar cambios en el historial del navegador
-  window.addEventListener('popstate', handlePopState);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('popstate', handlePopState);
-});
-
-const updateFormData = (data: Partial<typeof formData>) => {
-  Object.assign(formData, data);
-};
-
-const handleConsultar = () => {
-  // TODO: Implementar consulta de solicitud
-  console.log("Consultar solicitud");
+const onComplete = () => {
+  console.log('Formulario completado');
+  console.log('Datos de la solicitud:', store.getSolicitudJSON());
 };
 </script>
 
-<style scoped>
-/* =========================
-   Layout base
-========================= */
-.request-view {
-  min-height: 100svh;
-  padding: clamp(1rem, 2vw, 2rem);
-  display: grid;
-  place-items: center;
-  background: var(--church-surface);
+<style>
+/* Personalización del wizard */
+.vue-form-wizard {
+  padding-bottom: 0 !important;
 }
 
-@media (max-width: 640px) {
-  .request-view {
-    padding: 1rem;
-  }
+.vue-form-wizard .wizard-header {
+  display: none;
 }
 
-/* Paso inicio: full screen sin “saltos” */
-.request-view :deep(.step-inicio) {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+/* Línea de progreso de fondo */
+.vue-form-wizard .wizard-navigation .wizard-progress-with-circle {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  height: 3px !important;
+  top: 24px !important;
 }
 
-/* =========================
-   Botones (base)
-========================= */
-.btn {
-  --btn-bg: #ffffff;
-  --btn-fg: #111827;
-  --btn-br: #d1d5db;
-  --btn-bg-hover: #f3f4f6;
-  --btn-bg-active: #e5e7eb;
+/* Línea de progreso activa */
+.vue-form-wizard .wizard-navigation .wizard-progress-with-circle .wizard-progress-bar {
+  background-color: #C88A2A !important;
+}
 
-  appearance: none;
-  border: 1px solid var(--btn-br);
-  background: var(--btn-bg);
-  color: var(--btn-fg);
+/* Círculos de pasos - fondo sólido para tapar la línea */
+.vue-form-wizard .wizard-nav-pills > li > a .wizard-icon-circle {
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  background-color: #5A5A5A !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
 
-  padding: 0.65rem 1rem;
-  border-radius: 0.75rem;
-  font-size: 0.95rem;
+.vue-form-wizard .wizard-nav-pills > li > a .wizard-icon-circle .wizard-icon {
+  color: rgba(255, 255, 255, 0.8) !important;
   font-weight: 600;
-  line-height: 1;
-
-  cursor: pointer;
-  user-select: none;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    transform 120ms ease,
-    box-shadow 150ms ease;
 }
 
-.btn:hover {
-  background: var(--btn-bg-hover);
+/* Círculo activo */
+.vue-form-wizard .wizard-nav-pills > li.active > a .wizard-icon-circle {
+  background-color: #C88A2A !important;
+  border-color: #C88A2A !important;
 }
 
-.btn:active {
-  background: var(--btn-bg-active);
-  transform: translateY(1px);
+.vue-form-wizard .wizard-nav-pills > li.active > a .wizard-icon-circle .wizard-icon {
+  color: white !important;
 }
 
-.btn:disabled,
-.btn[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
+/* Pasos completados */
+.vue-form-wizard .wizard-nav-pills > li.checked > a .wizard-icon-circle {
+  background-color: #C88A2A !important;
+  border-color: #C88A2A !important;
 }
 
-/* Focus accesible (teclado) */
-.btn:focus-visible {
-  outline: 0;
-  box-shadow: 0 0 0 4px rgba(200, 100, 10, 0.25);
-  border-color: var(--church-brown-400);
+.vue-form-wizard .wizard-nav-pills > li.checked > a .wizard-icon-circle .wizard-icon {
+  color: white !important;
 }
 
-/* =========================
-   Variantes
-========================= */
-.btn--primary {
-  --btn-bg: #2563eb;
-  --btn-fg: #ffffff;
-  --btn-br: #2563eb;
-  --btn-bg-hover: #1d4ed8;
-  --btn-bg-active: #1e40af;
+/* Títulos de pasos */
+.vue-form-wizard .wizard-nav-pills > li > a .stepTitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.75rem;
+  margin-top: 8px;
 }
 
-.btn--secondary {
-  --btn-bg: #ffffff;
-  --btn-fg: #374151;
-  --btn-br: #d1d5db;
-  --btn-bg-hover: #f9fafb;
-  --btn-bg-active: #f3f4f6;
+.vue-form-wizard .wizard-nav-pills > li.active > a .stepTitle {
+  color: #D39E3A !important;
+  font-weight: 600;
 }
 
-.btn--purple {
-  --btn-bg: #9333ea;
-  --btn-fg: #ffffff;
-  --btn-br: #9333ea;
-  --btn-bg-hover: #7e22ce;
-  --btn-bg-active: #6b21a8;
+.vue-form-wizard .wizard-nav-pills > li.checked > a .stepTitle {
+  color: #D39E3A !important;
 }
 
-/* Tamaños */
-.btn--large {
-  padding: 0.9rem 1.25rem;
-  font-size: 1rem;
-  border-radius: 0.9rem;
+/* Botones del wizard */
+.vue-form-wizard .wizard-footer-left .wizard-btn,
+.vue-form-wizard .wizard-footer-right .wizard-btn {
+  min-height: 44px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-/* Opcional: botón ancho completo para móvil */
-@media (max-width: 640px) {
-  .btn--large {
-    width: 100%;
+.vue-form-wizard .wizard-footer-right .wizard-btn {
+  background-color: #C88A2A !important;
+  border-color: #C88A2A !important;
+}
+
+.vue-form-wizard .wizard-footer-right .wizard-btn:hover {
+  background-color: #B6791F !important;
+  border-color: #B6791F !important;
+}
+
+.vue-form-wizard .wizard-footer-left .wizard-btn {
+  background-color: white !important;
+  border: 1px solid #BFBFBF !important;
+  color: #4A4A4A !important;
+}
+
+.vue-form-wizard .wizard-footer-left .wizard-btn:hover {
+  background-color: #F5F0E8 !important;
+  border-color: #999 !important;
+}
+
+/* Contenido del tab */
+.vue-form-wizard .wizard-tab-content {
+  padding: 20px 0 !important;
+  min-height: 200px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vue-form-wizard .wizard-nav-pills > li > a .stepTitle {
+    font-size: 0.65rem;
+  }
+  
+  .bg-fixed {
+    background-attachment: scroll !important;
   }
 }
 </style>
