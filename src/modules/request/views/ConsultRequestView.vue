@@ -121,9 +121,11 @@
                     <span class="text-xs font-bold text-white bg-[#8C1D40] px-2 py-1 rounded">
                       #{{ solicitud.idsolicitud }}
                     </span>
+                    <!--
                     <h4 class="text-sm font-semibold text-[#4A4A4A]">
                       {{ solicitud.nombres }} {{ solicitud.apellidos }}
                     </h4>
+                    -->
                   </div>
                   <span
                     class="text-xs px-2.5 py-1 rounded-full font-medium"
@@ -139,10 +141,12 @@
 
                 <!-- Grid de información compacto -->
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2.5 text-xs">
+                  <!--
                   <div class="flex flex-col">
                     <span class="text-gray-500 font-medium">Documento</span>
                     <span class="text-gray-800 font-semibold">{{ solicitud.nrodocumento }}</span>
                   </div>
+                  -->
                   <div class="flex flex-col">
                     <span class="text-gray-500 font-medium">Estado</span>
                     <span class="text-gray-800">{{ solicitud.estado_proceso?.nombre || "-" }}</span>
@@ -163,10 +167,11 @@
                     <span class="text-gray-500 font-medium">Horario</span>
                     <span class="text-gray-800">{{ solicitud.horario?.nombre || "-" }}</span>
                   </div>
-                  <div class="flex flex-col">
+                  <!-- <div class="flex flex-col">
                     <span class="text-gray-500 font-medium">Monto</span>
                     <span class="text-[#8C1D40] font-bold">S/ {{ formatMoney(solicitud.montototal) }}</span>
-                  </div>
+                  </div> -->
+                  <!--
                   <div v-if="solicitud.voucherpago" class="flex flex-col">
                     <span class="text-gray-500 font-medium">Voucher</span>
                     <a
@@ -181,13 +186,16 @@
                       </svg>
                     </a>
                   </div>
+                  -->
                 </div>
 
                 <!-- Intención (si existe) -->
+                <!--
                 <div v-if="solicitud.intencion" class="mt-3 pt-3 border-t border-[#E0D5C5]">
                   <p class="text-xs text-gray-500 font-medium mb-1">Intención</p>
                   <p class="text-xs text-gray-700 leading-relaxed">{{ solicitud.intencion }}</p>
                 </div>
+                -->
 
                 <!-- Menciones (si existen) -->
                 <div v-if="solicitud.menciones && solicitud.menciones.length > 0" class="mt-3 pt-3 border-t border-[#E0D5C5]">
