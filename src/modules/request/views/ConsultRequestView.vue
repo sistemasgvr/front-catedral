@@ -10,143 +10,126 @@
 
     <div class="relative z-10 flex flex-col min-h-screen">
       <!-- Header -->
-      <header
-        class="bg-gradient-to-r from-[#8C1D40]/60 to-[#C88A2A]/40 backdrop-blur-sm py-6 px-4 shadow-lg"
-      >
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-          <div class="text-center flex-1">
-            <h1
-              class="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-md"
-            >
-              Iglesia de San Pedro de Lambayeque
-            </h1>
-            <p class="text-amber-100/90 text-sm mt-1">
-              Consultar Solicitudes
-            </p>
-          </div>
-          <router-link
-            to="/"
-            class="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg transition-all duration-300"
-            title="Volver al inicio"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-              />
-            </svg>
-            <span class="text-sm font-medium hidden sm:inline">Inicio</span>
-          </router-link>
-        </div>
-      </header>
+      <HeaderSolicitud />
 
       <!-- Content -->
-      <main class="flex-1 px-4 py-6">
-        <div class="w-full max-w-4xl mx-auto space-y-6">
-          <!-- Search Card -->
-          <section
-            class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8"
-          >
-            <h2
-              class="text-xl md:text-2xl font-serif font-bold text-[#8C1D40] mb-2 text-center"
-            >
-              Consultar por Numero de Documento
+      <main class="flex-1 px-4 py-4 md:py-6">
+        <div class="w-full max-w-3xl mx-auto space-y-4">
+          <!-- Search Card - Más compacto -->
+          <section class="bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-[#E0D5C5] p-5">
+            <h2 class="text-lg md:text-xl font-serif font-bold text-[#8C1D40] mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Consultar Solicitud
             </h2>
-            <div class="w-12 h-1 bg-[#8C1D40] rounded mx-auto mb-6"></div>
 
-            <form @submit.prevent="onBuscar" class="space-y-4">
-              <InputText
-                v-model="nroDocumento"
-                name="nroDocumento"
-                label="Numero de Documento"
-                placeholder="Ingrese su numero de documento"
-                :required="true"
-                :maxlength="20"
-                :error-message="fieldError"
-                @blur="validateDocumento"
-              />
-
-              <div class="flex flex-wrap gap-3">
-                <button
-                  type="submit"
-                  class="min-h-[44px] px-6 rounded-lg bg-[#8C1D40] hover:bg-[#741735] text-white font-semibold transition-all duration-300"
-                  :disabled="loading"
-                >
-                  {{ loading ? "Buscando..." : "Buscar" }}
-                </button>
-                <button
-                  type="button"
-                  class="min-h-[44px] px-6 rounded-lg bg-white border border-[#E0D5C5] text-[#4A4A4A] font-semibold hover:bg-[#F5F0E8] transition-all duration-300"
-                  @click="onLimpiar"
-                  :disabled="loading"
-                >
-                  Limpiar
-                </button>
+            <form @submit.prevent="onBuscar">
+              <div class="flex flex-col md:flex-row gap-2 md:items-end">
+                <div class="flex-1">
+                  <InputText
+                    v-model="nroDocumento"
+                    name="nroDocumento"
+                    label="Número de Documento"
+                    placeholder="Ingrese su número de documento"
+                    :required="true"
+                    :maxlength="20"
+                    :error-message="fieldError"
+                    @blur="validateDocumento"
+                  />
+                </div>
+                
+                <div class="flex gap-2">
+                  <button
+                    type="submit"
+                    class="min-h-[42px] px-6 rounded-lg bg-[#8C1D40] hover:bg-[#741735] text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    :disabled="loading"
+                  >
+                    <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ loading ? "Buscando..." : "Buscar" }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="min-h-[42px] px-5 rounded-lg bg-white border-2 border-[#E0D5C5] text-[#4A4A4A] font-medium hover:bg-[#F5F0E8] transition-all duration-200"
+                    @click="onLimpiar"
+                    :disabled="loading"
+                  >
+                    Limpiar
+                  </button>
+                </div>
               </div>
 
-              <p v-if="fetchError" class="text-sm text-red-500">
+              <p v-if="fetchError" class="text-sm text-red-600 flex items-center gap-1 mt-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
                 {{ fetchError }}
               </p>
             </form>
           </section>
 
-          <!-- Results -->
+          <!-- Results - Diseño minimalista -->
           <section
-            class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8"
+            v-if="hasSearched"
+            class="bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-[#E0D5C5] overflow-hidden"
           >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-[#4A4A4A]">
+            <!-- Header de resultados -->
+            <div class="bg-gradient-to-r from-[#8C1D40] to-[#741735] px-5 py-3 flex items-center justify-between">
+              <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 Resultados
               </h3>
-              <span
-                v-if="hasSearched"
-                class="text-sm text-[#8C1D40] font-semibold"
-              >
-                {{ solicitudes.length }} solicitud(es)
+              <span class="text-sm text-white/90 font-medium bg-white/20 px-3 py-1 rounded-full">
+                {{ solicitudes.length }} {{ solicitudes.length === 1 ? 'solicitud' : 'solicitudes' }}
               </span>
             </div>
 
-            <div v-if="loading" class="space-y-3">
-              <div v-for="i in 3" :key="i" class="animate-pulse">
-                <div class="h-24 bg-gray-200 rounded-lg"></div>
+            <!-- Loading state -->
+            <div v-if="loading" class="p-5 space-y-3">
+              <div v-for="i in 2" :key="i" class="animate-pulse">
+                <div class="h-32 bg-gray-200 rounded-lg"></div>
               </div>
             </div>
 
+            <!-- Empty state -->
             <div
-              v-else-if="hasSearched && solicitudes.length === 0"
-              class="text-center py-10 text-gray-500"
+              v-else-if="solicitudes.length === 0"
+              class="text-center py-12 px-4"
             >
-              No se encontraron solicitudes para ese documento.
+              <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p class="text-gray-500 font-medium">No se encontraron solicitudes</p>
+              <p class="text-sm text-gray-400 mt-1">Intente con otro número de documento</p>
             </div>
 
-            <div v-else class="space-y-4">
+            <!-- Results list -->
+            <div v-else class="divide-y divide-[#E0D5C5]">
               <article
                 v-for="solicitud in solicitudes"
                 :key="solicitud.idsolicitud"
-                class="p-4 border border-[#E0D5C5] rounded-lg bg-white"
+                class="p-5 hover:bg-[#FFF9F5] transition-colors duration-150"
               >
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <h4 class="text-[#4A4A4A] font-semibold">
-                      Solicitud #{{ solicitud.idsolicitud }}
-                    </h4>
-                    <p class="text-sm text-gray-500">
+                <!-- Header compacto -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-white bg-[#8C1D40] px-2 py-1 rounded">
+                      #{{ solicitud.idsolicitud }}
+                    </span>
+                    <h4 class="text-sm font-semibold text-[#4A4A4A]">
                       {{ solicitud.nombres }} {{ solicitud.apellidos }}
-                    </p>
+                    </h4>
                   </div>
                   <span
-                    class="text-xs px-2 py-1 rounded-full font-semibold"
+                    class="text-xs px-2.5 py-1 rounded-full font-medium"
                     :class="
                       solicitud.estado
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-emerald-100 text-emerald-700'
                         : 'bg-gray-100 text-gray-600'
                     "
                   >
@@ -154,62 +137,69 @@
                   </span>
                 </div>
 
-                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <div class="text-gray-600">
-                    <strong>Documento:</strong>
-                    {{ solicitud.nrodocumento }}
+                <!-- Grid de información compacto -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2.5 text-xs">
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Documento</span>
+                    <span class="text-gray-800 font-semibold">{{ solicitud.nrodocumento }}</span>
                   </div>
-                  <div class="text-gray-600">
-                    <strong>Estado proceso:</strong>
-                    {{ solicitud.estado_proceso?.nombre || "-" }}
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Estado</span>
+                    <span class="text-gray-800">{{ solicitud.estado_proceso?.nombre || "-" }}</span>
                   </div>
-                  <div class="text-gray-600">
-                    <strong>Fecha solicitud:</strong>
-                    {{ formatDate(solicitud.fechasolicitud || solicitud.fechacreacion) }}
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Tipo de misa</span>
+                    <span class="text-gray-800">{{ solicitud.tipomisa?.nombre || "-" }}</span>
                   </div>
-                  <div class="text-gray-600">
-                    <strong>Fecha misa:</strong>
-                    {{ formatDate(solicitud.fechamisadeseada || solicitud.fechacelebracion) }}
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Fecha solicitud</span>
+                    <span class="text-gray-800">{{ formatDateShort(solicitud.fechasolicitud || solicitud.fechacreacion) }}</span>
                   </div>
-                  <div class="text-gray-600">
-                    <strong>Tipo de misa:</strong>
-                    {{ solicitud.tipomisa?.nombre || "-" }}
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Fecha misa</span>
+                    <span class="text-gray-800">{{ formatDateShort(solicitud.fechamisadeseada || solicitud.fechacelebracion) }}</span>
                   </div>
-                  <div class="text-gray-600">
-                    <strong>Horario:</strong>
-                    {{ solicitud.horario?.nombre || "-" }}
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Horario</span>
+                    <span class="text-gray-800">{{ solicitud.horario?.nombre || "-" }}</span>
                   </div>
-                  <div class="text-gray-600">
-                    <strong>Monto total:</strong>
-                    S/ {{ formatMoney(solicitud.montototal) }}
+                  <div class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Monto</span>
+                    <span class="text-[#8C1D40] font-bold">S/ {{ formatMoney(solicitud.montototal) }}</span>
                   </div>
-                  <div class="text-gray-600 md:col-span-2">
-                    <strong>Intencion:</strong>
-                    {{ solicitud.intencion || "-" }}
-                  </div>
-                  <div class="text-gray-600 md:col-span-2">
-                    <strong>Menciones:</strong>
-                    <span v-if="(solicitud.menciones?.length || 0) === 0">-</span>
-                    <div v-else class="flex flex-wrap gap-2 mt-1">
-                      <span
-                        v-for="mencion in solicitud.menciones"
-                        :key="mencion.idmencion"
-                        class="text-xs px-2 py-1 rounded-full bg-[#FFF5E6] text-[#8C1D40] border border-[#D39E3A]/40"
-                      >
-                        {{ mencion.descripcion || "Sin descripcion" }}
-                      </span>
-                    </div>
-                  </div>
-                  <div v-if="solicitud.voucherpago" class="text-gray-600">
-                    <strong>Voucher:</strong>
+                  <div v-if="solicitud.voucherpago" class="flex flex-col">
+                    <span class="text-gray-500 font-medium">Voucher</span>
                     <a
                       :href="solicitud.voucherpago"
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="text-[#8C1D40] underline"
+                      class="text-[#8C1D40] hover:underline font-medium flex items-center gap-1"
                     >
                       Ver comprobante
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
                     </a>
+                  </div>
+                </div>
+
+                <!-- Intención (si existe) -->
+                <div v-if="solicitud.intencion" class="mt-3 pt-3 border-t border-[#E0D5C5]">
+                  <p class="text-xs text-gray-500 font-medium mb-1">Intención</p>
+                  <p class="text-xs text-gray-700 leading-relaxed">{{ solicitud.intencion }}</p>
+                </div>
+
+                <!-- Menciones (si existen) -->
+                <div v-if="solicitud.menciones && solicitud.menciones.length > 0" class="mt-3 pt-3 border-t border-[#E0D5C5]">
+                  <p class="text-xs text-gray-500 font-medium mb-2">Menciones</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="mencion in solicitud.menciones"
+                      :key="mencion.idmencion"
+                      class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200"
+                    >
+                      {{ mencion.descripcion || "Sin descripción" }}
+                    </span>
                   </div>
                 </div>
               </article>
@@ -219,14 +209,7 @@
       </main>
 
       <!-- Footer -->
-      <footer class="text-center py-6 px-4">
-        <p class="text-[#D39E3A] text-sm mb-1 drop-shadow-md">
-          Que Dios los bendiga
-        </p>
-        <p class="text-amber-200/70 text-xs drop-shadow-sm">
-          © 2026 Iglesia San Pedro de Lambayeque
-        </p>
-      </footer>
+      <FooterSolicitud />
     </div>
   </div>
 </template>
@@ -236,6 +219,8 @@ import { ref } from "vue";
 import { InputText } from "@/components/inputs";
 import { getSolicitudesByDocumento } from "../actions/getSolicitudesByDocumento.action";
 import type { ISolicitudDb } from "../interfaces/solicitudDb.interface";
+import HeaderSolicitud from "../components/HeaderSolicitud.vue";
+import FooterSolicitud from "../components/FooterSolicitud.vue";
 
 const nroDocumento = ref("");
 const fieldError = ref<string | undefined>(undefined);
@@ -246,7 +231,7 @@ const solicitudes = ref<ISolicitudDb[]>([]);
 
 const validateDocumento = () => {
   fieldError.value = !nroDocumento.value.trim()
-    ? "Ingrese su numero de documento"
+    ? "Ingrese su número de documento"
     : undefined;
 };
 
@@ -276,15 +261,15 @@ const onLimpiar = () => {
   hasSearched.value = false;
 };
 
-const formatDate = (value: string | null): string => {
+const formatDateShort = (value: string | null): string => {
   if (!value) return "-";
   const normalized = value.includes("T") ? value : `${value}T00:00:00`;
   const date = new Date(normalized);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("es-PE", {
+    day: "2-digit",
+    month: "short",
     year: "numeric",
-    month: "long",
-    day: "numeric",
   });
 };
 
