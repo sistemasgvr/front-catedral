@@ -14,7 +14,7 @@
 
       <!-- Content -->
       <main class="flex-1 px-4 py-4 md:py-6">
-        <div class="w-full max-w-3xl mx-auto space-y-4">
+        <div class="w-full max-w-7xl mx-auto space-y-4">
           <!-- Search Card - Más compacto -->
           <section class="bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-[#E0D5C5] p-5">
             <!-- <h2 class="text-lg md:text-xl font-serif font-bold text-[#8C1D40] mb-4 flex items-center gap-2">

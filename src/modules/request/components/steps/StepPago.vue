@@ -323,6 +323,7 @@ const registrarSolicitud = async (): Promise<boolean> => {
       { ...store.solicitud, montoTotal: totalPagar.value },
       archivoSeleccionado.value
     );
+    localStorage.setItem("solicitud_registered", "true");
     return true;
   } catch (err) {
     submitError.value =
