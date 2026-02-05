@@ -14,8 +14,8 @@
       <HeaderSolicitud />
 
       <!-- Wizard Container -->
-      <main class="flex-1 flex flex-col px-4 py-6">
-        <div class="w-full max-w-4xl mx-auto">
+      <main class="flex-1 flex items-center px-4 py-6">
+        <div class="w-full max-w-5xl mx-auto">
           <FormWizard
             ref="wizardRef"
             @complete="onComplete"
@@ -74,6 +74,7 @@
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import { FormWizard, TabContent } from 'vue3-form-wizard';
 import 'vue3-form-wizard/dist/style.css';
 
@@ -87,6 +88,7 @@ import StepResumen from '../components/steps/StepResumen.vue';
 import { useSolicitudStore } from '../stores/solicitud.store';
 
 const store = useSolicitudStore();
+const router = useRouter();
 
 // Referencia al FormWizard
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,6 +103,7 @@ const step2Ref = ref<any>(null);
 const step3Ref = ref<any>(null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const step4Ref = ref<any>(null);
+const isRegistered = ref(false);
 
 // Validaciones por paso
 const validateStep1 = async (): Promise<boolean> => {
@@ -145,7 +148,11 @@ const validateStep3 = async (): Promise<boolean> => {
 
 const validateStep4 = async (): Promise<boolean> => {
   if (step4Ref.value?.validate) {
-    return await step4Ref.value.validate();
+    const ok = await step4Ref.value.validate();
+    if (ok) {
+      isRegistered.value = true;
+    }
+    return ok;
   }
   return true;
 };
@@ -163,11 +170,26 @@ const onStepChange = (prevIndex: number, nextIndex: number) => {
       }, 50);
     });
   }
+
+  // Si ya se registró, no permitir regresar desde Resumen (4)
+  if (isRegistered.value && prevIndex === 4 && nextIndex < prevIndex) {
+    nextTick(() => {
+      setTimeout(() => {
+        if (wizardRef.value) {
+          wizardRef.value.changeTab(nextIndex, 4);
+        }
+      }, 50);
+    });
+  }
 };
 
 const onComplete = () => {
-  console.log('Formulario completado');
-  console.log('Datos de la solicitud:', store.getSolicitudJSON());
+  // Limpiar estado persistido y volver al inicio
+  localStorage.removeItem('solicitud');
+  localStorage.removeItem('solicitud_registered');
+  store.resetSolicitud();
+  isRegistered.value = false;
+  router.push('/');
 };
 </script>
 

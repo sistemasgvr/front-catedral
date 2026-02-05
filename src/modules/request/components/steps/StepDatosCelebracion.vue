@@ -241,6 +241,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed, reactive } from "vue";
+import { useRoute } from "vue-router";
 import { useSolicitudStore } from "../../stores/solicitud.store";
 import { getMisas } from "../../actions/getMisas.action";
 import { type ISelectOption } from "../../interfaces/opcionLista.interface";
@@ -258,6 +259,7 @@ import {
 } from "../../interfaces/tipoMisa.interface";
 
 const store = useSolicitudStore();
+const route = useRoute();
 
 // IDs de listas en opcioneslista
 const ID_LISTA_HORARIOS = 5;
@@ -339,7 +341,7 @@ const cargarHorarios = async () => {
 const cargarMisas = async () => {
   try {
     loadingMisas.value = true;
-    const misas = await getMisas(1);
+    const misas = await getMisas(idTipoMisa.value ?? undefined);
     misasDisponibles.value = misas.map(mapMisaToListItem);
   } catch (error) {
     console.error("Error al cargar misas:", error);
@@ -502,13 +504,27 @@ watch(
 onMounted(async () => {
   await Promise.all([cargarTiposMisa(), cargarHorarios()]);
 
-  idTipoMisa.value = store.solicitud.idTipoMisa;
+  const queryMisaId = parseInt(route.query.misaId as string, 10);
+  const queryTipoMisaId = parseInt(route.query.idTipoMisa as string, 10);
+
+  if (!Number.isNaN(queryTipoMisaId) && queryTipoMisaId > 0) {
+    idTipoMisa.value = queryTipoMisaId;
+  } else {
+    idTipoMisa.value = store.solicitud.idTipoMisa;
+  }
   fechaCelebracion.value = store.solicitud.fechaCelebracion;
   idHorario.value = store.solicitud.idHorario;
   intencion.value = store.solicitud.intencion;
 
   if (idTipoMisa.value && !esMisaPrivada.value) {
     await cargarMisas();
+
+    if (!Number.isNaN(queryMisaId) && queryMisaId > 0) {
+      const misa = misasDisponibles.value.find((m) => m.id === queryMisaId);
+      if (misa) {
+        seleccionarMisa(misa);
+      }
+    }
   }
 });
 

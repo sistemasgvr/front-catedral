@@ -24,6 +24,23 @@ export interface IUsuarioCreador {
   nombre: string;
 }
 
+// Para calendario de misas (sin usuario_creador)
+export interface IMisaCalendario {
+  idmisa: number;
+  idtipomisa: number;
+  titulo: string;
+  fechacelebracion: string;
+  horainicio: string;
+  horafin: string;
+  estado: boolean;
+  idusuariocreacion: number;
+  idusuariomodificacion: number | null;
+  fechacreacion: string;
+  fechamodificacion: string | null;
+  tipomisa: ITipoMisaInfo;
+  mencionesmisa?: { count: number }[];
+}
+
 // Para mostrar en el listado de misas
 export interface IMisaListItem {
   id: number;
