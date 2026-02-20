@@ -338,6 +338,32 @@
         </main>
       </div>
     </div>
+
+  <!-- Modales -->
+    <DetailMassModal
+      :is-open="modalDetalle.isOpen"
+      :misa-id="modalDetalle.misaId"
+      @close="modalDetalle.isOpen = false"
+    />
+
+    <FormMassModal
+      :is-open="modalForm.isOpen"
+      :misa-id="modalForm.misaId"
+      @close="modalForm.isOpen = false"
+      @saved="handleMisaGuardada"
+    />
+
+    <ConfirmModal
+      :is-open="modalConfirm.isOpen"
+      :loading="modalConfirm.loading"
+      type="danger"
+      title="¿Eliminar Misa?"
+      message="Esta acción no se puede deshacer. ¿Está seguro de que desea eliminar esta misa?"
+      confirm-text="Eliminar"
+      cancel-text="Cancelar"
+      @confirm="handleEliminar"
+      @cancel="modalConfirm.isOpen = false"
+    />
   </AdminLayout>
 </template>
 
@@ -349,6 +375,78 @@ import { eliminarMisa } from '../actions/eliminarMisa.action';
 import { getTiposMisa } from '../actions/getTiposMisa.action';
 import type { IMisaConRelaciones } from '../interfaces/misa.interface';
 import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
+
+import ConfirmModal from '../components/ConfirmModal.vue';
+import DetailMassModal from '../components/DetailMassModal.vue';
+import FormMassModal from '../components/FormMassModal.vue';
+
+// State para modales
+const modalDetalle = ref({
+  isOpen: false,
+  misaId: null as number | null,
+});
+
+const modalForm = ref({
+  isOpen: false,
+  misaId: null as number | null,
+});
+
+const modalConfirm = ref({
+  isOpen: false,
+  misaId: null as number | null,
+  loading: false,
+});
+
+// Métodos
+const abrirModalCrear = () => {
+  modalForm.value = {
+    isOpen: true,
+    misaId: null,
+  };
+};
+
+const verDetalle = (idMisa: number) => {
+  modalDetalle.value = {
+    isOpen: true,
+    misaId: idMisa,
+  };
+};
+
+const editarMisa = (idMisa: number) => {
+  modalForm.value = {
+    isOpen: true,
+    misaId: idMisa,
+  };
+};
+
+const confirmarEliminar = (idMisa: number) => {
+  modalConfirm.value = {
+    isOpen: true,
+    misaId: idMisa,
+    loading: false,
+  };
+};
+
+const handleEliminar = async () => {
+  if (!modalConfirm.value.misaId) return;
+
+  modalConfirm.value.loading = true;
+  try {
+    await eliminarMisa(modalConfirm.value.misaId);
+    await cargarMisas(); // Recargar lista
+    modalConfirm.value.isOpen = false;
+  } catch (error) {
+    console.error('Error eliminando misa:', error);
+    alert('Error al eliminar la misa');
+  } finally {
+    modalConfirm.value.loading = false;
+  }
+};
+
+const handleMisaGuardada = async () => {
+  await cargarMisas(); // Recargar lista
+};
+
 
 /* ================================
    STATE
@@ -450,34 +548,6 @@ const cargarTiposMisa = async () => {
     tiposMisa.value = await getTiposMisa();
   } catch (error) {
     console.error('Error cargando tipos de misa:', error);
-  }
-};
-
-const abrirModalCrear = () => {
-  console.log('Abrir modal crear misa');
-  // TODO: Implementar modal de creación
-};
-
-const verDetalle = (idMisa: number) => {
-  console.log('Ver detalle misa:', idMisa);
-  // TODO: Implementar vista de detalle
-};
-
-const editarMisa = (idMisa: number) => {
-  console.log('Editar misa:', idMisa);
-  // TODO: Implementar modal de edición
-};
-
-const confirmarEliminar = async (idMisa: number) => {
-  const confirmacion = confirm('¿Está seguro de eliminar esta misa?');
-  if (!confirmacion) return;
-
-  try {
-    await eliminarMisa(idMisa);
-    await cargarMisas(); // Recargar lista
-  } catch (error) {
-    console.error('Error eliminando misa:', error);
-    alert('Error al eliminar la misa');
   }
 };
 

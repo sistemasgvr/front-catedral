@@ -1,11 +1,8 @@
 import { isAxiosError } from "axios";
 import axios from "axios";
 
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  import.meta.env.API_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 const BUCKET_NAME = "vouchers";
 
