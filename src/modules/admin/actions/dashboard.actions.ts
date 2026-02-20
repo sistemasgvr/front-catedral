@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 import apiClient from "../../../api/apiClient";
-import type { IDashboardData, ISolicitudResumen } from "../interfaces/dashboard.interface";
+import type { IDashboardData } from "../interfaces/dashboard.interface";
 
 export const getDashboardData = async (): Promise<IDashboardData> => {
   try {

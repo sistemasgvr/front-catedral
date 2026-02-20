@@ -304,14 +304,14 @@ import { listarSolicitudes } from "../../actions/listSolicitudes.action";
 import { getTiposMisa } from "../../actions/getTiposMisa.action";
 import { mapOpcionToSelect } from "../../interfaces/opcionLista.interface";
 import type { ISelectOption } from "../../interfaces/opcionLista.interface";
-import type { ISolicitud } from "../../interfaces/listSolicitudes.interface";
+import type { ISolicitudDb } from "../../interfaces/listSolicitudes.interface";
 import type { ITipoMisa } from "../../interfaces/tipoMisa.interface";
 
 /* ================================
    STATE
 ================================ */
 
-const solicitudes = ref<ISolicitud[]>([]);
+const solicitudes = ref<ISolicitudDb[]>([]);
 const estados = ref<ISelectOption[]>([]);
 const tiposMisa = ref<ITipoMisa[]>([]);
 const opcionesCache = ref<Map<number, ISelectOption>>(new Map());
@@ -399,7 +399,7 @@ const cargarTiposMisa = async () => {
   }
 };
 
-const cargarTodasLasOpciones = async (solicitudes: ISolicitud[]) => {
+const cargarTodasLasOpciones = async (solicitudes: ISolicitudDb[]) => {
   const idsUnicos = new Set<number>();
   
   solicitudes.forEach(solicitud => {

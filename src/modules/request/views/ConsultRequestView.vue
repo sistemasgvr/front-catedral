@@ -281,11 +281,11 @@ const formatDateShort = (value: string | null): string => {
   });
 };
 
-const formatMoney = (value: number | null): string => {
-  if (typeof value !== "number") return "0.00";
-  return value.toFixed(2);
-};
-</script>
+// const formatMoney = (value: number | null): string => {
+//   if (typeof value !== "number") return "0.00";
+//   return value.toFixed(2);
+// };
+// </script>
 
 <style scoped>
 @media (max-width: 768px) {
