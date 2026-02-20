@@ -1,128 +1,128 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+/* EJECUCION . CORREGIDO*/
+
+ALTER DATABASE postgres SET timezone TO 'America/Lima';
 
 CREATE TABLE public.authusuarios (
-  idusuarios integer NOT NULL DEFAULT nextval('authusuarios_idusuarios_seq'::regclass),
-  nombre character varying NOT NULL,
-  correo character varying NOT NULL UNIQUE,
+  idusuarios integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nombre varchar NOT NULL,
+  correo varchar NOT NULL UNIQUE,
   estado boolean DEFAULT true,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  contrasena_hash text,
-  CONSTRAINT authusuarios_pkey PRIMARY KEY (idusuarios)
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  contrasena_hash text
 );
+
 CREATE TABLE public.listas (
-  idlista integer NOT NULL DEFAULT nextval('listas_idlista_seq'::regclass),
-  nombre character varying NOT NULL,
-  descripcion character varying,
+  idlista integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nombre varchar NOT NULL,
+  descripcion varchar,
   estado boolean DEFAULT true,
   idusuariocreacion integer,
   idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT listas_pkey PRIMARY KEY (idlista),
-  CONSTRAINT listas_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT listas_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
 );
-CREATE TABLE public.menciones (
-  idmencion integer NOT NULL DEFAULT nextval('menciones_idmencion_seq'::regclass),
-  idsolicitud integer NOT NULL,
-  descripcion character varying,
+
+CREATE TABLE public.tipomisa (
+  idtipomisa integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  nombre varchar NOT NULL,
+  precio numeric NOT NULL,
   estado boolean DEFAULT true,
   idusuariocreacion integer,
   idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT menciones_pkey PRIMARY KEY (idmencion),
-  CONSTRAINT menciones_idsolicitud_fkey FOREIGN KEY (idsolicitud) REFERENCES public.solicitudes(idsolicitud),
-  CONSTRAINT menciones_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT menciones_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
 );
-CREATE TABLE public.mencionesmisa (
-  idmencionmisa integer NOT NULL DEFAULT nextval('mencionesmisa_idmencionmisa_seq'::regclass),
-  idmencion integer NOT NULL,
-  idmisa integer NOT NULL,
-  estado boolean DEFAULT true,
-  idusuariocreacion integer,
-  idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT mencionesmisa_pkey PRIMARY KEY (idmencionmisa),
-  CONSTRAINT mencionesmisa_idmencion_fkey FOREIGN KEY (idmencion) REFERENCES public.menciones(idmencion),
-  CONSTRAINT mencionesmisa_idmisa_fkey FOREIGN KEY (idmisa) REFERENCES public.misas(idmisa),
-  CONSTRAINT mencionesmisa_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT mencionesmisa_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
-);
-CREATE TABLE public.misas (
-  idmisa integer NOT NULL DEFAULT nextval('misas_idmisa_seq'::regclass),
-  idtipomisa integer NOT NULL,
-  titulo character varying,
-  fechacelebracion date NOT NULL,
-  horainicio time without time zone NOT NULL,
-  horafin time without time zone NOT NULL,
-  estado boolean DEFAULT true,
-  idusuariocreacion integer,
-  idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT misas_pkey PRIMARY KEY (idmisa),
-  CONSTRAINT misas_idtipomisa_fkey FOREIGN KEY (idtipomisa) REFERENCES public.tipomisa(idtipomisa),
-  CONSTRAINT misas_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT misas_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
-);
+
 CREATE TABLE public.opcioneslista (
-  idopcionlista integer NOT NULL DEFAULT nextval('opcioneslista_idopcionlista_seq'::regclass),
+  idopcionlista integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   idlista integer NOT NULL,
-  nombre character varying NOT NULL,
-  descripcion character varying,
+  nombre varchar NOT NULL,
+  descripcion varchar,
   estado boolean DEFAULT true,
   idusuariocreacion integer,
   idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT opcioneslista_pkey PRIMARY KEY (idopcionlista),
-  CONSTRAINT opcioneslista_idlista_fkey FOREIGN KEY (idlista) REFERENCES public.listas(idlista),
-  CONSTRAINT opcioneslista_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT opcioneslista_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idlista) REFERENCES listas(idlista),
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
 );
+
 CREATE TABLE public.solicitudes (
-  idsolicitud integer NOT NULL DEFAULT nextval('solicitudes_idsolicitud_seq'::regclass),
+  idsolicitud integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   idtipodocumento integer NOT NULL,
-  nrodocumento character varying NOT NULL,
-  nombres character varying NOT NULL,
-  apellidos character varying NOT NULL,
+  nrodocumento varchar NOT NULL,
+  nombres varchar NOT NULL,
+  apellidos varchar NOT NULL,
   celular integer,
-  correo character varying,
+  correo varchar,
   fechacelebracion date,
   idtipomisa integer,
   idhorario integer,
-  intencion character varying,
-  voucherpago character varying,
+  intencion varchar,
+  voucherpago varchar,
   fechasolicitud date DEFAULT CURRENT_DATE,
   montototal numeric,
   fechamisadeseada date,
   estado boolean DEFAULT true,
   idusuariocreacion integer,
   idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT solicitudes_pkey PRIMARY KEY (idsolicitud),
-  CONSTRAINT solicitudes_idtipodocumento_fkey FOREIGN KEY (idtipodocumento) REFERENCES public.opcioneslista(idopcionlista),
-  CONSTRAINT solicitudes_idtipomisa_fkey FOREIGN KEY (idtipomisa) REFERENCES public.tipomisa(idtipomisa),
-  CONSTRAINT solicitudes_idhorario_fkey FOREIGN KEY (idhorario) REFERENCES public.opcioneslista(idopcionlista),
-  CONSTRAINT solicitudes_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT solicitudes_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idtipodocumento) REFERENCES opcioneslista(idopcionlista),
+  FOREIGN KEY (idtipomisa) REFERENCES tipomisa(idtipomisa),
+  FOREIGN KEY (idhorario) REFERENCES opcioneslista(idopcionlista),
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
 );
-CREATE TABLE public.tipomisa (
-  idtipomisa integer NOT NULL DEFAULT nextval('tipomisa_idtipomisa_seq'::regclass),
-  nombre character varying NOT NULL,
+
+CREATE TABLE public.menciones (
+  idmencion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  idsolicitud integer NOT NULL,
+  descripcion varchar,
   estado boolean DEFAULT true,
-  precio numeric NOT NULL,
   idusuariocreacion integer,
   idusuariomodificacion integer,
-  fechacreacion timestamp with time zone DEFAULT now(),
-  fechamodificacion timestamp with time zone,
-  CONSTRAINT tipomisa_pkey PRIMARY KEY (idtipomisa),
-  CONSTRAINT tipomisa_idusuariocreacion_fkey FOREIGN KEY (idusuariocreacion) REFERENCES public.authusuarios(idusuarios),
-  CONSTRAINT tipomisa_idusuariomodificacion_fkey FOREIGN KEY (idusuariomodificacion) REFERENCES public.authusuarios(idusuarios)
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idsolicitud) REFERENCES solicitudes(idsolicitud),
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
+);
+
+CREATE TABLE public.misas (
+  idmisa integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  idtipomisa integer NOT NULL,
+  titulo varchar,
+  fechacelebracion date NOT NULL,
+  horainicio time NOT NULL,
+  horafin time NOT NULL,
+  estado boolean DEFAULT true,
+  idusuariocreacion integer,
+  idusuariomodificacion integer,
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idtipomisa) REFERENCES tipomisa(idtipomisa),
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
+);
+
+CREATE TABLE public.mencionesmisa (
+  idmencionmisa integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  idmencion integer NOT NULL,
+  idmisa integer NOT NULL,
+  estado boolean DEFAULT true,
+  idusuariocreacion integer,
+  idusuariomodificacion integer,
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idmencion) REFERENCES menciones(idmencion),
+  FOREIGN KEY (idmisa) REFERENCES misas(idmisa),
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
 );

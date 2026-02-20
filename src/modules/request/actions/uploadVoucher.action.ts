@@ -2,12 +2,10 @@ import { isAxiosError } from "axios";
 import axios from "axios";
 
 const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ||
-  "https://vznzemijoprwsqflcvob.supabase.co";
+  import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  import.meta.env.API_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6bnplbWlqb3Byd3NxZmxjdm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwODYzNDIsImV4cCI6MjA4NDY2MjM0Mn0.L4FhiyUXXqBlSn5M7BoxqG8s6yghJEt6TfV0k0f8taI";
+  import.meta.env.API_KEY;
 
 const BUCKET_NAME = "vouchers";
 

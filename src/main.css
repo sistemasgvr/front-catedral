@@ -1,1 +1,140 @@
 @import "tailwindcss";
+
+@theme {
+  /* Configuración de dark mode */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+  
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  
+  --color-dark-900: #0f172a;
+}
+
+@variant dark (&:is(.dark *));
+
+/* Estilos base para transiciones de modo oscuro */
+:root {
+  color-scheme: light dark;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Transición suave al cambiar de modo */
+* {
+  transition: background-color 0.3s ease, 
+              border-color 0.3s ease, 
+              color 0.3s ease;
+}
+
+/* Prevenir transición en elementos específicos que no la necesitan */
+button,
+input,
+select,
+textarea,
+[role="button"] {
+  transition: background-color 0.2s ease, 
+              border-color 0.2s ease, 
+              color 0.2s ease,
+              opacity 0.2s ease,
+              transform 0.2s ease;
+}
+
+/* Scrollbar global para modo oscuro */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Mejoras de accesibilidad para modo oscuro */
+.dark {
+  /* Mejorar contraste de texto */
+  --tw-text-opacity: 0.95;
+}
+
+/* Prevenir FOUC (Flash of Unstyled Content) en el cambio de modo */
+html:not(.dark) body {
+  background-color: #ffffff;
+}
+
+html.dark body {
+  background-color: #111827;
+}
+
+/* Animación suave para el cambio de clase dark en html */
+html {
+  transition: background-color 0.3s ease;
+}
+
+/* Optimización de rendimiento para animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Restaurar ícono del input date en Chrome */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+  filter: none !important;
+  position: relative;
+  z-index: 10;
+}
+
+/* Evitar que herede transiciones globales */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  transition: none !important;
+}

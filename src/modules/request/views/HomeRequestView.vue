@@ -79,19 +79,12 @@
               Menciones
             </router-link>
           </div>
-
-          <!-- Quote -->
-          <div class="mt-8 text-center">
-            <p class="text-[#4A4A4A] italic text-sm">"La fe mueve montañas"</p>
-            <p class="text-[#4A4A4A]/70 text-xs mt-1">Mateo 17:20</p>
-          </div>
         </div>
       </main>
 
       <!-- Footer -->
       <footer class="text-center py-6 px-4">
-        <p class="text-[#D39E3A] text-sm mb-1 drop-shadow-md">Que Dios los bendiga</p>
-        <p class="text-amber-200/70 text-xs drop-shadow-sm">© 2026 Iglesia San Pedro de Lambayeque</p>
+        <p class="text-amber-200/70 text-xs drop-shadow-sm">© 2026 Iglesia San Pedro de Lambayeque, Perú</p>
       </footer>
     </div>
   </div>

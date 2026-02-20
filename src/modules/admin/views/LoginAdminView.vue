@@ -1,11 +1,5 @@
 <template>
-  <body
-    x-data="{ page: 'comingSoon', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
-    x-init="
-         darkMode = JSON.parse(localStorage.getItem('darkMode'));
-         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-    :class="{'dark bg-gray-900': darkMode === true}"
-  >
+  <body :class="{ 'dark bg-gray-900': darkMode === true }">
     <!-- ===== Preloader Start ===== -->
     <include src="./partials/preloader.html"></include>
     <!-- ===== Preloader End ===== -->
@@ -17,30 +11,6 @@
       >
         <!-- Form -->
         <div class="flex flex-col flex-1 w-full lg:w-1/2">
-          <div class="w-full max-w-md pt-10 mx-auto">
-            <a
-              href="index.html"
-              class="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            >
-              <svg
-                class="stroke-current"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-              >
-                <path
-                  d="M12.7083 5L7.5 10.2083L12.7083 15.4167"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              Back to dashboard
-            </a>
-          </div>
           <div
             class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto"
           >
@@ -49,90 +19,43 @@
                 <h1
                   class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md"
                 >
-                  Sign In
+                  Inicie Sesión
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Enter your email and password to sign in!
+                  Ingrese su correo y contraseña para ingresar como
+                  administrador.
                 </p>
               </div>
-              <div>
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-                  <button
-                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M18.7511 10.1944C18.7511 9.47495 18.6915 8.94995 18.5626 8.40552H10.1797V11.6527H15.1003C15.0011 12.4597 14.4654 13.675 13.2749 14.4916L13.2582 14.6003L15.9087 16.6126L16.0924 16.6305C17.7788 15.1041 18.7511 12.8583 18.7511 10.1944Z"
-                        fill="#4285F4"
-                      />
-                      <path
-                        d="M10.1788 18.75C12.5895 18.75 14.6133 17.9722 16.0915 16.6305L13.274 14.4916C12.5201 15.0068 11.5081 15.3666 10.1788 15.3666C7.81773 15.3666 5.81379 13.8402 5.09944 11.7305L4.99473 11.7392L2.23868 13.8295L2.20264 13.9277C3.67087 16.786 6.68674 18.75 10.1788 18.75Z"
-                        fill="#34A853"
-                      />
-                      <path
-                        d="M5.10014 11.7305C4.91165 11.186 4.80257 10.6027 4.80257 9.99992C4.80257 9.3971 4.91165 8.81379 5.09022 8.26935L5.08523 8.1534L2.29464 6.02954L2.20333 6.0721C1.5982 7.25823 1.25098 8.5902 1.25098 9.99992C1.25098 11.4096 1.5982 12.7415 2.20333 13.9277L5.10014 11.7305Z"
-                        fill="#FBBC05"
-                      />
-                      <path
-                        d="M10.1789 4.63331C11.8554 4.63331 12.9864 5.34303 13.6312 5.93612L16.1511 3.525C14.6035 2.11528 12.5895 1.25 10.1789 1.25C6.68676 1.25 3.67088 3.21387 2.20264 6.07218L5.08953 8.26943C5.81381 6.15972 7.81776 4.63331 10.1789 4.63331Z"
-                        fill="#EB4335"
-                      />
-                    </svg>
-                    Sign in with Google
-                  </button>
-                  <button
-                    class="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
-                  >
-                    <svg
-                      width="21"
-                      class="fill-current"
-                      height="20"
-                      viewBox="0 0 21 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z"
-                      />
-                    </svg>
 
-                    Sign in with X
-                  </button>
-                </div>
-                <div class="relative py-3 sm:py-5">
-                  <div class="absolute inset-0 flex items-center">
-                    <div
-                      class="w-full border-t border-gray-200 dark:border-gray-800"
-                    ></div>
-                  </div>
-                  <div class="relative flex justify-center text-sm">
-                    <span
-                      class="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2"
-                      >Or</span
-                    >
-                  </div>
-                </div>
-                <form>
+              <!-- Mensaje de error -->
+              <div
+                v-if="errorMessage"
+                class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+              >
+                <p class="text-sm text-red-600 dark:text-red-400">
+                  {{ errorMessage }}
+                </p>
+              </div>
+
+              <div>
+                <form @submit.prevent="handleLogin">
                   <div class="space-y-5">
                     <!-- Email -->
                     <div>
                       <label
                         class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                       >
-                        Email<span class="text-error-500">*</span>
+                        Correo<span class="text-error-500">*</span>
                       </label>
                       <input
+                        v-model="email"
                         type="email"
                         id="email"
                         name="email"
                         placeholder="info@gmail.com"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                        required
+                        :disabled="isLoading"
+                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
                     <!-- Password -->
@@ -140,20 +63,23 @@
                       <label
                         class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                       >
-                        Password<span class="text-error-500">*</span>
+                        Contraseña<span class="text-error-500">*</span>
                       </label>
-                      <div x-data="{ showPassword: false }" class="relative">
+                      <div class="relative">
                         <input
+                          v-model="password"
                           :type="showPassword ? 'text' : 'password'"
-                          placeholder="Enter your password"
-                          class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                          placeholder="Ingrese su contraseña"
+                          required
+                          :disabled="isLoading"
+                          class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                         <span
                           @click="showPassword = !showPassword"
                           class="absolute z-30 text-gray-500 -translate-y-1/2 cursor-pointer right-4 top-1/2 dark:text-gray-400"
                         >
                           <svg
-                            x-show="!showPassword"
+                            v-show="!showPassword"
                             class="fill-current"
                             width="20"
                             height="20"
@@ -169,7 +95,7 @@
                             />
                           </svg>
                           <svg
-                            x-show="showPassword"
+                            v-show="showPassword"
                             class="fill-current"
                             width="20"
                             height="20"
@@ -189,23 +115,28 @@
                     </div>
                     <!-- Checkbox -->
                     <div class="flex items-center justify-between">
-                      <div x-data="{ checkboxToggle: false }">
+                      <div>
                         <label
                           for="checkboxLabelOne"
                           class="flex items-center text-sm font-normal text-gray-700 cursor-pointer select-none dark:text-gray-400"
                         >
                           <div class="relative">
                             <input
+                              v-model="rememberMe"
                               type="checkbox"
                               id="checkboxLabelOne"
                               class="sr-only"
-                              @change="checkboxToggle = !checkboxToggle"
+                              :disabled="isLoading"
                             />
                             <div
-                              :class="checkboxToggle ? 'border-brand-500 bg-brand-500' : 'bg-transparent border-gray-300 dark:border-gray-700'"
+                              :class="
+                                rememberMe
+                                  ? 'border-brand-500 bg-brand-500'
+                                  : 'bg-transparent border-gray-300 dark:border-gray-700'
+                              "
                               class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]"
                             >
-                              <span :class="checkboxToggle ? '' : 'opacity-0'">
+                              <span :class="rememberMe ? '' : 'opacity-0'">
                                 <svg
                                   width="14"
                                   height="14"
@@ -224,66 +155,78 @@
                               </span>
                             </div>
                           </div>
-                          Keep me logged in
+                          Mantener sesión iniciada
                         </label>
                       </div>
-                      <a
-                        href="/reset-password.html"
-                        class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                        >Forgot password?</a
-                      >
                     </div>
                     <!-- Button -->
                     <div>
                       <button
-                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                        type="submit"
+                        :disabled="isLoading"
+                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Sign In
+                        <span v-if="!isLoading">Iniciar Sesión</span>
+                        <span v-else class="flex items-center gap-2">
+                          <svg
+                            class="animate-spin h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              class="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              stroke-width="4"
+                            ></circle>
+                            <path
+                              class="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Iniciando sesión...
+                        </span>
                       </button>
                     </div>
                   </div>
                 </form>
-                <div class="mt-5">
-                  <p
-                    class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start"
-                  >
-                    Don't have an account?
-                    <a
-                      href="/signup.html"
-                      class="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                      >Sign Up</a
-                    >
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div
-          class="relative items-center hidden w-full h-full bg-brand-950 dark:bg-white/5 lg:grid lg:w-1/2"
+          class="relative items-center hidden w-full h-full bg-brand-950 dark:bg-white/5 lg:grid lg:w-1/2 overflow-hidden"
         >
-          <div class="flex items-center justify-center z-1">
-            <!-- ===== Common Grid Shape Start ===== -->
-            <include src="./partials/common-grid-shape.html"></include>
+          <div class="absolute inset-0 z-0">
+            <img
+              src="/images/FondoCatedral.jpeg"
+              alt="Catedral"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div class="relative z-10 flex items-center justify-center">
             <div class="flex flex-col items-center max-w-xs">
               <a href="index.html" class="block mb-4">
-                <img src="./images/logo/auth-logo.svg" alt="Logo" />
+                <!-- Logo si lo necesitas -->
               </a>
-              <p class="text-center text-gray-400 dark:text-white/60">
-                Free and Open-Source Tailwind CSS Admin Dashboard Template
-              </p>
             </div>
           </div>
         </div>
-        <!-- Toggler -->
+
+        <!-- Toggler Dark Mode -->
         <div class="fixed z-50 hidden bottom-6 right-6 sm:block">
           <button
             class="inline-flex items-center justify-center text-white transition-colors rounded-full size-14 bg-brand-500 hover:bg-brand-600"
-            @click.prevent="darkMode = !darkMode"
+            @click="toggleDarkMode"
           >
             <svg
-              class="hidden fill-current dark:block"
+              v-show="darkMode"
+              class="fill-current"
               width="20"
               height="20"
               viewBox="0 0 20 20"
@@ -298,7 +241,8 @@
               />
             </svg>
             <svg
-              class="fill-current dark:hidden"
+              v-show="!darkMode"
+              class="fill-current"
               width="20"
               height="20"
               viewBox="0 0 20 20"
@@ -318,12 +262,83 @@
   </body>
 </template>
 
-
 <script setup lang="ts">
+import { ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { loginUser } from "../actions/iniciarSesion.action";
 
+// Variables reactivas para el formulario
+const email = ref("");
+const password = ref("");
+const rememberMe = ref(false);
+const showPassword = ref(false);
+const darkMode = ref(false);
+const isLoading = ref(false);
+const errorMessage = ref("");
+
+const router = useRouter();
+
+// Inicializar dark mode desde localStorage
+onMounted(() => {
+  const savedDarkMode = localStorage.getItem("darkMode");
+  if (savedDarkMode !== null) {
+    darkMode.value = JSON.parse(savedDarkMode);
+  }
+
+  // Cargar credenciales guardadas si existe
+  const savedEmail = localStorage.getItem("savedEmail");
+  if (savedEmail) {
+    email.value = savedEmail;
+    rememberMe.value = true;
+  }
+});
+
+// Observar cambios en darkMode y guardar en localStorage
+watch(darkMode, (newValue) => {
+  localStorage.setItem("darkMode", JSON.stringify(newValue));
+});
+
+// Función para alternar dark mode
+const toggleDarkMode = () => {
+  darkMode.value = !darkMode.value;
+};
+
+// Función de inicio de sesión
+const handleLogin = async () => {
+  try {
+    // Limpiar mensaje de error anterior
+    errorMessage.value = "";
+    isLoading.value = true;
+
+    // Llamar a la acción de login
+    const userData = await loginUser({
+      p_correo: email.value,
+      p_contrasena: password.value,
+    });
+
+    // Guardar datos del usuario en localStorage
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("isAuthenticated", "true");
+
+    // Guardar correo si se marcó "Mantener sesión iniciada"
+    if (rememberMe.value) {
+      localStorage.setItem("savedEmail", email.value);
+    } else {
+      localStorage.removeItem("savedEmail");
+    }
+
+    // Redirigir al dashboard o página principal
+    router.push("/dashboard");
+  } catch (error) {
+    // Mostrar mensaje de error
+    errorMessage.value =
+      error instanceof Error ? error.message : "Error al iniciar sesión";
+  } finally {
+    isLoading.value = false;
+  }
+};
 </script>
 
-
 <style scoped>
-    
+/* Estilos adicionales si son necesarios */
 </style>

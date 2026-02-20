@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full">
+  <div class="w-full text-gray-900">
     <label 
       v-if="label" 
       :for="name" 

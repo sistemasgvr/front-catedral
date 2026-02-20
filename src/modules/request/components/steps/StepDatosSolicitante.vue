@@ -120,11 +120,11 @@ const cargarTiposDocumento = async () => {
   } catch (error) {
     console.error('Error al cargar tipos de documento:', error);
     // Fallback a datos estáticos en caso de error
-    tiposDocumento.value = [
-      { id: 1, nombre: 'DNI' },
-      { id: 2, nombre: 'Carnet de Extranjería' },
-      { id: 3, nombre: 'Pasaporte' },
-    ];
+    // tiposDocumento.value = [
+    //   { id: 1, nombre: 'DNI' },
+    //   { id: 2, nombre: 'Carnet de Extranjería' },
+    //   { id: 3, nombre: 'Pasaporte' },
+    // ];
   } finally {
     loadingTiposDocumento.value = false;
   }
