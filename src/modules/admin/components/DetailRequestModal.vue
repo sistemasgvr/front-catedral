@@ -11,11 +11,11 @@
     >
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-[9999] overflow-y-auto"
+        class="fixed inset-0 z-[999999999] overflow-y-auto"
         @click.self="closeModal"
       >
         <!-- Backdrop con Blur -->
-        <div class="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-[0.5px] transition-all"></div>
+        <div class="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-xs transition-all"></div>
 
         <!-- Modal Container -->
         <div class="flex min-h-full items-center justify-center p-4">

@@ -23,3 +23,33 @@ export interface IMisaConRelaciones extends IMisa {
     intencion: string | null;
   };
 }
+
+export interface IMisaDetalle extends IMisa {
+  tipomisa: {
+    idtipomisa: number;
+    nombre: string;
+    precio: number;
+  };
+  menciones?: Array<{
+    idmencion: number;
+    descripcion: string;
+    solicitud: {
+      nombres: string;
+      apellidos: string;
+      intencion: string | null;
+    };
+  }>;
+}
+
+export interface ICrearMisaForm {
+  idtipomisa: number;
+  titulo: string;
+  fechacelebracion: string;
+  horainicio: string;
+  horafin: string;
+  estado: boolean;
+}
+
+export interface IEditarMisaForm extends ICrearMisaForm {
+  idmisa: number;
+}
