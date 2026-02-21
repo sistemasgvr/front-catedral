@@ -284,14 +284,14 @@ const shouldShowText = computed(() => {
 // });
 
 // Computed para el nombre del usuario
-const userName = computed(() => {
-  return user.value?.nombre || 'Usuario';
-});
+// const userName = computed(() => {
+//   return user.value?.nombre || 'Usuario';
+// });
 
 // Computed para el correo del usuario
-const userEmail = computed(() => {
-  return user.value?.correo || 'usuario@ejemplo.com';
-});
+// const userEmail = computed(() => {
+//   return user.value?.correo || 'usuario@ejemplo.com';
+// });
 
 const menuGroups = ref<MenuGroup[]>([
   {
