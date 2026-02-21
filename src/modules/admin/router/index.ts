@@ -2,6 +2,8 @@ import LoginAdminView from "../views/LoginAdminView.vue";
 import DashboardAdminView from "../views/DashboardView.vue";
 import RequestAdminView from "../views/request/RequestAdminView.vue";
 import MassesAdminView from "../views/MassesView.vue";
+import MassesTypeAdminView from "../views/MassTypesAdminView.vue";
+import NewsAdminView from "../views/NewsAdminView.vue";
 
 const routes = [
   {
@@ -24,6 +26,16 @@ const routes = [
     name: "Misas",
     component: MassesAdminView
   },
+  {
+    path: "/tipos-misa",
+    name: "TiposMisa",
+    component: MassesTypeAdminView
+  },
+  {
+    path: "/noticias", 
+    name: "Noticias", 
+    component: NewsAdminView
+  }
 ];
 
 export default routes;

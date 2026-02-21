@@ -170,7 +170,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { crearMisa, actualizarMisa, obtenerDetalleMisa } from '../actions/crudMisa.action';
-import { getTiposMisa } from '../actions/getTiposMisa.action';
+import { listarTiposMisa } from '../actions/tipoMisa.action';
 import type { ICrearMisaForm, IEditarMisaForm } from '../interfaces/misa.interface';
 import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
 
@@ -219,7 +219,7 @@ const resetForm = () => {
 
 const cargarTiposMisa = async () => {
   try {
-    tiposMisa.value = await getTiposMisa();
+    tiposMisa.value = await listarTiposMisa();
   } catch (error) {
     console.error('Error cargando tipos de misa:', error);
   }

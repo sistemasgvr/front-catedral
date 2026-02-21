@@ -301,7 +301,7 @@ import AdminLayout from "../../layouts/AdminLayout.vue";
 import DetailRequestModal from "../../components/DetailRequestModal.vue";
 import { getOpcionesLista } from "../../actions/getOpcionesLista.action";
 import { listarSolicitudes } from "../../actions/listSolicitudes.action";
-import { getTiposMisa } from "../../actions/getTiposMisa.action";
+import { listarTiposMisa } from '../../actions/tipoMisa.action';
 import { mapOpcionToSelect } from "../../interfaces/opcionLista.interface";
 import type { ISelectOption } from "../../interfaces/opcionLista.interface";
 import type { ISolicitudDb } from "../../interfaces/listSolicitudes.interface";
@@ -393,9 +393,9 @@ const cargarEstados = async () => {
 
 const cargarTiposMisa = async () => {
   try {
-    tiposMisa.value = await getTiposMisa();
+    tiposMisa.value = await listarTiposMisa();
   } catch (error) {
-    console.error("Error cargando tipos de misa:", error);
+    console.error('Error cargando tipos de misa:', error);
   }
 };
 

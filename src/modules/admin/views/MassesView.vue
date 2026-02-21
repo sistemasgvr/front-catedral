@@ -372,7 +372,7 @@ import { ref, computed, onMounted } from 'vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import { listarMisas } from '../actions/listarMisas.action';
 import { eliminarMisa } from '../actions/eliminarMisa.action';
-import { getTiposMisa } from '../actions/getTiposMisa.action';
+import { listarTiposMisa } from '../actions/tipoMisa.action';
 import type { IMisaConRelaciones } from '../interfaces/misa.interface';
 import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
 
@@ -545,7 +545,7 @@ const cargarMisas = async () => {
 
 const cargarTiposMisa = async () => {
   try {
-    tiposMisa.value = await getTiposMisa();
+    tiposMisa.value = await listarTiposMisa();
   } catch (error) {
     console.error('Error cargando tipos de misa:', error);
   }

@@ -584,7 +584,7 @@ import { getDetalleSolicitud } from "../actions/getDetalleSolicitud.action";
 import { actualizarSolicitud } from "../actions/actualizarSolicitud.action";
 import { cambiarEstadoSolicitud } from "../actions/cambiarEstadoSolicitud.action";
 import { getOpcionesLista } from "../actions/getOpcionesLista.action";
-import { getTiposMisa } from "../actions/getTiposMisa.action";
+import { listarTiposMisa } from '../actions/tipoMisa.action';
 import { mapOpcionToSelect } from "../interfaces/opcionLista.interface";
 import type { IDetalleSolicitud } from "../interfaces/detalleSolicitud.interface";
 import type { ISelectOption } from "../interfaces/opcionLista.interface";
@@ -678,9 +678,9 @@ const cargarOpcionesPorLista = async (idLista: number) => {
 
 const cargarTiposMisa = async () => {
   try {
-    tiposMisa.value = await getTiposMisa();
-  } catch (err) {
-    console.error("Error cargando tipos de misa:", err);
+    tiposMisa.value = await listarTiposMisa();
+  } catch (error) {
+    console.error('Error cargando tipos de misa:', error);
   }
 };
 

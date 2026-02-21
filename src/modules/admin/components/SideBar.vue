@@ -51,7 +51,7 @@
           leave-to-class="opacity-0 -translate-x-4"
         >
           <span
-            v-if="isExpanded || isMobileOpen || isHovered"
+            v-if="shouldShowText"
             class="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent whitespace-nowrap"
           >
             Catedral San Pedro
@@ -77,10 +77,10 @@
             <h2
               :class="[
                 'text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 px-3 transition-all duration-200',
-                !isExpanded && !isHovered && !isMobileOpen ? 'lg:text-center' : 'text-left',
+                shouldShowText ? 'text-left' : 'lg:text-center',
               ]"
             >
-              <template v-if="isExpanded || isHovered || isMobileOpen">
+              <template v-if="shouldShowText">
                 {{ menuGroup.title }}
               </template>
               <span v-else class="flex justify-center">•••</span>
@@ -101,20 +101,20 @@
                     'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400': isSubmenuOpen(groupIndex, index),
                     'text-gray-700 dark:text-gray-300': !isSubmenuOpen(groupIndex, index),
                   },
-                  !isExpanded && !isHovered && !isMobileOpen ? 'lg:justify-center' : 'lg:justify-start',
+                  shouldShowText ? 'lg:justify-start' : 'lg:justify-center',
                 ]"
               >
                 <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   <component :is="item.icon" class="w-5 h-5" />
                 </span>
                 <span
-                  v-if="isExpanded || isHovered || isMobileOpen"
+                  v-if="shouldShowText"
                   class="font-medium text-sm flex-1 text-left"
                 >
                   {{ item.name }}
                 </span>
                 <ChevronDown
-                  v-if="isExpanded || isHovered || isMobileOpen"
+                  v-if="shouldShowText"
                   :class="[
                     'w-4 h-4 transition-transform duration-200 flex-shrink-0',
                     { 'rotate-180': isSubmenuOpen(groupIndex, index) },
@@ -134,14 +134,14 @@
                     'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm': isActive(item.path),
                     'text-gray-700 dark:text-gray-300': !isActive(item.path),
                   },
-                  !isExpanded && !isHovered && !isMobileOpen ? 'lg:justify-center' : 'lg:justify-start',
+                  shouldShowText ? 'lg:justify-start' : 'lg:justify-center',
                 ]"
               >
                 <span class="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   <component :is="item.icon" class="w-5 h-5" />
                 </span>
                 <span
-                  v-if="isExpanded || isHovered || isMobileOpen"
+                  v-if="shouldShowText"
                   class="font-medium text-sm"
                 >
                   {{ item.name }}
@@ -156,7 +156,7 @@
                 @after-leave="endTransition"
               >
                 <div
-                  v-show="isSubmenuOpen(groupIndex, index) && (isExpanded || isHovered || isMobileOpen)"
+                  v-show="isSubmenuOpen(groupIndex, index) && shouldShowText"
                   class="overflow-hidden"
                 >
                   <ul class="mt-1 space-y-1 ml-8 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
@@ -201,32 +201,34 @@
 
     <!-- Footer -->
     <div 
-      v-if="isExpanded || isHovered || isMobileOpen"
+      v-if="shouldShowText"
       class="px-5 py-4 border-t border-gray-200 dark:border-gray-800"
     >
-      <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800">
-        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-          JD
+      <!-- <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+          {{ userInitials }}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">John Doe</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">admin@example.com</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ userName }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
         </div>
-      </div>
+      </div> -->
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useSidebar } from "@/composables/useSidebar";
 import { 
   LayoutDashboard, 
   FileText, 
   Church,
+  Box,
   ChevronDown,
-  X
+  X,
+  Newspaper
 } from "lucide-vue-next";
 
 interface SubItem {
@@ -248,6 +250,11 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
+interface User {
+  nombre: string;
+  correo: string;
+}
+
 const route = useRoute();
 
 const {
@@ -259,6 +266,32 @@ const {
 } = useSidebar();
 
 const openSubmenuLocal = ref<string | null>(null);
+const user = ref<User | null>(null);
+
+// Computed para determinar cuándo mostrar el texto
+const shouldShowText = computed(() => {
+  return isExpanded.value || isMobileOpen.value || isHovered.value;
+});
+
+// Computed para obtener las iniciales del usuario
+// const userInitials = computed(() => {
+//   if (!user.value?.nombre) return 'U';
+//   const names = user.value.nombre.split(' ');
+//   if (names.length >= 2) {
+//     return (names[0][0] + names[1][0]).toUpperCase();
+//   }
+//   return names[0][0].toUpperCase();
+// });
+
+// Computed para el nombre del usuario
+const userName = computed(() => {
+  return user.value?.nombre || 'Usuario';
+});
+
+// Computed para el correo del usuario
+const userEmail = computed(() => {
+  return user.value?.correo || 'usuario@ejemplo.com';
+});
 
 const menuGroups = ref<MenuGroup[]>([
   {
@@ -283,6 +316,16 @@ const menuGroups = ref<MenuGroup[]>([
         name: "Misas",
         path: "/misas",
         icon: Church
+      },
+      {
+        name: "Tipos de Misa",
+        path: "/tipos-misa",
+        icon: Box
+      },
+      {
+        name: "Noticias",
+        path: "/noticias",
+        icon: Newspaper // Importa: import { Newspaper } from "lucide-vue-next";
       },
     ]
   }
@@ -340,6 +383,22 @@ const endTransition = (el: Element): void => {
   htmlEl.style.height = "";
   htmlEl.style.overflow = "";
 };
+
+// Cargar usuario desde localStorage
+const loadUser = () => {
+  const savedUser = localStorage.getItem("user");
+  if (savedUser) {
+    try {
+      user.value = JSON.parse(savedUser);
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
+  }
+};
+
+onMounted(() => {
+  loadUser();
+});
 </script>
 
 <style scoped>
