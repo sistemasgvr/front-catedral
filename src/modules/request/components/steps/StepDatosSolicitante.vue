@@ -134,8 +134,7 @@ const cargarTiposDocumento = async () => {
 const validationSchema = yup.object({
   idTipoDocumento: yup
     .number()
-    .required('Seleccione un tipo de documento')
-    .nullable(),
+    .required('Seleccione un tipo de documento'),
   nroDocumento: yup
     .string()
     .required('El número de documento es requerido')

@@ -126,3 +126,20 @@ CREATE TABLE public.mencionesmisa (
   FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
   FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
 );
+
+CREATE TABLE public.noticias (
+  idnoticia integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  titulo varchar NOT NULL,
+  contenido text NOT NULL,
+  imagen varchar,
+  fecha_publicacion date NOT NULL DEFAULT CURRENT_DATE,
+  fecha_evento date,
+  destacada boolean DEFAULT false,
+  estado boolean DEFAULT true,
+  idusuariocreacion integer,
+  idusuariomodificacion integer,
+  fechacreacion timestamptz DEFAULT now(),
+  fechamodificacion timestamptz,
+  FOREIGN KEY (idusuariocreacion) REFERENCES authusuarios(idusuarios),
+  FOREIGN KEY (idusuariomodificacion) REFERENCES authusuarios(idusuarios)
+);

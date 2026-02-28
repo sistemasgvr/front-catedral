@@ -26,7 +26,7 @@
 import { onMounted } from 'vue'
 import SideBar from '../components/SideBar.vue'
 import Header from '../components/Header.vue'
-import { useSidebar } from '@/composables/useSidebar'
+import { useSidebar } from '@/modules/admin/composables/useSidebar'
 import { useDarkMode } from '@/composables/useDarkMode'
 
 const { isExpanded } = useSidebar()

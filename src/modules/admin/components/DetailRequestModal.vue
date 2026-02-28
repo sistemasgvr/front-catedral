@@ -345,7 +345,7 @@
                           </label>
                           <select
                             v-if="modoEdicion"
-                            v-model="formEdicion.idEstadoProceso"
+                            v-model="formEdicion.idestadoproceso"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent"
                           >
                             <option :value="null">Sin estado</option>
@@ -358,8 +358,8 @@
                             </option>
                           </select>
                           <div v-else>
-                            <span v-if="solicitud.idEstadoProceso" :class="getEstadoClass(solicitud.idEstadoProceso)">
-                              {{ getNombreOpcion(solicitud.idEstadoProceso) }}
+                            <span v-if="solicitud.idestadoproceso" :class="getEstadoClass(solicitud.idestadoproceso)">
+                              {{ getNombreOpcion(solicitud.idestadoproceso) }}
                             </span>
                             <span v-else class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-gray-100/60 dark:bg-gray-900/40 text-gray-800 dark:text-gray-300 border border-gray-300 dark:border-gray-600">
                               Sin estado
@@ -637,7 +637,7 @@ const formEdicion = ref({
   intencion: "",
   montototal: 0,
   voucherpago: "",
-  idEstadoProceso: null as number | null,
+  idestadoproceso: null as number | null, 
   estado: true,
 });
 
@@ -689,7 +689,7 @@ const cargarTodasLasOpciones = async (solicitudData: IDetalleSolicitud) => {
   
   if (solicitudData.idtipodocumento) idsUnicos.add(solicitudData.idtipodocumento);
   if (solicitudData.idhorario) idsUnicos.add(solicitudData.idhorario);
-  if (solicitudData.idEstadoProceso) idsUnicos.add(solicitudData.idEstadoProceso);
+  if (solicitudData.idestadoproceso) idsUnicos.add(solicitudData.idestadoproceso);
 
   const idsArray = Array.from(idsUnicos);
   await Promise.all(idsArray.map(id => cargarOpcionesPorLista(id)));
@@ -741,7 +741,7 @@ const activarModoEdicion = () => {
     intencion: solicitud.value.intencion || "",
     montototal: solicitud.value.montototal,
     voucherpago: solicitud.value.voucherpago,
-    idEstadoProceso: solicitud.value.idEstadoProceso,
+    idestadoproceso: solicitud.value.idestadoproceso,
     estado: solicitud.value.estado,
   };
   
@@ -756,6 +756,8 @@ const guardarCambios = async () => {
   if (!solicitud.value) return;
 
   guardando.value = true;
+  error.value = null; // Usar error en lugar de validationError
+  
   try {
     await actualizarSolicitud(solicitud.value.idsolicitud, formEdicion.value);
     
@@ -764,8 +766,21 @@ const guardarCambios = async () => {
     
     modoEdicion.value = false;
     emit("updated");
+    
+    // Mostrar mensaje de éxito
+    alert('Solicitud actualizada correctamente. Si fue aprobada, se creó automáticamente una misa.');
   } catch (err) {
-    error.value = err instanceof Error ? err.message : "Error al guardar los cambios";
+    const errorMessage = err instanceof Error ? err.message : "Error al guardar los cambios";
+    
+    // Si el mensaje indica que la misa tuvo problemas pero la solicitud se guardó
+    if (errorMessage.includes('Solicitud actualizada, pero')) {
+      alert(errorMessage);
+      await cargarDetalle();
+      emit("updated");
+    } else {
+      error.value = errorMessage; // Usar error en lugar de validationError
+    }
+    
     console.error("Error guardando cambios:", err);
   } finally {
     guardando.value = false;

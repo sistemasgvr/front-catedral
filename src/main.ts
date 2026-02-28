@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
+import { VueQueryPlugin } from "@tanstack/vue-query";
 import App from "./App.vue";
 import router from "./router";
 
@@ -8,7 +9,7 @@ import "./main.css";
 const app = createApp(App);
 const pinia = createPinia();
 
-// Plugin para persistir el estado en localStorage
+// Persistencia Pinia
 pinia.use(({ store }) => {
   const storedState = localStorage.getItem(store.$id);
   if (storedState) {
@@ -21,4 +22,5 @@ pinia.use(({ store }) => {
 
 app.use(pinia);
 app.use(router);
+app.use(VueQueryPlugin);
 app.mount("#app");

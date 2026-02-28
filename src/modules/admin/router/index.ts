@@ -4,6 +4,8 @@ import RequestAdminView from "../views/request/RequestAdminView.vue";
 import MassesAdminView from "../views/MassesView.vue";
 import MassesTypeAdminView from "../views/MassTypesAdminView.vue";
 import NewsAdminView from "../views/NewsAdminView.vue";
+import ProfileAdminView from "../views/ProfileView.vue";
+import SettingsAdminView from "../views/SettingsView.vue";
 
 const routes = [
   {
@@ -35,6 +37,16 @@ const routes = [
     path: "/noticias", 
     name: "Noticias", 
     component: NewsAdminView
+  },
+  {
+    path: "/perfil",
+    name: "Perfil",
+    component: ProfileAdminView
+  },
+  {
+    path: "/configuracion",
+    name: "Configuracion",
+    component: SettingsAdminView
   }
 ];
 

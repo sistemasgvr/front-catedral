@@ -10,7 +10,7 @@ export const getSolicitudesByDocumento = async (
     if (!trimmed) return [];
 
     const select =
-      "*,tipomisa(nombre,precio),tipo_documento:opcioneslista!solicitudes_idtipodocumento_fkey(idopcionlista,nombre,descripcion),horario:opcioneslista!solicitudes_idhorario_fkey(idopcionlista,nombre,descripcion),estado_proceso:opcioneslista!solicitudes_idEstadoProceso_fkey(idopcionlista,nombre,descripcion),menciones(idmencion,descripcion,estado,fechacreacion)";
+      "*,tipomisa(nombre,precio),tipo_documento:opcioneslista!solicitudes_idtipodocumento_fkey(idopcionlista,nombre,descripcion),horario:opcioneslista!solicitudes_idhorario_fkey(idopcionlista,nombre,descripcion),estado_proceso:opcioneslista!solicitudes_idestadoproceso_fkey(idopcionlista,nombre,descripcion),menciones(idmencion,descripcion,estado,fechacreacion)";
     const url = `/solicitudes?select=${select}&nrodocumento=eq.${encodeURIComponent(
       trimmed
     )}&order=fechacreacion.desc`;

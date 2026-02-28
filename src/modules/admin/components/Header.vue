@@ -27,73 +27,55 @@
         </h1>
       </div>
 
-      <!-- Acciones del header (notificaciones, perfil, etc.) -->
+      <!-- Acciones del header -->
       <div class="flex items-center gap-2 lg:gap-3">
-        <!-- Botón de modo oscuro -->
+        <!-- Botón de modo oscuro (solo móvil, en desktop está en el dropdown) -->
         <button
           @click="toggleDarkMode"
-          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          class="sm:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-label="Alternar modo oscuro"
         >
           <Sun v-if="darkMode" class="w-5 h-5 text-gray-700 dark:text-gray-300" />
           <Moon v-else class="w-5 h-5 text-gray-700 dark:text-gray-300" />
         </button>
 
-        <!-- Botón de notificaciones -->
-        <button
-          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
-          aria-label="Notificaciones"
-        >
-          <Bell class="w-5 h-5 text-gray-700 dark:text-gray-300" />
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-
-        <!-- Botón de configuración -->
-        <button
-          class="hidden sm:flex p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          aria-label="Configuración"
-        >
-          <Settings class="w-5 h-5 text-gray-700 dark:text-gray-300" />
-        </button>
-
-        <!-- Avatar de usuario -->
-        <button class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <span class="text-white font-semibold text-sm">JD</span>
-          </div>
-        </button>
+        <!-- Usuario -->
+        <UserDropdown />
       </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useSidebar } from '@/composables/useSidebar'
-import { useDarkMode } from '@/composables/useDarkMode'
-import { Menu, PanelLeftClose, PanelLeftOpen, Bell, Settings, Sun, Moon } from 'lucide-vue-next'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useSidebar } from '@/modules/admin/composables/useSidebar';
+import { useDarkMode } from '@/composables/useDarkMode';
+import { Menu, PanelLeftClose, PanelLeftOpen, Sun, Moon } from 'lucide-vue-next';
+import UserDropdown from './UserDropdown.vue';
 
-const route = useRoute()
-const { isExpanded, toggleMobileSidebar, toggleDesktopSidebar } = useSidebar()
-const { darkMode, toggleDarkMode } = useDarkMode()
+const route = useRoute();
+const { isExpanded, toggleMobileSidebar, toggleDesktopSidebar } = useSidebar();
+const { darkMode, toggleDarkMode } = useDarkMode();
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
     '/dashboard': 'Dashboard',
     '/solicitudes': 'Solicitudes',
     '/misas': 'Misas',
-  }
-  return titles[route.path] || 'Catedral San Pedro'
-})
+    '/tipos-misa': 'Tipos de Misa',
+    '/noticias': 'Noticias',
+    '/perfil': 'Mi Perfil',
+    '/configuracion': 'Configuración',
+  };
+  return titles[route.path] || 'Catedral San Pedro';
+});
 
 const handleMobileToggle = () => {
-  console.log('Mobile toggle clicked')
-  toggleMobileSidebar()
-}
+  toggleMobileSidebar();
+};
 
 const handleDesktopToggle = () => {
-  console.log('Desktop toggle clicked')
-  toggleDesktopSidebar()
-}
+  toggleDesktopSidebar();
+};
 </script>

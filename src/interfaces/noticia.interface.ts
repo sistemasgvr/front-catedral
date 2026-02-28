@@ -2,23 +2,32 @@ export interface INoticia {
   idnoticia: number;
   titulo: string;
   contenido: string;
-  imagen: string | null;
+  imagen?: string | null;
   fecha_publicacion: string;
-  fecha_evento: string | null;
+  fecha_evento: string;
   destacada: boolean;
   estado: boolean;
-  idusuariocreacion: number | null;
-  idusuariomodificacion: number | null;
-  fechacreacion: string;
-  fechamodificacion: string | null;
+  idusuariocreacion?: number | null;
+  idusuariomodificacion?: number | null;
+  fechacreacion?: string;
+  fechamodificacion?: string | null;
 }
 
 export interface INoticiaResumen {
   idnoticia: number;
   titulo: string;
   contenido: string;
-  imagen: string | null;
+  imagen?: string | null;
   fecha_publicacion: string;
-  fecha_evento: string | null;
+  fecha_evento: string;
+  destacada: boolean;
+}
+
+export interface INoticiaForm {
+  titulo: string;
+  contenido: string;
+  imagen?: string | null;
+  fecha_publicacion: string;
+  fecha_evento: string;
   destacada: boolean;
 }

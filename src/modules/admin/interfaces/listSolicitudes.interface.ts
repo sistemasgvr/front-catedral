@@ -30,5 +30,5 @@ export interface ISolicitudDb {
   fechacreacion: string;     // ISO datetime
   fechamodificacion: string; // ISO datetime
 
-  idEstadoProceso: number;
+  idestadoproceso: number;
 }

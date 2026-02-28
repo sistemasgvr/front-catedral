@@ -183,8 +183,8 @@
                         </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <span :class="getEstadoClass(solicitud.idEstadoProceso)">
-                          {{ getNombreOpcion(solicitud.idEstadoProceso) }}
+                        <span :class="getEstadoClass(solicitud.idestadoproceso)">
+                          {{ getNombreOpcion(solicitud.idestadoproceso) }}
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
@@ -225,8 +225,8 @@
                         {{ solicitud.nombres }} {{ solicitud.apellidos }}
                       </div>
                     </div>
-                    <span :class="getEstadoClass(solicitud.idEstadoProceso)">
-                      {{ getNombreOpcion(solicitud.idEstadoProceso) }}
+                    <span :class="getEstadoClass(solicitud.idestadoproceso)">
+                      {{ getNombreOpcion(solicitud.idestadoproceso) }}
                     </span>
                   </div>
 
@@ -344,7 +344,7 @@ const solicitudesFiltradas = computed(() => {
 
   if (filtros.value.estado !== null) {
     resultado = resultado.filter(s => 
-      s.idEstadoProceso === filtros.value.estado
+      s.idestadoproceso === filtros.value.estado
     );
   }
 
@@ -405,7 +405,7 @@ const cargarTodasLasOpciones = async (solicitudes: ISolicitudDb[]) => {
   solicitudes.forEach(solicitud => {
     if (solicitud.idtipodocumento) idsUnicos.add(solicitud.idtipodocumento);
     if (solicitud.idhorario) idsUnicos.add(solicitud.idhorario);
-    if (solicitud.idEstadoProceso) idsUnicos.add(solicitud.idEstadoProceso);
+    if (solicitud.idestadoproceso) idsUnicos.add(solicitud.idestadoproceso);
   });
 
   const idsArray = Array.from(idsUnicos);

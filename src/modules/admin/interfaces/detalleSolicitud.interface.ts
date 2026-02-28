@@ -19,5 +19,5 @@ export interface IDetalleSolicitud {
   idusuariomodificacion: number | null;
   fechacreacion: string;
   fechamodificacion: string;
-  idEstadoProceso: number | null;
+  idestadoproceso: number | null;
 }

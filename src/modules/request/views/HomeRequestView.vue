@@ -122,8 +122,8 @@
                     </svg>
                   </div>
                   <div class="text-left">
-                    <p class="font-bold text-base">Menciones</p>
-                    <p class="text-xs text-white/80">Consulta las menciones programadas</p>
+                    <p class="font-bold text-base">Misas Comunitarias</p>
+                    <p class="text-xs text-white/80">Solicita mencion(es) en una misa pública</p>
                   </div>
                 </div>
                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -220,7 +220,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { useSidebar } from "@/composables/useSidebar";
+import { useSidebar } from "@/modules/admin/composables/useSidebar";
 import { 
   LayoutDashboard, 
   FileText, 

@@ -1,7 +1,9 @@
 import { isAxiosError } from "axios";
 import apiClient from "../../../api/apiClient";
+import { crearMisaDesdeSolicitud } from "./crudMisa.action";
+import { crearMencion, vincularMencionAMisa } from "./menciones.action";
 
-interface IActualizarSolicitudData {
+export interface IActualizarSolicitudData {
   nombres: string;
   apellidos: string;
   idtipodocumento: number;
@@ -16,7 +18,7 @@ interface IActualizarSolicitudData {
   intencion: string;
   montototal: number;
   voucherpago: string;
-  idEstadoProceso: number | null;
+  idestadoproceso: number | null; // TODO EN MINÚSCULAS
   estado: boolean;
 }
 
@@ -30,6 +32,16 @@ export const actualizarSolicitud = async (
   data: IActualizarSolicitudData
 ): Promise<void> => {
   try {
+    // Obtener el estado anterior de la solicitud
+    const { data: solicitudAnterior } = await apiClient.get(
+      `/solicitudes?idsolicitud=eq.${idSolicitud}&select=idestadoproceso,idtipomisa,fechacelebracion,idhorario,intencion,nombres,apellidos`
+    );
+
+    const estadoAnterior = Array.isArray(solicitudAnterior) && solicitudAnterior.length > 0
+      ? solicitudAnterior[0].idestadoproceso
+      : null;
+
+    // Actualizar la solicitud
     await apiClient.patch(
       `/solicitudes?idsolicitud=eq.${idSolicitud}`,
       {
@@ -37,6 +49,46 @@ export const actualizarSolicitud = async (
         fechamodificacion: new Date().toISOString(),
       }
     );
+
+    // Si el estado cambió a APROBADA (18) y antes no estaba aprobada
+    if (data.idestadoproceso === 18 && estadoAnterior !== 18) {
+      console.log('Solicitud aprobada, creando misa automáticamente...');
+      
+      try {
+        // Crear la misa automáticamente
+        const idMisaCreada = await crearMisaDesdeSolicitud({
+          idtipomisa: data.idtipomisa,
+          fechacelebracion: data.fechacelebracion,
+          idhorario: data.idhorario,
+          intencion: data.intencion || '',
+          nombres: data.nombres,
+          apellidos: data.apellidos,
+        });
+
+        console.log('Misa creada con ID:', idMisaCreada);
+
+        // Crear la mención asociada a la solicitud
+        const idMencionCreada = await crearMencion({
+          idsolicitud: idSolicitud,
+          descripcion: data.intencion || `Intención de ${data.nombres} ${data.apellidos}`,
+        });
+
+        console.log('Mención creada con ID:', idMencionCreada);
+
+        // Vincular la mención con la misa
+        await vincularMencionAMisa({
+          idmencion: idMencionCreada,
+          idmisa: idMisaCreada,
+        });
+
+        console.log('Mención vinculada a la misa exitosamente');
+      } catch (errorMisa) {
+        console.error('Error al crear misa automática:', errorMisa);
+        // No lanzamos el error para no revertir la actualización de la solicitud
+        // pero lo registramos para que el usuario sepa
+        throw new Error(`Solicitud actualizada, pero hubo un error al crear la misa: ${errorMisa instanceof Error ? errorMisa.message : 'Error desconocido'}`);
+      }
+    }
   } catch (error) {
     if (
       isAxiosError(error) &&

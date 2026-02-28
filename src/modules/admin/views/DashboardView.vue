@@ -28,6 +28,21 @@
         </div>
       </div>
 
+      <!-- ERROR STATE -->
+      <div v-else-if="error" class="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-8 text-center">
+        <svg class="w-16 h-16 mx-auto text-red-500 dark:text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-semibold text-red-900 dark:text-red-200 mb-2">Error al cargar el dashboard</h3>
+        <p class="text-sm text-red-700 dark:text-red-300 mb-4">{{ error }}</p>
+        <button
+          @click="loadDashboard"
+          class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+        >
+          Reintentar
+        </button>
+      </div>
+
       <!-- CONTENT -->
       <template v-else>
         <!-- MÉTRICAS PRINCIPALES -->
@@ -259,6 +274,7 @@ import type { IDashboardData } from "../interfaces/dashboard.interface";
 
 const user = ref<any>(null);
 const loading = ref(false);
+const error = ref<string | null>(null);
 let intervalId: number | null = null;
 
 const dashboardData = ref<IDashboardData>({
@@ -282,50 +298,63 @@ const dashboardData = ref<IDashboardData>({
 const loadDashboard = async () => {
   try {
     loading.value = true;
-    dashboardData.value = await getDashboardData();
-  } catch (error) {
-    console.error("Error cargando dashboard:", error);
+    error.value = null;
+    console.log('Cargando dashboard...'); // Debug
+    const data = await getDashboardData();
+    console.log('Dashboard data recibida:', data); // Debug
+    dashboardData.value = data;
+  } catch (err) {
+    console.error("Error cargando dashboard:", err);
+    error.value = err instanceof Error ? err.message : "Error desconocido";
   } finally {
     loading.value = false;
   }
 };
 
 // Configuración de gráficos
-const chartSolicitudesMes = computed(() => ({
-  labels: dashboardData.value.solicitudesPorMes.map(d => d.mes),
-  datasets: [{
-    label: 'Solicitudes',
-    data: dashboardData.value.solicitudesPorMes.map(d => d.cantidad),
-    borderColor: '#C88A2A',
-    backgroundColor: 'rgba(200, 138, 42, 0.1)',
-    tension: 0.4,
-    fill: true,
-  }]
-}));
+const chartSolicitudesMes = computed(() => {
+  console.log('Datos para gráfico de mes:', dashboardData.value.solicitudesPorMes); // Debug
+  return {
+    labels: dashboardData.value.solicitudesPorMes.map(d => d.mes),
+    datasets: [{
+      label: 'Solicitudes',
+      data: dashboardData.value.solicitudesPorMes.map(d => d.cantidad),
+      borderColor: '#C88A2A',
+      backgroundColor: 'rgba(200, 138, 42, 0.1)',
+      tension: 0.4,
+      fill: true,
+    }]
+  };
+});
 
-const chartTipoMisa = computed(() => ({
-  labels: dashboardData.value.solicitudesPorTipoMisa.map(d => d.tipo),
-  datasets: [{
-    data: dashboardData.value.solicitudesPorTipoMisa.map(d => d.cantidad),
-    backgroundColor: [
-      'rgba(59, 130, 246, 0.8)',
-      'rgba(16, 185, 129, 0.8)',
-      'rgba(245, 158, 11, 0.8)',
-      'rgba(239, 68, 68, 0.8)',
-      'rgba(139, 92, 246, 0.8)',
-    ],
-    borderColor: [
-      'rgb(59, 130, 246)',
-      'rgb(16, 185, 129)',
-      'rgb(245, 158, 11)',
-      'rgb(239, 68, 68)',
-      'rgb(139, 92, 246)',
-    ],
-    borderWidth: 2,
-  }]
-}));
+const chartTipoMisa = computed(() => {
+  console.log('Datos para gráfico de tipo:', dashboardData.value.solicitudesPorTipoMisa); // Debug
+  return {
+    labels: dashboardData.value.solicitudesPorTipoMisa.map(d => d.tipo),
+    datasets: [{
+      data: dashboardData.value.solicitudesPorTipoMisa.map(d => d.cantidad),
+      backgroundColor: [
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(16, 185, 129, 0.8)',
+        'rgba(245, 158, 11, 0.8)',
+        'rgba(239, 68, 68, 0.8)',
+        'rgba(139, 92, 246, 0.8)',
+      ],
+      borderColor: [
+        'rgb(59, 130, 246)',
+        'rgb(16, 185, 129)',
+        'rgb(245, 158, 11)',
+        'rgb(239, 68, 68)',
+        'rgb(139, 92, 246)',
+      ],
+      borderWidth: 2,
+    }]
+  };
+});
 
 const lineChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       display: false,
@@ -342,6 +371,8 @@ const lineChartOptions = {
 };
 
 const doughnutChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'bottom' as const,
@@ -350,17 +381,26 @@ const doughnutChartOptions = {
 };
 
 const formatearMonto = (monto: number): string => {
+  if (typeof monto !== 'number' || isNaN(monto)) {
+    console.warn('Monto inválido:', monto);
+    return '0.00';
+  }
   return monto.toFixed(2);
 };
 
 const formatearFecha = (fecha: string): string => {
   if (!fecha) return 'N/A';
-  const date = new Date(fecha);
-  return date.toLocaleDateString('es-PE', { 
-    day: '2-digit', 
-    month: 'short', 
-    year: 'numeric' 
-  });
+  try {
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-PE', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  } catch (e) {
+    console.error('Error formateando fecha:', fecha, e);
+    return 'N/A';
+  }
 };
 
 const getEstadoClass = (estado: string | null): string => {
@@ -387,16 +427,20 @@ onMounted(async () => {
   // Usuario desde localStorage
   const savedUser = localStorage.getItem("user");
   if (savedUser) {
-    user.value = JSON.parse(savedUser);
+    try {
+      user.value = JSON.parse(savedUser);
+    } catch (e) {
+      console.error('Error parsing user:', e);
+    }
   }
 
   // Cargar dashboard
   await loadDashboard();
 
-  // Actualizar cada 30 segundos
+  // Actualizar cada 60 segundos (opcional)
   // intervalId = window.setInterval(() => {
   //   loadDashboard();
-  // }, 30000);
+  // }, 60000);
 });
 
 onUnmounted(() => {

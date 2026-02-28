@@ -37,7 +37,7 @@ export interface ISolicitudDb {
   idusuariomodificacion: number | null;
   fechacreacion: string | null;
   fechamodificacion: string | null;
-  idEstadoProceso?: number | null;
+  idestadoproceso?: number | null;
   tipomisa?: ITipoMisaRef | null;
   tipo_documento?: IOpcionListaRef | null;
   horario?: IOpcionListaRef | null;
