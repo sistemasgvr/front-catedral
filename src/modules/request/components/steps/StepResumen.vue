@@ -145,13 +145,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <div>
+          <!-- <div>
             <p class="font-semibold text-blue-800 text-sm">Confirmación enviada</p>
             <p class="text-xs text-blue-600">
               Hemos enviado un correo de confirmación a <strong>{{ store.solicitud.correo }}</strong>
             </p>
             <p class="text-xs text-blue-500 mt-1">Por favor revise su bandeja de entrada o spam</p>
-          </div>
+          </div> -->
         </div>
       </div>
 

@@ -88,10 +88,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                          Título
+                          Intención
                         </label>
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                          {{ misa.titulo || 'Sin título' }}
+                          {{ misa.titulo || 'Sin intención' }}
                         </p>
                       </div>
                       <div>
