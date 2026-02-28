@@ -695,8 +695,8 @@ const cargarTodasLasOpciones = async (solicitudData: IDetalleSolicitud) => {
   await Promise.all(idsArray.map(id => cargarOpcionesPorLista(id)));
   
   // Cargar listas completas para selectores en modo edición
-  opcionesTipoDocumento.value = await cargarOpcionesPorLista(21); // Ajusta el ID de lista según tu BD
-  opcionesHorario.value = await cargarOpcionesPorLista(8); // Ajusta el ID de lista según tu BD
+  opcionesTipoDocumento.value = await cargarOpcionesPorLista(1); // Ajusta el ID de lista según tu BD
+  opcionesHorario.value = await cargarOpcionesPorLista(5); // Ajusta el ID de lista según tu BD
   opcionesEstado.value = await cargarOpcionesPorLista(7); // ID LISTA 7 para estados
 };
 
