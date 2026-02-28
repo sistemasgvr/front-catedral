@@ -58,6 +58,7 @@ defineEmits<{
 .date-input {
   appearance: auto;
   -webkit-appearance: auto;
+  color-scheme: light;
 }
 
 /* Forzar visibilidad del icono en Chrome */
