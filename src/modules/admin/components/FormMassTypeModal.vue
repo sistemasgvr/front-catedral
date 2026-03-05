@@ -74,7 +74,7 @@
                     <input
                       v-model.number="form.precio"
                       type="number"
-                      step="0.01"
+                      step="0.5"
                       min="0"
                       required
                       placeholder="0.00"
@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onUnmounted } from 'vue';
 import { crearTipoMisa, actualizarTipoMisa, obtenerTipoMisa } from '../actions/tipoMisa.action';
 
 interface Props {
@@ -134,8 +134,11 @@ const emit = defineEmits<{
   saved: [];
 }>();
 
+// --- ESTADO ---
 const guardando = ref(false);
 const validationError = ref<string | null>(null);
+const toast = ref({ visible: false, mensaje: '', tipo: 'success' as 'success' | 'error' });
+let toastTimer: ReturnType<typeof setTimeout>;
 
 const modoEdicion = computed(() => !!props.tipoMisaId);
 
@@ -144,47 +147,33 @@ const form = ref({
   precio: 0,
 });
 
+// --- MÉTODOS ---
+const mostrarToast = (mensaje: string, tipo: 'success' | 'error') => {
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.value = { visible: true, mensaje, tipo };
+  toastTimer = setTimeout(() => { toast.value.visible = false; }, 3500);
+};
+
 const resetForm = () => {
-  form.value = {
-    nombre: '',
-    precio: 0,
-  };
+  form.value = { nombre: '', precio: 0 };
   validationError.value = null;
 };
 
 const cargarTipoMisa = async () => {
   if (!props.tipoMisaId) return;
-
   try {
     const tipoMisa = await obtenerTipoMisa(props.tipoMisaId);
-    form.value = {
-      nombre: tipoMisa.nombre,
-      precio: tipoMisa.precio,
-    };
+    form.value = { nombre: tipoMisa.nombre, precio: tipoMisa.precio };
   } catch (error) {
-    console.error('Error cargando tipo de misa:', error);
     validationError.value = 'Error al cargar los datos';
   }
 };
 
 const validarFormulario = (): boolean => {
   validationError.value = null;
-
-  if (!form.value.nombre.trim()) {
-    validationError.value = 'El nombre es requerido';
-    return false;
-  }
-
-  if (form.value.nombre.trim().length < 3) {
-    validationError.value = 'El nombre debe tener al menos 3 caracteres';
-    return false;
-  }
-
-  if (form.value.precio <= 0) {
-    validationError.value = 'El precio debe ser mayor a 0';
-    return false;
-  }
-
+  if (!form.value.nombre.trim()) { validationError.value = 'El nombre es requerido'; return false; }
+  if (form.value.nombre.trim().length < 3) { validationError.value = 'Mínimo 3 caracteres'; return false; }
+  if (form.value.precio <= 0) { validationError.value = 'El precio debe ser mayor a 0'; return false; }
   return true;
 };
 
@@ -195,15 +184,21 @@ const handleSubmit = async () => {
   try {
     if (modoEdicion.value && props.tipoMisaId) {
       await actualizarTipoMisa(props.tipoMisaId, form.value);
+      mostrarToast('Tipo de misa actualizado', 'success');
     } else {
       await crearTipoMisa(form.value);
+      mostrarToast('Tipo de misa creado', 'success');
     }
     
-    emit('saved');
-    handleClose();
+    // ORDEN CRÍTICO PARA EL CIERRE:
+    emit('saved'); // Avisa al padre que refresque la lista
+    emit('close'); // Avisa al padre que cierre el modal (isOpen = false)
+    resetForm();   // Limpia localmente
+    
   } catch (error) {
-    validationError.value = error instanceof Error ? error.message : 'Error al guardar';
-    console.error('Error guardando tipo de misa:', error);
+    const msg = error instanceof Error ? error.message : 'Error al guardar';
+    validationError.value = msg;
+    mostrarToast(msg, 'error');
   } finally {
     guardando.value = false;
   }
@@ -216,16 +211,13 @@ const handleClose = () => {
   }
 };
 
-watch(
-  () => props.isOpen,
-  async (newValue) => {
-    if (newValue) {
-      if (modoEdicion.value) {
-        await cargarTipoMisa();
-      } else {
-        resetForm();
-      }
-    }
+// --- WATCHERS ---
+watch(() => props.isOpen, async (newValue) => {
+  if (newValue) {
+    if (modoEdicion.value) await cargarTipoMisa();
+    else resetForm();
   }
-);
+});
+
+onUnmounted(() => { if (toastTimer) clearTimeout(toastTimer); });
 </script>

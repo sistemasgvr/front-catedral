@@ -10,7 +10,7 @@
     >
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-[99999] overflow-y-auto"
+        class="fixed inset-0 z-[9999999999] overflow-y-auto"
         @click.self="cancelar"
       >
         <!-- Backdrop con Blur -->

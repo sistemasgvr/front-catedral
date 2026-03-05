@@ -4,8 +4,6 @@ import type { IDashboardData } from "../interfaces/dashboard.interface";
 
 export const getDashboardData = async (): Promise<IDashboardData> => {
   try {
-    console.log('=== Iniciando carga de dashboard ===');
-    
     // 1. Obtener métricas de solicitudes
     // IMPORTANTE: Separar el select en líneas para evitar problemas de codificación
     const selectFields = [
@@ -19,95 +17,94 @@ export const getDashboardData = async (): Promise<IDashboardData> => {
     ].join(',');
 
     const solicitudesUrl = `/solicitudes?select=${selectFields}&estado=eq.true&order=fechasolicitud.desc`;
-    console.log('URL solicitudes:', solicitudesUrl);
 
     const { data: solicitudes } = await apiClient.get<any[]>(solicitudesUrl);
 
-    console.log('Solicitudes recibidas:', solicitudes);
-    console.log('Cantidad de solicitudes:', solicitudes?.length);
-
     const solicitudesArray = Array.isArray(solicitudes) ? solicitudes : [];
-
-    if (solicitudesArray.length > 0) {
-      console.log('Ejemplo de solicitud:', solicitudesArray[0]);
-    }
 
     // Calcular métricas básicas
     const pendientes = solicitudesArray.filter(s => s.idestadoproceso === 17).length;
     const aprobadas = solicitudesArray.filter(s => s.idestadoproceso === 18).length;
-    const denegadas = solicitudesArray.filter(s => s.idestadoproceso === 19).length;
-
-    console.log('Métricas:', { 
-      total: solicitudesArray.length,
-      pendientes, 
-      aprobadas, 
-      denegadas,
-      conEstado: solicitudesArray.filter(s => s.idestadoproceso != null).length,
-      sinEstado: solicitudesArray.filter(s => s.idestadoproceso == null).length
-    });
+    const denegadas = solicitudesArray.filter(s => s.idestadoproceso === 19).length
 
     // 2. Obtener solicitudes por mes (últimos 6 meses)
     const solicitudesPorMes = calcularSolicitudesPorMes(solicitudesArray);
-    console.log('Solicitudes por mes:', solicitudesPorMes);
 
     // 3. Obtener tipos de misa y calcular estadísticas
     const { data: tiposMisa } = await apiClient.get(`/tipomisa?select=*&estado=eq.true`);
-    console.log('Tipos de misa recibidos:', tiposMisa);
-    
+
     const tiposMisaArray = Array.isArray(tiposMisa) ? tiposMisa : [];
 
     const solicitudesPorTipoMisa = tiposMisaArray.map(tipo => {
-      const solicitudesTipo = solicitudesArray.filter(s => s.idtipomisa === tipo.idtipomisa);
-      const monto = solicitudesTipo.reduce((sum, s) => {
+      // 1. Filtramos por tipo de misa Y por estado aprobado (id 18)
+      const solicitudesTipoAprobadas = solicitudesArray.filter(s =>
+        s.idtipomisa === tipo.idtipomisa &&
+        Number(s.idestadoproceso) === 18
+      );
+
+      // 2. Calculamos el monto solo de esas solicitudes aprobadas
+      const monto = solicitudesTipoAprobadas.reduce((sum, s) => {
         const montoNum = Number(s.montototal);
         return sum + (isNaN(montoNum) ? 0 : montoNum);
       }, 0);
-      
+
       return {
         tipo: tipo.nombre,
-        cantidad: solicitudesTipo.length,
-        monto: monto,
+        cantidad: solicitudesTipoAprobadas.length, // Cantidad de aprobadas
+        monto: monto, // Monto de aprobadas
       };
     });
 
-    console.log('Solicitudes por tipo de misa:', solicitudesPorTipoMisa);
-
     // 4. Obtener misas próximas
+    // 1. Obtener fecha de hoy normalizada (sin horas para evitar desfases)
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
     const fechaHoyISO = hoy.toISOString().split('T')[0];
-    
-    console.log('Consultando misas desde:', fechaHoyISO);
-    
+
+    // 2. Llamada a la API
     const { data: misas } = await apiClient.get(
-      `/misas?select=*&estado=eq.true&fechacelebracion=gte.${fechaHoyISO}&order=fechacelebracion.asc`
+      `/misas?select=*&estado=eq.true&fechacelebracion=gte.${fechaHoyISO}&order=fechacelebracion.desc`
     );
-    
-    console.log('Misas recibidas:', misas);
-    
+
     const misasArray = Array.isArray(misas) ? misas : [];
 
+    // 3. Definir los límites temporales exactos
+    // --- Fin de esta semana (Domingo actual a las 23:59:59) ---
     const finSemana = new Date(hoy);
-    finSemana.setDate(hoy.getDate() + 7);
-    const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+    const diaSemana = hoy.getDay(); // 0 es domingo, 1 lunes...
+    const diasHastaDomingo = diaSemana === 0 ? 0 : 7 - diaSemana;
+    finSemana.setDate(hoy.getDate() + diasHastaDomingo);
+    finSemana.setHours(23, 59, 59, 999);
 
+    // --- Fin de este mes (Último día del mes a las 23:59:59) ---
+    const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    // 4. Calcular contadores en una sola pasada (más eficiente)
     const misasProximas = {
       total: misasArray.length,
-      estaSemana: misasArray.filter(m => {
-        const fechaMisa = new Date(m.fechacelebracion + 'T00:00:00');
-        return fechaMisa <= finSemana;
-      }).length,
-      esteMes: misasArray.filter(m => {
-        const fechaMisa = new Date(m.fechacelebracion + 'T00:00:00');
-        return fechaMisa <= finMes;
-      }).length,
+      estaSemana: 0,
+      esteMes: 0
     };
 
-    console.log('Misas próximas:', misasProximas);
+    misasArray.forEach(m => {
+      // Forzamos T00:00:00 para que la fecha se interprete en horario local
+      const fechaMisa = new Date(m.fechacelebracion + 'T00:00:00');
+
+      // Misa está dentro de esta semana (hasta el domingo)
+      if (fechaMisa >= hoy && fechaMisa <= finSemana) {
+        misasProximas.estaSemana++;
+      }
+
+      // Misa está dentro de este mes calendario
+      if (fechaMisa >= hoy && fechaMisa <= finMes) {
+        misasProximas.esteMes++;
+      }
+    });
 
     // 5. Calcular ingresos totales (SOLO DE APROBADAS - idestadoproceso = 18)
     const solicitudesAprobadas = solicitudesArray.filter(s => s.idestadoproceso === 18);
-    console.log('Solicitudes aprobadas para ingresos:', solicitudesAprobadas.length);
-    
+
     const ingresosTotales = solicitudesAprobadas.reduce((sum, s) => {
       const monto = Number(s.montototal);
       if (isNaN(monto)) {
@@ -117,19 +114,13 @@ export const getDashboardData = async (): Promise<IDashboardData> => {
       return sum + monto;
     }, 0);
 
-    console.log('Ingresos totales calculados:', ingresosTotales);
-
     // 6. Obtener opciones de estado para las solicitudes recientes
     const { data: estadosData } = await apiClient.get(
       `/opcioneslista?select=*&idlista=eq.7&estado=eq.true`
     );
-    
-    console.log('Estados recibidos:', estadosData);
-    
+
     const estadosArray = Array.isArray(estadosData) ? estadosData : [];
     const estadosMap = new Map(estadosArray.map(e => [e.idopcionlista, e.nombre]));
-
-    console.log('Mapa de estados:', Array.from(estadosMap.entries()));
 
     // 7. Solicitudes recientes (últimas 5)
     const solicitudesRecientes = solicitudesArray.slice(0, 5).map(s => ({
@@ -140,8 +131,6 @@ export const getDashboardData = async (): Promise<IDashboardData> => {
       estado: s.idestadoproceso ? estadosMap.get(s.idestadoproceso) || null : null,
       idestado: s.idestadoproceso, // Para debug
     }));
-
-    console.log('Solicitudes recientes:', solicitudesRecientes);
 
     const resultado = {
       metrics: {
@@ -157,28 +146,25 @@ export const getDashboardData = async (): Promise<IDashboardData> => {
       solicitudesRecientes,
     };
 
-    console.log('=== Dashboard cargado exitosamente ===');
-    console.log('Resultado final:', resultado);
-
     return resultado;
   } catch (error) {
     console.error('=== Error en getDashboardData ===');
     console.error('Error completo:', error);
-    
+
     if (isAxiosError(error)) {
       console.error('Status:', error.response?.status);
       console.error('Data:', error.response?.data);
       console.error('Headers:', error.response?.headers);
       console.error('Config URL:', error.config?.url);
-      
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error 
+
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
         || error.response?.data?.hint
         || `Error ${error.response?.status}: ${error.response?.statusText}`;
-      
+
       throw new Error(errorMessage);
     }
-    
+
     throw new Error("No se pudo realizar la petición del dashboard");
   }
 };
@@ -191,8 +177,8 @@ function calcularSolicitudesPorMes(solicitudes: any[]): { mes: string; cantidad:
     const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
     const mesAnio = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
     const nombreMes = fecha.toLocaleDateString('es-PE', { month: 'short', year: 'numeric' });
-    
-    const cantidad = solicitudes.filter(s => 
+
+    const cantidad = solicitudes.filter(s =>
       s.fechasolicitud && s.fechasolicitud.startsWith(mesAnio)
     ).length;
 

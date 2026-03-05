@@ -13,10 +13,8 @@
         class="fixed inset-0 z-[99999] overflow-y-auto"
         @click.self="handleClose"
       >
-        <!-- Backdrop con Blur -->
         <div class="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-all"></div>
 
-        <!-- Modal Container -->
         <div class="flex min-h-full items-center justify-center p-4">
           <Transition
             enter-active-class="transition-all duration-300"
@@ -31,7 +29,6 @@
               class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[100000]"
               @click.stop
             >
-              <!-- Modal Header -->
               <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
                   {{ modoEdicion ? 'Editar Misa' : 'Nueva Misa' }}
@@ -46,9 +43,7 @@
                 </button>
               </div>
 
-              <!-- Modal Body -->
               <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
-                <!-- Tipo de Misa -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Tipo de Misa <span class="text-red-500">*</span>
@@ -58,14 +53,13 @@
                     required
                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all"
                   >
-                    <option value="">Seleccione un tipo de misa</option>
+                    <option value="0">Seleccione un tipo de misa</option>
                     <option v-for="tipo in tiposMisa" :key="tipo.idtipomisa" :value="tipo.idtipomisa">
                       {{ tipo.nombre }} - S/ {{ Number(tipo.precio).toFixed(2) }}
                     </option>
                   </select>
                 </div>
 
-                <!-- Título -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Título <span class="text-red-500">*</span>
@@ -79,7 +73,6 @@
                   />
                 </div>
 
-                <!-- Fecha de Celebración -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Fecha de Celebración <span class="text-red-500">*</span>
@@ -89,11 +82,10 @@
                     type="date"
                     required
                     :min="minFecha"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all"
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
 
-                <!-- Horarios -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -103,7 +95,7 @@
                       v-model="form.horainicio"
                       type="time"
                       required
-                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all [color-scheme:light] dark:[color-scheme:dark]"
                     />
                   </div>
                   <div>
@@ -114,12 +106,11 @@
                       v-model="form.horafin"
                       type="time"
                       required
-                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all [color-scheme:light] dark:[color-scheme:dark]"
                     />
                   </div>
                 </div>
 
-                <!-- Estado -->
                 <div class="flex items-center">
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input 
@@ -134,12 +125,10 @@
                   </label>
                 </div>
 
-                <!-- Validation Error -->
                 <div v-if="validationError" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                   <p class="text-sm text-red-600 dark:text-red-400">{{ validationError }}</p>
                 </div>
 
-                <!-- Actions -->
                 <div class="flex gap-3 pt-4">
                   <button
                     type="button"
@@ -164,14 +153,38 @@
         </div>
       </div>
     </Transition>
+
+    <Transition
+      enter-active-class="transform transition duration-300 ease-out"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="toast.visible" 
+           class="fixed bottom-5 right-5 z-[100001] flex items-center p-4 w-full max-w-xs text-gray-500 bg-white rounded-lg shadow-2xl dark:text-gray-400 dark:bg-gray-800 border-l-4"
+           :class="toast.tipo === 'success' ? 'border-green-500' : 'border-red-500'">
+        
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"
+             :class="toast.tipo === 'success' ? 'text-green-500 bg-green-100 dark:bg-green-800/30' : 'text-red-500 bg-red-100 dark:bg-red-800/30'">
+          <svg v-if="toast.tipo === 'success'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+          <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/></svg>
+        </div>
+        <div class="ms-3 text-sm font-medium text-gray-900 dark:text-white">{{ toast.mensaje }}</div>
+        <button @click="toast.visible = false" class="ms-auto bg-transparent text-gray-400 hover:text-gray-900 rounded-lg p-1.5 inline-flex h-8 w-8 dark:hover:text-white">
+          <svg class="w-3 h-3" fill="none" viewBox="0 0 14 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/></svg>
+        </button>
+      </div>
+    </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onUnmounted } from 'vue';
 import { crearMisa, actualizarMisa, obtenerDetalleMisa } from '../actions/crudMisa.action';
 import { listarTiposMisa } from '../actions/tipoMisa.action';
-import type { ICrearMisaForm, IEditarMisaForm } from '../interfaces/misa.interface';
+import type { ICrearMisaForm } from '../interfaces/misa.interface';
 import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
 
 interface Props {
@@ -185,9 +198,12 @@ const emit = defineEmits<{
   saved: [];
 }>();
 
+// --- ESTADO ---
 const tiposMisa = ref<ITipoMisa[]>([]);
 const guardando = ref(false);
 const validationError = ref<string | null>(null);
+const toast = ref({ visible: false, mensaje: '', tipo: 'success' as 'success' | 'error' });
+let toastTimer: ReturnType<typeof setTimeout>;
 
 const modoEdicion = computed(() => !!props.misaId);
 
@@ -200,20 +216,17 @@ const form = ref<ICrearMisaForm>({
   estado: true,
 });
 
-const minFecha = computed(() => {
-  const hoy = new Date();
-  return hoy.toISOString().split('T')[0];
-});
+const minFecha = computed(() => new Date().toISOString().split('T')[0]);
+
+// --- MÉTODOS ---
+const mostrarToast = (mensaje: string, tipo: 'success' | 'error') => {
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.value = { visible: true, mensaje, tipo };
+  toastTimer = setTimeout(() => { toast.value.visible = false; }, 3500);
+};
 
 const resetForm = () => {
-  form.value = {
-    idtipomisa: 0,
-    titulo: '',
-    fechacelebracion: '',
-    horainicio: '',
-    horafin: '',
-    estado: true,
-  };
+  form.value = { idtipomisa: 0, titulo: '', fechacelebracion: '', horainicio: '', horafin: '', estado: true };
   validationError.value = null;
 };
 
@@ -227,7 +240,6 @@ const cargarTiposMisa = async () => {
 
 const cargarMisa = async () => {
   if (!props.misaId) return;
-
   try {
     const misa = await obtenerDetalleMisa(props.misaId);
     form.value = {
@@ -245,55 +257,40 @@ const cargarMisa = async () => {
 
 const validarFormulario = (): boolean => {
   validationError.value = null;
-
-  if (!form.value.idtipomisa) {
-    validationError.value = 'Debe seleccionar un tipo de misa';
-    return false;
-  }
-
-  if (!form.value.titulo.trim()) {
-    validationError.value = 'El título es requerido';
-    return false;
-  }
-
-  if (!form.value.fechacelebracion) {
-    validationError.value = 'La fecha de celebración es requerida';
-    return false;
-  }
-
-  if (!form.value.horainicio || !form.value.horafin) {
-    validationError.value = 'Debe especificar el horario de inicio y fin';
-    return false;
-  }
-
-  if (form.value.horainicio >= form.value.horafin) {
-    validationError.value = 'La hora de fin debe ser posterior a la hora de inicio';
-    return false;
-  }
-
+  if (!form.value.idtipomisa) { validationError.value = 'Debe seleccionar un tipo de misa'; return false; }
+  if (!form.value.titulo.trim()) { validationError.value = 'El título es requerido'; return false; }
+  if (!form.value.fechacelebracion) { validationError.value = 'La fecha de celebración es requerida'; return false; }
+  if (!form.value.horainicio || !form.value.horafin) { validationError.value = 'Debe especificar el horario'; return false; }
+  if (form.value.horainicio >= form.value.horafin) { validationError.value = 'La hora de fin debe ser posterior'; return false; }
   return true;
 };
 
 const handleSubmit = async () => {
   if (!validarFormulario()) return;
-
   guardando.value = true;
+  
   try {
     if (modoEdicion.value && props.misaId) {
-      const dataEditar: IEditarMisaForm = {
-        idmisa: props.misaId,
-        ...form.value,
-      };
-      await actualizarMisa(dataEditar);
+      await actualizarMisa({ idmisa: props.misaId, ...form.value });
+      mostrarToast('Misa actualizada correctamente', 'success');
     } else {
       await crearMisa(form.value);
+      mostrarToast('Misa creada con éxito', 'success');
     }
+
+    // 1. Notificamos al padre que se guardó (para que refresque la lista)
+    emit('saved'); 
     
-    emit('saved');
-    handleClose();
+    // 2. IMPORTANTE: Forzamos el cierre manual llamando al emit de close directamente
+    // o asegurándonos de que handleClose no tenga bloqueos.
+    emit('close'); 
+    
+    // 3. Limpiamos el formulario después de emitir
+    resetForm();
+
   } catch (error) {
-    validationError.value = error instanceof Error ? error.message : 'Error al guardar la misa';
-    console.error('Error guardando misa:', error);
+    const msg = error instanceof Error ? error.message : 'Error al guardar';
+    mostrarToast(msg, 'error');
   } finally {
     guardando.value = false;
   }
@@ -306,17 +303,14 @@ const handleClose = () => {
   }
 };
 
-watch(
-  () => props.isOpen,
-  async (newValue) => {
-    if (newValue) {
-      await cargarTiposMisa();
-      if (modoEdicion.value) {
-        await cargarMisa();
-      } else {
-        resetForm();
-      }
-    }
+// --- WATCHERS Y LIFECYCLE ---
+watch(() => props.isOpen, async (newValue) => {
+  if (newValue) {
+    await cargarTiposMisa();
+    if (modoEdicion.value) await cargarMisa();
+    else resetForm();
   }
-);
+});
+
+onUnmounted(() => { if (toastTimer) clearTimeout(toastTimer); });
 </script>

@@ -29,6 +29,7 @@ export const useNoticiaByIdQuery = (id: number) => {
     queryKey: [QUERY_KEY, id],
     queryFn: () => obtenerNoticiaPorId(id),
     enabled: !!id,
+    refetchOnWindowFocus: true,
   });
 };
 

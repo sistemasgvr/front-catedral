@@ -23,11 +23,11 @@
 
       <!-- Header -->
       <header class="flex-shrink-0 flex flex-col items-center justify-center px-4 pt-12 pb-6">
-        <div class="w-24 h-24 bg-gradient-to-br from-[#C88A2A]/40 to-[#B6791F]/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 border-2 border-[#D39E3A]/50 shadow-2xl animate-fade-in">
+        <!-- <div class="w-24 h-24 bg-gradient-to-br from-[#C88A2A]/40 to-[#B6791F]/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 border-2 border-[#D39E3A]/50 shadow-2xl animate-fade-in">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-amber-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L12 6M12 6L8 10M12 6L16 10M8 10V18H6V22H18V18H16V10M8 10H16M12 10V18M10 22V18M14 22V18" />
           </svg>
-        </div>
+        </div> -->
         <h1 class="text-[clamp(1.75rem,5vw,3rem)] font-serif font-bold text-white mb-3 text-center drop-shadow-2xl animate-slide-up">
           Catedral San Pedro
         </h1>

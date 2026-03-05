@@ -191,7 +191,7 @@
                   </div>
                   <div class="flex items-center gap-2">
                     <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#8C1D40] flex items-center justify-center text-[10px] text-white font-bold">
-                      15
+                      
                     </div>
                     <span class="text-gray-600">Hoy</span>
                   </div>

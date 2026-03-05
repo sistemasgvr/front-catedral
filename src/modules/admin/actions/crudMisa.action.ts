@@ -8,27 +8,16 @@ import type { IMisaDetalle, ICrearMisaForm, IEditarMisaForm } from "../interface
 export const obtenerDetalleMisa = async (idMisa: number): Promise<IMisaDetalle> => {
   try {
     const { data } = await apiClient.get<IMisaDetalle[]>(
-      `/misas?select=*,tipomisa:idtipomisa(*),menciones:mencionesmisa(idmencionmisa,mencion:idmencion(idmencion,descripcion,solicitud:idsolicitud(nombres,apellidos,intencion)))&idmisa=eq.${idMisa}`
+      `/misas?select=*,tipomisa:idtipomisa(*),menciones:mencionesmisa(idmencionmisa,mencion:idmencion(idmencion,descripcion,solicitud:idsolicitud(idsolicitud,nombres,apellidos,celular,correo,nrodocumento,intencion)))&idmisa=eq.${idMisa}`
     );
-    
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("No se encontró la misa");
-    }
-    
+
+    if (!Array.isArray(data) || data.length === 0) throw new Error("No se encontró la misa");
     const misa = data[0];
-    if (!misa) {
-      throw new Error("No se encontró la misa");
-    }
-    
+    if (!misa) throw new Error("No se encontró la misa");
     return misa;
   } catch (error) {
-    if (
-      isAxiosError(error) &&
-      [400, 401, 404, 422].includes(error.response?.status ?? 0)
-    ) {
-      const errorMessage =
-        error.response?.data?.error || "Error al obtener el detalle de la misa";
-      throw new Error(errorMessage);
+    if (isAxiosError(error) && [400, 401, 404, 422].includes(error.response?.status ?? 0)) {
+      throw new Error(error.response?.data?.error || "Error al obtener el detalle de la misa");
     }
     throw new Error("No se pudo realizar la petición");
   }
@@ -120,17 +109,17 @@ export const crearMisaDesdeSolicitud = async (solicitud: {
     const { data: horarioData } = await apiClient.get(
       `/opcioneslista?idopcionlista=eq.${solicitud.idhorario}&select=nombre,descripcion`
     );
-    
+
     let horainicio = '09:00:00';
     let horafin = '10:00:00';
-    
+
     if (Array.isArray(horarioData) && horarioData.length > 0) {
       const horario = horarioData[0];
       // Intentar extraer las horas del nombre o descripción
       // Formato esperado: "09:00 AM - 10:00 AM" o similar
       const horarioTexto = horario.nombre || horario.descripcion || '';
       const horarioMatch = horarioTexto.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/gi);
-      
+
       if (horarioMatch && horarioMatch.length >= 2) {
         horainicio = convertirA24Horas(horarioMatch[0]);
         horafin = convertirA24Horas(horarioMatch[1]);

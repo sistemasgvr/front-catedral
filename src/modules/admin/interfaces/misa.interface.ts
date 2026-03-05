@@ -24,21 +24,30 @@ export interface IMisaConRelaciones extends IMisa {
   };
 }
 
+export interface IMencionMisa {
+  idmencionmisa: number;
+  mencion: {
+    idmencion: number;
+    descripcion: string | null;
+    solicitud: {
+      idsolicitud: number;
+      nombres: string;
+      apellidos: string;
+      celular: number | null;
+      correo: string | null;
+      nrodocumento: string;
+      intencion: string | null;
+    };
+  };
+}
+
 export interface IMisaDetalle extends IMisa {
   tipomisa: {
     idtipomisa: number;
     nombre: string;
     precio: number;
   };
-  menciones?: Array<{
-    idmencion: number;
-    descripcion: string;
-    solicitud: {
-      nombres: string;
-      apellidos: string;
-      intencion: string | null;
-    };
-  }>;
+  menciones?: IMencionMisa[];
 }
 
 export interface ICrearMisaForm {
