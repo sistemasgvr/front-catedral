@@ -1,20 +1,19 @@
 <template>
-  <div class="w-full text-gray-900" >
+  <div class="w-full">
     <label 
       v-if="label" 
       :for="name" 
-      class="block text-sm font-medium text-[#4A4A4A] mb-1"
+      class="block text-sm font-medium mb-1 transition-colors duration-200"
+      :class="errorMessage ? 'text-red-500' : 'text-[#4A4A4A] dark:text-gray-300'"
     >
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
     
-    <!-- Skeleton Loading -->
     <div v-if="loading" class="animate-pulse">
-      <div class="h-[50px] bg-gray-200 rounded-lg"></div>
+      <div class="h-[50px] bg-gray-200 dark:bg-gray-700 rounded-lg w-full"></div>
     </div>
 
-    <!-- Select -->
     <div v-else class="relative">
       <select
         :id="name"
@@ -23,31 +22,38 @@
         :disabled="disabled"
         @change="onChange($event)"
         @blur="$emit('blur')"
-        class="w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 outline-none appearance-none cursor-pointer pr-10"
+        class="w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 outline-none appearance-none cursor-pointer pr-10 disabled:cursor-not-allowed disabled:opacity-50"
         :class="[
           errorMessage 
-            ? 'border-red-400 focus:border-red-500 bg-red-50' 
-            : 'border-[#E0D5C5] focus:border-[#C88A2A] bg-white hover:border-[#C88A2A]/50'
+            ? 'border-red-400 focus:border-red-500 bg-red-50 dark:bg-red-900/10 dark:text-red-400' 
+            : 'border-[#E0D5C5] focus:border-[#C88A2A] bg-white text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white hover:border-[#C88A2A]/50'
         ]"
       >
-        <option value="" disabled>{{ placeholder || 'Seleccionar' }}</option>
+        <option value="" disabled class="dark:bg-gray-800">{{ placeholder || 'Seleccionar' }}</option>
         <option 
           v-for="option in options" 
           :key="option.id" 
           :value="option.id"
+          class="dark:bg-gray-800 dark:text-white"
         >
           {{ option.nombre }}
         </option>
       </select>
-      <!-- Arrow icon -->
+
       <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg 
+          class="w-5 h-5 transition-colors duration-200" 
+          :class="errorMessage ? 'text-red-400' : 'text-gray-400 dark:text-gray-500'" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </div>
     </div>
     
-    <p v-if="errorMessage && !loading" class="mt-1 text-sm text-red-500">
+    <p v-if="errorMessage && !loading" class="mt-1 text-sm text-red-500 animate-pulse">
       {{ errorMessage }}
     </p>
   </div>
@@ -60,7 +66,7 @@ interface Option {
   [key: string]: unknown;
 }
 
-defineProps<{
+withDefaults(defineProps<{
   modelValue: number | null;
   name: string;
   label?: string;
@@ -70,7 +76,12 @@ defineProps<{
   disabled?: boolean;
   loading?: boolean;
   errorMessage?: string;
-}>();
+}>(), {
+  required: false,
+  disabled: false,
+  loading: false,
+  options: () => []
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number | null): void;
@@ -82,6 +93,3 @@ const onChange = (event: Event) => {
   emit('update:modelValue', val === '' ? null : Number(val));
 };
 </script>
-
-<style scoped>
-</style>

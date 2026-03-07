@@ -13,10 +13,10 @@
   --color-brand-800: #1e40af;
   --color-brand-900: #1e3a8a;
   --color-brand-950: #172554;
-  
+
   --color-error-500: #ef4444;
   --color-error-600: #dc2626;
-  
+
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
   --color-gray-200: #e5e7eb;
@@ -27,7 +27,7 @@
   --color-gray-700: #374151;
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
-  
+
   --color-dark-900: #0f172a;
 }
 
@@ -35,7 +35,7 @@
 
 /* Estilos base para transiciones de modo oscuro */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 .dark {
@@ -44,9 +44,9 @@
 
 /* Transición suave al cambiar de modo */
 * {
-  transition: background-color 0.3s ease, 
-              border-color 0.3s ease, 
-              color 0.3s ease;
+  transition: background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Prevenir transición en elementos específicos que no la necesitan */
@@ -55,11 +55,11 @@ input,
 select,
 textarea,
 [role="button"] {
-  transition: background-color 0.2s ease, 
-              border-color 0.2s ease, 
-              color 0.2s ease,
-              opacity 0.2s ease,
-              transform 0.2s ease;
+  transition: background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 /* Scrollbar global para modo oscuro */
@@ -115,6 +115,7 @@ html {
 
 /* Optimización de rendimiento para animaciones */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

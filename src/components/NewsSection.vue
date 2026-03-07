@@ -1,19 +1,17 @@
 <template>
-  <div class="news-slider-wrapper">
-    <!-- Header -->
+  <div class="news-slider-wrapper transition-all duration-300" :class="{ 'dark-mode': darkMode }">
     <div class="slider-header">
       <div class="header-left">
         <div class="pulse-dot"></div>
-        <span class="header-label">Noticias & Eventos</span>
+        <span class="header-label transition-colors duration-300">Noticias & Eventos</span>
       </div>
-      <span v-if="!loading && noticias.length > 0" class="count-badge">
+      <span v-if="!loading && noticias.length > 0" class="count-badge transition-all duration-300">
         {{ noticias.length }} anuncios
       </span>
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="loading-track">
-      <div v-for="i in 3" :key="i" class="skeleton-card">
+      <div v-for="i in 3" :key="i" class="skeleton-card shadow-sm">
         <div class="skeleton-img"></div>
         <div class="skeleton-lines">
           <div class="skel skel-title"></div>
@@ -23,40 +21,35 @@
       </div>
     </div>
 
-    <!-- Empty -->
     <div v-else-if="noticias.length === 0" class="empty-state">
-      <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="opacity-50">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
           d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
       </svg>
-      <p>No hay noticias disponibles</p>
+      <p class="font-medium">No hay noticias disponibles</p>
     </div>
 
-    <!-- Slider Track -->
     <div v-else class="slider-outer" @mouseenter="pauseSlider" @mouseleave="resumeSlider">
       <div class="slider-track" :style="trackStyle" ref="trackRef">
-        <!-- Doubled for infinite loop -->
         <div
           v-for="(noticia, index) in duplicatedNoticias"
           :key="`${noticia.idnoticia}-${index}`"
-          class="news-card"
+          class="news-card group"
           :class="{ expanded: expandedId === `${noticia.idnoticia}-${index}` }"
         >
-          <!-- Destacada badge -->
           <span v-if="noticia.destacada" class="badge-destacada">★ Destacada</span>
 
-          <div class="card-inner">
-            <!-- Image -->
-            <div v-if="noticia.imagen" class="card-img-wrap">
+          <div class="card-inner shadow-md hover:shadow-xl transition-shadow duration-300">
+            <div v-if="noticia.imagen" class="card-img-wrap relative">
               <img
                 :src="noticia.imagen"
                 :alt="noticia.titulo"
                 class="card-img"
                 @click.stop="abrirImagen(noticia.imagen!, noticia.titulo)"
               />
+              <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors pointer-events-none"></div>
             </div>
 
-            <!-- Content -->
             <div class="card-body">
               <h4 class="card-title">{{ noticia.titulo }}</h4>
 
@@ -85,7 +78,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {{ formatearFecha(noticia.fecha_evento) }}
+                  Evento: {{ formatearFecha(noticia.fecha_evento) }}
                 </span>
               </div>
             </div>
@@ -94,7 +87,6 @@
       </div>
     </div>
 
-    <!-- Modal imagen -->
     <NoticiaImageModal
       :is-open="imagenModal.abierto"
       :name="'imagenModal'"
@@ -110,6 +102,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { obtenerNoticiasPublicas } from '../actions/noticias.action';
 import NoticiaImageModal from './NoticiaImageModal.vue';
 import type { INoticiaResumen } from '@/interfaces/noticia.interface';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { darkMode } = useDarkMode();
 
 const noticias = ref<INoticiaResumen[]>([]);
 const loading = ref(false);
@@ -121,7 +116,7 @@ const imagenModal = ref({ abierto: false, src: '' as string | null, alt: '' });
 const offset = ref(0);
 const isPaused = ref(false);
 let animFrame: number;
-const SPEED = 0.4; // px per frame
+const SPEED = 0.4;
 
 const duplicatedNoticias = computed(() => [...noticias.value, ...noticias.value]);
 
@@ -252,7 +247,7 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
   border: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
   overflow: hidden;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease, border 0.3s ease;
   position: relative;
   cursor: default;
 }
@@ -422,4 +417,46 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
   color: rgba(255,255,255,0.35);
 }
 .empty-state p { font-size: 0.85rem; }
+
+/* ========================================
+   MODO OSCURO — usando clase local .dark-mode
+   ======================================== */
+
+.dark-mode .news-card {
+  background: #1e293b;
+  border: 1px solid rgba(211, 158, 58, 0.2);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .card-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .card-text {
+  color: #cbd5e1;
+}
+
+.dark-mode .meta-date {
+  color: #94a3b8;
+}
+
+.dark-mode .meta-event {
+  color: #fb7185;
+}
+
+.dark-mode .ver-mas {
+  color: #d39e3a;
+}
+.dark-mode .ver-mas:hover {
+  color: #eab308;
+}
+
+.dark-mode .count-badge {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark-mode .skeleton-card {
+  background: rgba(255, 255, 255, 0.05);
+}
 </style>
