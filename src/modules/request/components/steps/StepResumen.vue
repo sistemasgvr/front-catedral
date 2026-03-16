@@ -161,7 +161,7 @@
           @click="nuevaSolicitud"
           class="px-6 py-3 bg-[#C88A2A] hover:bg-[#B6791F] text-white rounded-lg font-medium transition-colors"
         >
-          Realizar Nueva Solicitud
+          Finalizar
         </button>
       </div>
     </div>

@@ -58,28 +58,33 @@ defineEmits<{
 </script>
 
 <style scoped>
-/* Restaurar comportamiento nativo y permitir modo oscuro en el popup del calendario */
+/* --- MODO CLARO (Default) --- */
 .date-input {
   appearance: auto;
   -webkit-appearance: auto;
-  /* Crucial: Esto le dice al navegador que el calendario interno debe adaptarse al tema */
-  color-scheme: light dark;
+  color-scheme: light; /* Indica al navegador que use iconos oscuros */
 }
 
-/* Forzar visibilidad y color del icono del calendario en Chrome/Edge */
+/* Forzamos que el icono sea oscuro si el navegador intenta ponerlo blanco */
 .date-input::-webkit-calendar-picker-indicator {
-  opacity: 1;
   cursor: pointer;
-  /* En modo oscuro, invertimos el color del icono si es necesario, 
-     aunque color-scheme suele manejarlo bien */
-  filter: var(--tw-drop-shadow); 
+  filter: invert(0); 
 }
 
-/* Estética para el dark mode específicamente en el icono si fuera necesario */
-:deep(.dark) .date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
+/* --- MODO OSCURO (Aislado) --- */
+/** * Usamos :host-context(.dark) si usas Web Components, 
+ * pero para Vue estándar, lo más seguro es usar un selector que busque 
+ * la clase .dark en los ancestros sin usar :global.
+ */
+ :is(.dark *) .date-input {
+  color-scheme: dark;
 }
 
+:is(.dark *) .date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* Aquí el icono se vuelve blanco */
+}
+
+/* Limpieza de botones extra de Chrome */
 .date-input::-webkit-inner-spin-button,
 .date-input::-webkit-clear-button {
   display: none;

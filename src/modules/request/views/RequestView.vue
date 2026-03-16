@@ -1,10 +1,9 @@
 <template>
   <div class="min-h-screen flex flex-col relative">
+
     <!-- Background Image with Overlay -->
-    <div 
-      class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
-      :style="{ backgroundImage: `url('/images/FondoCatedral.jpeg')` }"
-    >
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+      :style="{ backgroundImage: `url('/images/FondoCatedral.jpeg')` }">
       <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
@@ -16,52 +15,30 @@
       <!-- Wizard Container -->
       <main class="flex-1 flex items-center px-4 py-6">
         <div class="w-full max-w-5xl mx-auto">
-          <FormWizard
-            ref="wizardRef"
-            @complete="onComplete"
-            @on-change="onStepChange"
-            color="#C88A2A"
-            title=""
-            subtitle=""
-            step-size="sm"
-            back-button-text="Anterior"
-            next-button-text="Siguiente"
-            finish-button-text="Finalizar"
-          >
-            <TabContent 
-              title="Solicitante"
-              :before-change="validateStep1"
-            >
+          <FormWizard ref="wizardRef" @complete="onComplete" @on-change="onStepChange" color="#C88A2A" title=""
+            subtitle="" step-size="sm" back-button-text="Anterior" next-button-text="Siguiente"
+            finish-button-text="Finalizar">
+            <TabContent title="Solicitante" :before-change="validateStep1">
               <StepDatosSolicitante ref="step1Ref" />
             </TabContent>
 
-            <TabContent 
-              title="Celebración"
-              :before-change="validateStep2"
-            >
+            <TabContent title="Celebración" :before-change="validateStep2">
               <StepDatosCelebracion ref="step2Ref" />
             </TabContent>
 
-            <TabContent 
-              title="Menciones"
-              :before-change="validateStep3"
-            >
+            <TabContent title="Menciones" :before-change="validateStep3">
               <StepMenciones ref="step3Ref" />
             </TabContent>
 
-            <TabContent 
-              title="Pago"
-              :before-change="validateStep4"
-            >
+            <TabContent title="Pago" :before-change="validateStep4">
               <StepPago ref="step4Ref" />
             </TabContent>
 
-            <TabContent 
-              title="Confirmación"
-              :before-change="() => true"
-            >
+            <TabContent title="Confirmación" :before-change="() => true">
               <StepResumen ref="step5Ref" />
             </TabContent>
+            <template #finish>
+            </template>
           </FormWizard>
         </div>
       </main>
@@ -90,11 +67,9 @@ import { useSolicitudStore } from '../stores/solicitud.store';
 const store = useSolicitudStore();
 const router = useRouter();
 
-// Referencia al FormWizard
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const wizardRef = ref<any>(null);
 
-// Referencias a los componentes de pasos
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const step1Ref = ref<any>(null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,6 +79,20 @@ const step3Ref = ref<any>(null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const step4Ref = ref<any>(null);
 const isRegistered = ref(false);
+
+// Ocultar botón "Anterior" cuando ya está registrado
+const hideBackButton = () => {
+  nextTick(() => {
+    setTimeout(() => {
+      const backBtn = document.querySelector(
+        '.vue-form-wizard .wizard-footer-left .wizard-btn'
+      ) as HTMLElement | null;
+      if (backBtn) {
+        backBtn.style.display = 'none';
+      }
+    }, 60);
+  });
+};
 
 // Validaciones por paso
 const validateStep1 = async (): Promise<boolean> => {
@@ -116,22 +105,19 @@ const validateStep1 = async (): Promise<boolean> => {
 const validateStep2 = async (): Promise<boolean> => {
   if (step2Ref.value?.validate) {
     const isValid = await step2Ref.value.validate();
-    
+
     if (isValid) {
-      // Verificar si es misa privada o comunitaria
       const esMisaPrivada = step2Ref.value?.esMisaPrivada;
-      
+
       if (esMisaPrivada) {
-        // Misa privada -> Saltar directamente a Pago (índice 3)
         await nextTick();
         setTimeout(() => {
           if (wizardRef.value) {
-            wizardRef.value.changeTab(1, 3); // De Celebración (1) a Pago (3)
+            wizardRef.value.changeTab(1, 3);
           }
         }, 50);
-        return false; // Retornar false para que no avance automáticamente
+        return false;
       }
-      // Misa comunitaria -> Continuar a Menciones normalmente
       return true;
     }
     return false;
@@ -151,21 +137,21 @@ const validateStep4 = async (): Promise<boolean> => {
     const ok = await step4Ref.value.validate();
     if (ok) {
       isRegistered.value = true;
+      hideBackButton();
     }
     return ok;
   }
   return true;
 };
 
-// Manejar cambios de paso (para navegación hacia atrás)
+// Manejar cambios de paso
 const onStepChange = (prevIndex: number, nextIndex: number) => {
   // Si estamos yendo hacia atrás desde Pago (3) a Menciones (2) y es misa privada
-  // Redirigir a Celebración (1)
   if (prevIndex === 3 && nextIndex === 2 && store.esMisaPrivada) {
     nextTick(() => {
       setTimeout(() => {
         if (wizardRef.value) {
-          wizardRef.value.changeTab(2, 1); // De Menciones (2) a Celebración (1)
+          wizardRef.value.changeTab(2, 1);
         }
       }, 50);
     });
@@ -181,10 +167,14 @@ const onStepChange = (prevIndex: number, nextIndex: number) => {
       }, 50);
     });
   }
+
+  // Si ya está registrado y cambia de paso, mantener el botón oculto
+  if (isRegistered.value) {
+    hideBackButton();
+  }
 };
 
 const onComplete = () => {
-  // Limpiar estado persistido y volver al inicio
   localStorage.removeItem('solicitud');
   localStorage.removeItem('solicitud_registered');
   store.resetSolicitud();
@@ -215,51 +205,51 @@ const onComplete = () => {
   background-color: #C88A2A !important;
 }
 
-/* Círculos de pasos - fondo sólido para tapar la línea */
-.vue-form-wizard .wizard-nav-pills > li > a .wizard-icon-circle {
+/* Círculos de pasos */
+.vue-form-wizard .wizard-nav-pills>li>a .wizard-icon-circle {
   border: 2px solid rgba(255, 255, 255, 0.5) !important;
   background-color: #5A5A5A !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.vue-form-wizard .wizard-nav-pills > li > a .wizard-icon-circle .wizard-icon {
+.vue-form-wizard .wizard-nav-pills>li>a .wizard-icon-circle .wizard-icon {
   color: rgba(255, 255, 255, 0.8) !important;
   font-weight: 600;
 }
 
 /* Círculo activo */
-.vue-form-wizard .wizard-nav-pills > li.active > a .wizard-icon-circle {
+.vue-form-wizard .wizard-nav-pills>li.active>a .wizard-icon-circle {
   background-color: #C88A2A !important;
   border-color: #C88A2A !important;
 }
 
-.vue-form-wizard .wizard-nav-pills > li.active > a .wizard-icon-circle .wizard-icon {
+.vue-form-wizard .wizard-nav-pills>li.active>a .wizard-icon-circle .wizard-icon {
   color: white !important;
 }
 
 /* Pasos completados */
-.vue-form-wizard .wizard-nav-pills > li.checked > a .wizard-icon-circle {
+.vue-form-wizard .wizard-nav-pills>li.checked>a .wizard-icon-circle {
   background-color: #C88A2A !important;
   border-color: #C88A2A !important;
 }
 
-.vue-form-wizard .wizard-nav-pills > li.checked > a .wizard-icon-circle .wizard-icon {
+.vue-form-wizard .wizard-nav-pills>li.checked>a .wizard-icon-circle .wizard-icon {
   color: white !important;
 }
 
 /* Títulos de pasos */
-.vue-form-wizard .wizard-nav-pills > li > a .stepTitle {
+.vue-form-wizard .wizard-nav-pills>li>a .stepTitle {
   color: rgba(255, 255, 255, 0.8) !important;
   font-size: 0.75rem;
   margin-top: 8px;
 }
 
-.vue-form-wizard .wizard-nav-pills > li.active > a .stepTitle {
+.vue-form-wizard .wizard-nav-pills>li.active>a .stepTitle {
   color: #D39E3A !important;
   font-weight: 600;
 }
 
-.vue-form-wizard .wizard-nav-pills > li.checked > a .stepTitle {
+.vue-form-wizard .wizard-nav-pills>li.checked>a .stepTitle {
   color: #D39E3A !important;
 }
 
@@ -302,10 +292,10 @@ const onComplete = () => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .vue-form-wizard .wizard-nav-pills > li > a .stepTitle {
+  .vue-form-wizard .wizard-nav-pills>li>a .stepTitle {
     font-size: 0.65rem;
   }
-  
+
   .bg-fixed {
     background-attachment: scroll !important;
   }

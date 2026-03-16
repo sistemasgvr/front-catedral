@@ -1,8 +1,6 @@
 <template>
   <div class="step-content">
-    <div
-      class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto"
-    >
+    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
       <!-- Title -->
       <h2 class="text-2xl font-serif font-bold text-[#C88A2A] mb-2 text-center">
         Datos de la Celebración
@@ -12,17 +10,9 @@
       <!-- Form -->
       <form @submit.prevent class="space-y-4">
         <!-- Tipo de Misa -->
-        <InputSelect
-          v-model="idTipoMisa"
-          name="idTipoMisa"
-          label="Tipo de Misa"
-          placeholder="Seleccionar tipo de misa"
-          :options="tiposMisa"
-          :loading="loadingTiposMisa"
-          :required="true"
-          :error-message="fieldErrors.idTipoMisa"
-          @blur="touchField('idTipoMisa')"
-        />
+        <InputSelect v-model="idTipoMisa" name="idTipoMisa" label="Tipo de Misa" placeholder="Seleccionar tipo de misa"
+          :options="tiposMisa" :loading="loadingTiposMisa" :required="true" :error-message="fieldErrors.idTipoMisa"
+          @blur="touchField('idTipoMisa')" />
 
         <!-- Contenido condicional según tipo de misa -->
         <template v-if="idTipoMisa">
@@ -32,65 +22,30 @@
             <div class="bg-[#FFF5E6] rounded-lg p-4 border border-[#D39E3A]/30">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <svg
-                    class="w-5 h-5 text-[#C88A2A]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
+                  <svg class="w-5 h-5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <span class="text-[#4A4A4A] font-medium"
-                    >Costo de Misa Privada</span
-                  >
+                  <span class="text-[#4A4A4A] font-medium">Costo de Misa Privada</span>
                 </div>
-                <span class="text-[#C88A2A] font-bold text-xl"
-                  >S/ {{ precioTipoMisa.toFixed(2) }}</span
-                >
+                <span class="text-[#C88A2A] font-bold text-xl">S/ {{ precioTipoMisa.toFixed(2) }}</span>
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputDate
-                v-model="fechaCelebracion"
-                name="fechaCelebracion"
-                label="Fecha de Celebración"
-                :min="fechaMinima"
-                :required="true"
-                :error-message="fieldErrors.fechaCelebracion"
-                @blur="touchField('fechaCelebracion')"
-              />
-              <InputSelect
-                v-model="idHorario"
-                name="idHorario"
-                label="Horario"
-                placeholder="Seleccionar horario"
-                :options="horarios"
-                :loading="loadingHorarios"
-                :required="true"
-                :error-message="fieldErrors.idHorario"
-                @blur="touchField('idHorario')"
-              />
+              <InputDate v-model="fechaCelebracion" name="fechaCelebracion" label="Fecha de Celebración"
+                :min="fechaMinima" :required="true" :error-message="fieldErrors.fechaCelebracion"
+                @blur="touchField('fechaCelebracion')" />
+              <InputSelect v-model="idHorario" name="idHorario" label="Horario" placeholder="Seleccionar horario"
+                :options="horarios" :loading="loadingHorarios" :required="true" :error-message="fieldErrors.idHorario"
+                @blur="touchField('idHorario')" />
             </div>
 
             <!-- Intención (solo para misa privada) -->
-            <InputTextarea
-              v-model="intencion"
-              name="intencion"
-              label="Intención"
-              placeholder="Escriba la intención de la misa (ej: Acción de gracias, por la salud de...)"
-              :rows="3"
-              :maxlength="500"
-              :show-count="true"
-              :required="true"
-              :error-message="fieldErrors.intencion"
-              @blur="touchField('intencion')"
-            />
+            <InputTextarea v-model="intencion" name="intencion" label="Intención"
+              placeholder="Escriba la intención de la misa (ej: Acción de gracias, por la salud de...)" :rows="3"
+              :maxlength="500" :show-count="true" :required="true" :error-message="fieldErrors.intencion"
+              @blur="touchField('intencion')" />
           </template>
 
           <!-- MISA COMUNITARIA -->
@@ -109,21 +64,13 @@
               </div>
 
               <!-- Lista de misas -->
-              <div
-                v-else-if="misasDisponibles.length > 0"
-                class="space-y-3 max-h-64 overflow-y-auto"
-              >
-                <div
-                  v-for="misa in misasDisponibles"
-                  :key="misa.id"
-                  @click="seleccionarMisa(misa)"
-                  class="p-4 border-2 rounded-lg cursor-pointer transition-all duration-200"
-                  :class="[
+              <div v-else-if="misasDisponibles.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
+                <div v-for="misa in misasDisponibles" :key="misa.id" @click="seleccionarMisa(misa)"
+                  class="p-4 border-2 rounded-lg cursor-pointer transition-all duration-200" :class="[
                     idMisaSeleccionada === misa.id
                       ? 'border-[#C88A2A] bg-[#FFF5E6]'
                       : 'border-[#E0D5C5] hover:border-[#C88A2A]/50 bg-white',
-                  ]"
-                >
+                  ]">
                   <div class="flex justify-between items-start">
                     <div>
                       <h4 class="font-semibold text-[#4A4A4A]">
@@ -131,40 +78,20 @@
                       </h4>
                       <p class="text-sm text-gray-500">{{ misa.tipoMisa }}</p>
                     </div>
-                    <span class="text-[#C88A2A] font-bold"
-                      >S/ {{ misa.precio.toFixed(2) }}</span
-                    >
+                    <span class="text-[#C88A2A] font-bold">S/ {{ misa.precio.toFixed(2) }}</span>
                   </div>
                   <div class="mt-2 flex gap-4 text-sm text-gray-600">
                     <span class="flex items-center gap-1">
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       {{ formatDate(misa.fecha) }}
                     </span>
                     <span class="flex items-center gap-1">
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       {{ misa.horario }}
                     </span>
@@ -174,35 +101,20 @@
 
               <!-- Sin misas disponibles -->
               <div v-else class="text-center py-8 text-gray-500">
-                <svg
-                  class="w-12 h-12 mx-auto mb-2 text-gray-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p>No hay misas comunitarias disponibles</p>
               </div>
 
-              <p
-                v-if="fieldErrors.idMisaSeleccionada"
-                class="text-sm text-red-500"
-              >
+              <p v-if="fieldErrors.idMisaSeleccionada" class="text-sm text-red-500">
                 {{ fieldErrors.idMisaSeleccionada }}
               </p>
             </div>
 
             <!-- Mostrar fecha y horario seleccionados -->
-            <div
-              v-if="idMisaSeleccionada"
-              class="bg-[#FFF5E6] rounded-lg p-4 border border-[#D39E3A]/30"
-            >
+            <div v-if="idMisaSeleccionada" class="bg-[#FFF5E6] rounded-lg p-4 border border-[#D39E3A]/30">
               <p class="text-sm text-[#4A4A4A]">
                 <strong>Fecha:</strong> {{ formatDate(fechaCelebracion) }} |
                 <strong>Horario:</strong> {{ horarioMisaSeleccionada }}
@@ -212,23 +124,12 @@
         </template>
 
         <!-- Validation Message -->
-        <div
-          v-if="hasInteracted && hasErrors"
-          class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 text-amber-500 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
+        <div v-if="hasInteracted && hasErrors"
+          class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <p class="text-amber-700 text-sm">
             Complete todos los campos para continuar
@@ -294,7 +195,7 @@ const fechaMinima = computed(() => new Date().toISOString().split("T")[0]);
 // Determinar si es misa privada
 const esMisaPrivada = computed(() => {
   const tipo = tiposMisa.value.find((t) => t.id === idTipoMisa.value);
-  return tipo?.nombre?.toLowerCase().includes("privada") ?? false;
+  return !(tipo?.nombre?.toLowerCase().includes("comunitaria") ?? false);
 });
 
 // Obtener precio del tipo de misa seleccionado
