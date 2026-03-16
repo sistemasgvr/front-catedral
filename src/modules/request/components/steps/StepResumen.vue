@@ -158,14 +158,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
 import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
 import { mapOpcionToSelect } from '../../interfaces/opcionLista.interface';
 
 const store = useSolicitudStore();
-const router = useRouter();
 
 const ID_LISTA_TIPOS_DOCUMENTO = 1;
 const ID_LISTA_HORARIOS = 5;
