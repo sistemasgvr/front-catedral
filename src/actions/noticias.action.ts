@@ -75,7 +75,7 @@ export const crearNoticia = async (form: INoticiaForm): Promise<INoticia> => {
   try {
     const { data } = await apiClient.post<INoticia>(
       BASE,
-      { ...form, estado: true },
+      { ...sanitizarForm(form), estado: true },  // 👈
       { headers: { Prefer: "return=representation" } }
     );
     return Array.isArray(data) ? data[0] : data;
@@ -94,7 +94,7 @@ export const actualizarNoticia = async (id: number, form: INoticiaForm): Promise
   try {
     const { data } = await apiClient.patch<INoticia>(
       `${BASE}?idnoticia=eq.${id}`,
-      { ...form, fechamodificacion: new Date().toISOString() },
+      { ...sanitizarForm(form), fechamodificacion: new Date().toISOString() },  // 👈
       { headers: { Prefer: "return=representation" } }
     );
     return Array.isArray(data) ? data[0] : data;
@@ -141,4 +141,14 @@ export const subirImagenNoticia = async (file: File): Promise<string> => {
     }
     throw new Error("No se pudo subir la imagen");
   }
+};
+
+// Utilidad para limpiar strings vacíos → null antes de enviar a Supabase
+const sanitizarForm = (form: INoticiaForm): Record<string, unknown> => {
+  return Object.fromEntries(
+    Object.entries(form).map(([key, value]) => [
+      key,
+      typeof value === 'string' && value.trim() === '' ? null : value,
+    ])
+  );
 };

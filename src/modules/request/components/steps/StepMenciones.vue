@@ -1,17 +1,17 @@
 <template>
   <div class="step-content">
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-[#E0D5C5] dark:border-gray-700 p-6 md:p-8 w-full max-w-3xl mx-auto">
       
       <!-- Title -->
-      <h2 class="text-2xl font-serif font-bold text-[#C88A2A] mb-2 text-center">
+      <h2 class="text-2xl font-serif font-bold text-[#C88A2A] dark:text-[#E5A84A] mb-2 text-center">
         Menciones
       </h2>
-      <div class="w-12 h-1 bg-[#C88A2A] rounded mx-auto mb-6"></div>
+      <div class="w-12 h-1 bg-[#C88A2A] dark:bg-[#E5A84A] rounded mx-auto mb-6"></div>
 
       <!-- Descripción -->
-       <p class="text-sm text-[#7A7A7A] text-center mb-6">
+      <p class="text-sm text-[#7A7A7A] dark:text-gray-400 text-center mb-6">
         Agregue las menciones que desea incluir en la misa. Cada mención tiene un costo de 
-        <span class="font-semibold text-[#C88A2A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
+        <span class="font-semibold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
       </p>
       
       <!-- Botón Agregar -->
@@ -30,7 +30,7 @@
       <!-- Lista de Menciones -->
       <div class="space-y-3 mb-6">
         <!-- Sin menciones -->
-        <div v-if="store.solicitud.menciones.length === 0" class="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+        <div v-if="store.solicitud.menciones.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg">
           <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -42,23 +42,23 @@
         <div 
           v-for="mencion in store.solicitud.menciones" 
           :key="mencion.id"
-          class="border border-[#E0D5C5] rounded-lg overflow-hidden"
+          class="border border-[#E0D5C5] dark:border-gray-700 rounded-lg overflow-hidden"
         >
           <!-- Header con costo -->
-          <div class="bg-gray-50 px-4 py-2 flex justify-between items-center border-b border-[#E0D5C5]">
-            <span class="text-xs text-gray-500">Mención</span>
-            <span class="text-sm font-semibold text-[#4A4A4A]">Costo: S/ {{ mencion.costo }}</span>
+          <div class="bg-gray-50 dark:bg-gray-700/60 px-4 py-2 flex justify-between items-center border-b border-[#E0D5C5] dark:border-gray-700">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Mención</span>
+            <span class="text-sm font-semibold text-[#4A4A4A] dark:text-gray-200">Costo: S/ {{ mencion.costo }}</span>
           </div>
           
           <!-- Contenido -->
-          <div class="p-4 flex justify-between items-start gap-3">
-            <p class="text-[#4A4A4A] flex-1 break-words">{{ mencion.descripcion }}</p>
+          <div class="p-4 flex justify-between items-start gap-3 bg-white dark:bg-gray-800">
+            <p class="text-[#4A4A4A] dark:text-gray-200 flex-1 break-words">{{ mencion.descripcion }}</p>
             
             <!-- Acciones -->
             <div class="flex gap-2 shrink-0">
               <button
                 @click="editarMencion(mencion)"
-                class="p-2 text-[#3B5998] hover:bg-blue-50 rounded-lg transition-colors"
+                class="p-2 text-[#3B5998] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                 title="Editar"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@
               </button>
               <button
                 @click="confirmarEliminar(mencion.id)"
-                class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                class="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 title="Eliminar"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,20 +80,20 @@
       </div>
 
       <!-- Separador -->
-      <div class="border-t border-[#E0D5C5] pt-4">
+      <div class="border-t border-[#E0D5C5] dark:border-gray-700 pt-4">
         <!-- Total -->
         <div class="flex justify-end items-center gap-2">
-          <span class="text-lg text-[#4A4A4A]">Total:</span>
-          <span class="text-2xl font-bold text-[#C88A2A]">S/ {{ store.totalMenciones.toFixed(2) }}</span>
+          <span class="text-lg text-[#4A4A4A] dark:text-gray-300">Total:</span>
+          <span class="text-2xl font-bold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ store.totalMenciones.toFixed(2) }}</span>
         </div>
       </div>
 
       <!-- Mensaje informativo -->
-      <div v-if="store.solicitud.menciones.length > 0" class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
-        <svg class="w-5 h-5 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div v-if="store.solicitud.menciones.length > 0" class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg p-3 flex items-start gap-2">
+        <svg class="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <p class="text-sm text-blue-700">
+        <p class="text-sm text-blue-700 dark:text-blue-300">
           Has agregado <strong>{{ store.solicitud.menciones.length }}</strong> mención(es). 
           El costo de las menciones se sumará al monto total de la solicitud.
         </p>
@@ -111,15 +111,15 @@
         <div class="absolute inset-0 bg-black/50"></div>
         
         <!-- Modal -->
-        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-modal">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 animate-modal">
           <!-- Header -->
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-serif font-bold text-[#C88A2A]">
+            <h3 class="text-xl font-serif font-bold text-[#C88A2A] dark:text-[#E5A84A]">
               {{ editando ? 'Editar Mención' : 'Nueva Mención' }}
             </h3>
             <button 
               @click="cerrarModal"
-              class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -130,7 +130,7 @@
           <!-- Form -->
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-[#4A4A4A] mb-1">
+              <label class="block text-sm font-medium text-[#4A4A4A] dark:text-gray-300 mb-1">
                 Descripción <span class="text-red-500">*</span>
               </label>
               <textarea
@@ -138,20 +138,20 @@
                 rows="4"
                 maxlength="200"
                 placeholder="Ej: En memoria de Juan Pérez, Por la salud de María..."
-                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#C88A2A]/30 focus:border-[#C88A2A] transition-all resize-none"
-                :class="errorDescripcion ? 'border-red-300' : 'border-[#E0D5C5]'"
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#C88A2A]/30 focus:border-[#C88A2A] transition-all resize-none bg-white dark:bg-gray-700 text-[#4A4A4A] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                :class="errorDescripcion ? 'border-red-300 dark:border-red-500' : 'border-[#E0D5C5] dark:border-gray-600'"
               ></textarea>
               <div class="flex justify-between items-center mt-1">
-                <span v-if="errorDescripcion" class="text-sm text-red-500">{{ errorDescripcion }}</span>
+                <span v-if="errorDescripcion" class="text-sm text-red-500 dark:text-red-400">{{ errorDescripcion }}</span>
                 <span v-else class="text-sm text-gray-400"></span>
-                <span class="text-xs text-gray-400">{{ nuevaDescripcion.length }}/200</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500">{{ nuevaDescripcion.length }}/200</span>
               </div>
             </div>
 
             <!-- Costo -->
-            <div class="bg-[#FFF5E6] rounded-lg p-3 flex justify-between items-center">
-              <span class="text-[#4A4A4A]">Costo de la mención:</span>
-              <span class="font-bold text-[#C88A2A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
+            <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-lg p-3 flex justify-between items-center border border-transparent dark:border-amber-700/30">
+              <span class="text-[#4A4A4A] dark:text-gray-200">Costo de la mención:</span>
+              <span class="font-bold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
             </div>
           </div>
 
@@ -159,7 +159,7 @@
           <div class="flex gap-3 mt-6">
             <button
               @click="cerrarModal"
-              class="flex-1 px-4 py-3 border border-[#BFBFBF] text-[#4A4A4A] rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              class="flex-1 px-4 py-3 border border-[#BFBFBF] dark:border-gray-600 text-[#4A4A4A] dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Cancelar
             </button>

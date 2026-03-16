@@ -1,6 +1,6 @@
 <template>
   <div class="step-content">
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-[#E0D5C5] dark:border-gray-700 p-6 md:p-8 w-full max-w-3xl mx-auto">
       
       <!-- Resumen del Concepto -->
       <div class="bg-gradient-to-r from-[#C88A2A] to-[#D39E3A] rounded-xl p-5 text-white mb-6">
@@ -27,15 +27,15 @@
       <!-- Contenido Principal -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Instrucciones -->
-        <div class="bg-[#FFF5E6] rounded-xl p-5 border border-[#D39E3A]/30">
+        <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-5 border border-[#D39E3A]/30 dark:border-amber-700/30">
           <div class="flex items-center gap-2 mb-4">
             <!-- Yape Icon -->
             <div class="w-8 h-8 bg-[#742284] rounded-lg flex items-center justify-center">
               <span class="text-white font-bold text-sm">Y</span>
             </div>
-            <h4 class="font-semibold text-[#4A4A4A]">Pagar con Yape</h4>
+            <h4 class="font-semibold text-[#4A4A4A] dark:text-gray-200">Pagar con Yape</h4>
           </div>
-          <ol class="space-y-4 text-sm text-[#4A4A4A]">
+          <ol class="space-y-4 text-sm text-[#4A4A4A] dark:text-gray-300">
             <li class="flex gap-3">
               <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
               <span>Abre tu aplicación de <strong>Yape</strong> en tu celular</span>
@@ -46,7 +46,7 @@
             </li>
             <li class="flex gap-3">
               <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
-              <span>Ingresa el monto: <strong class="text-[#C88A2A]">S/ {{ totalPagar.toFixed(2) }}</strong></span>
+              <span>Ingresa el monto: <strong class="text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ totalPagar.toFixed(2) }}</strong></span>
             </li>
             <li class="flex gap-3">
               <span class="w-6 h-6 bg-[#C88A2A] text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span>
@@ -70,7 +70,7 @@
       </div>
 
       <!-- Datos Bancarios -->
-      <div class="bg-[#4A4A4A] rounded-xl p-4 mb-6">
+      <div class="bg-[#4A4A4A] dark:bg-gray-700 rounded-xl p-4 mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
@@ -96,10 +96,10 @@
           class="border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer"
           :class="[
             archivoSeleccionado 
-              ? 'border-green-400 bg-green-50' 
+              ? 'border-green-400 bg-green-50 dark:bg-green-900/20' 
               : fieldErrors.voucher 
-                ? 'border-red-300 bg-red-50'
-                : 'border-[#C88A2A] bg-[#FFF5E6] hover:bg-[#FFF0D9]'
+                ? 'border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-500/50'
+                : 'border-[#C88A2A] bg-[#FFF5E6] dark:bg-amber-900/20 dark:border-[#E5A84A]/50 hover:bg-[#FFF0D9] dark:hover:bg-amber-900/30'
           ]"
           @click="triggerFileInput"
           @drop.prevent="handleDrop"
@@ -116,36 +116,36 @@
           
           <!-- Icono -->
           <div class="flex justify-center mb-3">
-            <div v-if="archivoSeleccionado" class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div v-if="archivoSeleccionado" class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <div v-else class="w-12 h-12 bg-[#C88A2A]/20 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div v-else class="w-12 h-12 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
           </div>
 
           <!-- Texto -->
-          <p class="font-semibold text-[#4A4A4A]">
+          <p class="font-semibold text-[#4A4A4A] dark:text-gray-200">
             {{ archivoSeleccionado ? archivoSeleccionado.name : 'Subir Comprobante' }}
           </p>
-          <p class="text-sm text-gray-500 mt-1">
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {{ archivoSeleccionado ? 'Click para cambiar' : 'Click o arrastra archivo' }}
           </p>
-          <p class="text-xs text-gray-400 mt-2">JPG, PNG, PDF (Máx. 5MB)</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">JPG, PNG, PDF (Máx. 5MB)</p>
           
           <!-- Error Message -->
-          <p v-if="fieldErrors.voucher" class="text-sm text-red-500 mt-2">
+          <p v-if="fieldErrors.voucher" class="text-sm text-red-500 dark:text-red-400 mt-2">
             {{ fieldErrors.voucher }}
           </p>
 
           <!-- Preview del archivo si es imagen -->
           <div v-if="previewUrl" class="mt-3 flex justify-center">
             <div class="relative">
-              <img :src="previewUrl" alt="Preview" class="max-h-24 rounded-lg border border-gray-200" />
+              <img :src="previewUrl" alt="Preview" class="max-h-24 rounded-lg border border-gray-200 dark:border-gray-600" />
               <button 
                 @click.stop="eliminarArchivo"
                 class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
@@ -159,25 +159,25 @@
         </div>
 
         <!-- Resumen de precios -->
-        <div class="bg-[#FFF5E6] rounded-xl p-5 border border-[#D39E3A]/30">
-          <h4 class="font-semibold text-[#4A4A4A] mb-4">Resumen de Pago</h4>
+        <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-5 border border-[#D39E3A]/30 dark:border-amber-700/30">
+          <h4 class="font-semibold text-[#4A4A4A] dark:text-gray-200 mb-4">Resumen de Pago</h4>
           <div class="space-y-3">
-            <div v-if="store.esMisaPrivada" class="flex justify-between text-[#4A4A4A]">
+            <div v-if="store.esMisaPrivada" class="flex justify-between text-[#4A4A4A] dark:text-gray-300">
               <span>Misa Privada</span>
               <span>S/ {{ store.solicitud.montoTotal.toFixed(2) }}</span>
             </div>
             <div v-else-if="store.solicitud.menciones.length > 0">
-              <div class="flex justify-between text-[#4A4A4A] mb-2">
+              <div class="flex justify-between text-[#4A4A4A] dark:text-gray-300 mb-2">
                 <span>Menciones ({{ store.solicitud.menciones.length }})</span>
                 <span>S/ {{ store.totalMenciones.toFixed(2) }}</span>
               </div>
-              <div class="text-xs text-gray-500 pl-2 space-y-1 max-h-20 overflow-y-auto">
+              <div class="text-xs text-gray-500 dark:text-gray-400 pl-2 space-y-1 max-h-20 overflow-y-auto">
                 <p v-for="(m, i) in store.solicitud.menciones" :key="m.id">
                   {{ i + 1 }}. {{ m.descripcion.substring(0, 30) }}{{ m.descripcion.length > 30 ? '...' : '' }}
                 </p>
               </div>
             </div>
-            <div class="flex justify-between text-xl font-bold text-[#C88A2A] pt-3 border-t border-[#D39E3A]/30">
+            <div class="flex justify-between text-xl font-bold text-[#C88A2A] dark:text-[#E5A84A] pt-3 border-t border-[#D39E3A]/30 dark:border-amber-700/30">
               <span>Total</span>
               <span>S/ {{ totalPagar.toFixed(2) }}</span>
             </div>
@@ -188,23 +188,23 @@
       <!-- Validation Message -->
       <div 
         v-if="hasInteracted && hasErrors" 
-        class="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3"
+        class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4 flex items-center gap-3"
       >
-        <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
-        <p class="text-amber-700 text-sm">Debe subir el comprobante de pago para continuar</p>
+        <p class="text-amber-700 dark:text-amber-300 text-sm">Debe subir el comprobante de pago para continuar</p>
       </div>
 
       <!-- Error de registro -->
       <div 
         v-if="submitError" 
-        class="mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+        class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg p-4 flex items-start gap-3"
       >
-        <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <p class="text-red-700 text-sm">{{ submitError }}</p>
+        <p class="text-red-700 dark:text-red-300 text-sm">{{ submitError }}</p>
       </div>
     </div>
   </div>

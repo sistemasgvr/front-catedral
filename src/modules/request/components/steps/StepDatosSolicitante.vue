@@ -1,12 +1,12 @@
 <template>
   <div class="step-content">
-    <div class="bg-white rounded-2xl shadow-sm border border-[#E0D5C5] p-6 md:p-8 w-full max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-[#E0D5C5] dark:border-gray-700 p-6 md:p-8 w-full max-w-3xl mx-auto">
       
       <!-- Title -->
-      <h2 class="text-2xl font-serif font-bold text-[#C88A2A] mb-2 text-center">
+      <h2 class="text-2xl font-serif font-bold text-[#C88A2A] dark:text-[#E5A84A] mb-2 text-center">
         Datos del Solicitante
       </h2>
-      <div class="w-12 h-1 bg-[#C88A2A] rounded mx-auto mb-6"></div>
+      <div class="w-12 h-1 bg-[#C88A2A] dark:bg-[#E5A84A] rounded mx-auto mb-6"></div>
       
       <!-- Form -->
       <form @submit.prevent="onSubmit" class="space-y-4">
@@ -75,21 +75,21 @@
             type="email"
             label="Correo Electrónico"
             placeholder="correo@ejemplo.com"
-            :required="true"
+            :required="false"
             :error-message="getFieldError('correo')"
             @blur="validateField('correo')"
           />
         </div>
 
-        <!-- Validation Message - Solo mostrar si ha interactuado y hay errores -->
+        <!-- Validation Message -->
         <div 
           v-if="hasInteracted && !isValid && touchedFields.size > 0" 
-          class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3"
+          class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4 flex items-center gap-3"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <p class="text-amber-700 text-sm">Complete todos los campos para continuar</p>
+          <p class="text-amber-700 dark:text-amber-300 text-sm">Complete todos los campos para continuar</p>
         </div>
       </form>
     </div>
@@ -115,16 +115,10 @@ const loadingTiposDocumento = ref(true);
 const cargarTiposDocumento = async () => {
   try {
     loadingTiposDocumento.value = true;
-    const opciones = await getOpcionesLista(1); // ID 1 = Tipos de Documento
+    const opciones = await getOpcionesLista(1);
     tiposDocumento.value = opciones.map(mapOpcionToSelect);
   } catch (error) {
     console.error('Error al cargar tipos de documento:', error);
-    // Fallback a datos estáticos en caso de error
-    // tiposDocumento.value = [
-    //   { id: 1, nombre: 'DNI' },
-    //   { id: 2, nombre: 'Carnet de Extranjería' },
-    //   { id: 3, nombre: 'Pasaporte' },
-    // ];
   } finally {
     loadingTiposDocumento.value = false;
   }
@@ -159,7 +153,6 @@ const validationSchema = yup.object({
 
 type FormFields = 'idTipoDocumento' | 'nroDocumento' | 'nombres' | 'apellidos' | 'celular' | 'correo';
 
-// Configurar vee-validate
 const { errors, validate, validateField: validateFieldForm } = useForm<Record<FormFields, unknown>>({
   validationSchema,
   initialValues: {
@@ -173,7 +166,6 @@ const { errors, validate, validateField: validateFieldForm } = useForm<Record<Fo
   validateOnMount: false,
 });
 
-// Campos del formulario
 const { value: idTipoDocumento } = useField<number | null>('idTipoDocumento');
 const { value: nroDocumento } = useField<string>('nroDocumento');
 const { value: nombres } = useField<string>('nombres');
@@ -185,14 +177,12 @@ const isValid = ref(true);
 const hasInteracted = ref(false);
 const touchedFields = ref<Set<FormFields>>(new Set());
 
-// Validar un campo específico solo si fue tocado
 const validateField = async (fieldName: FormFields) => {
   touchedFields.value.add(fieldName);
   hasInteracted.value = true;
   await validateFieldForm(fieldName);
 };
 
-// Watch para guardar en store cuando cambien los valores
 watch(
   [idTipoDocumento, nroDocumento, nombres, apellidos, celular, correo],
   () => {
@@ -208,12 +198,9 @@ watch(
   { deep: true }
 );
 
-// Cargar datos al montar
 onMounted(async () => {
-  // Cargar tipos de documento
   await cargarTiposDocumento();
   
-  // Cargar datos del store
   idTipoDocumento.value = store.solicitud.idTipoDocumento;
   nroDocumento.value = store.solicitud.nroDocumento;
   nombres.value = store.solicitud.nombres;
@@ -229,7 +216,6 @@ const onSubmit = async () => {
   }
 };
 
-// Obtener error solo si el campo fue tocado
 const getFieldError = (fieldName: FormFields): string | undefined => {
   if (touchedFields.value.has(fieldName)) {
     return errors.value[fieldName];
@@ -237,7 +223,6 @@ const getFieldError = (fieldName: FormFields): string | undefined => {
   return undefined;
 };
 
-// Exponer método de validación para el wizard
 defineExpose({
   validate: async () => {
     const allFields: FormFields[] = ['idTipoDocumento', 'nroDocumento', 'nombres', 'apellidos', 'celular', 'correo'];

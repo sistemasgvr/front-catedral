@@ -35,7 +35,8 @@
             </TabContent>
 
             <TabContent title="Confirmación" :before-change="() => true">
-              <StepResumen ref="step5Ref" />
+              <StepResumen ref="step5Ref" @ir-inicio="router.push('/')"
+                @nueva-solicitud="() => { store.resetSolicitud(); router.push('/nueva-solicitud'); }" />
             </TabContent>
             <template #finish>
             </template>
@@ -94,6 +95,19 @@ const hideBackButton = () => {
   });
 };
 
+const hideFinishButton = () => {
+  nextTick(() => {
+    setTimeout(() => {
+      const btns = document.querySelectorAll('.vue-form-wizard .wizard-footer-right .wizard-btn');
+      btns.forEach((btn) => {
+        if ((btn as HTMLElement).innerText.trim() === 'Finalizar') {
+          (btn as HTMLElement).style.display = 'none';
+        }
+      });
+    }, 60);
+  });
+};
+
 // Validaciones por paso
 const validateStep1 = async (): Promise<boolean> => {
   if (step1Ref.value?.validate) {
@@ -146,6 +160,9 @@ const validateStep4 = async (): Promise<boolean> => {
 
 // Manejar cambios de paso
 const onStepChange = (prevIndex: number, nextIndex: number) => {
+
+  hideFinishButton();
+
   // Si estamos yendo hacia atrás desde Pago (3) a Menciones (2) y es misa privada
   if (prevIndex === 3 && nextIndex === 2 && store.esMisaPrivada) {
     nextTick(() => {
@@ -189,8 +206,10 @@ const onComplete = () => {
   padding-bottom: 0 !important;
 }
 
-.vue-form-wizard .wizard-header {
-  display: none;
+/* Ocultar botón Finalizar */
+.vue-form-wizard .wizard-footer-right .wizard-btn[disabled],
+.vue-form-wizard .wizard-footer-right .finish-button {
+  display: none !important;
 }
 
 /* Línea de progreso de fondo */

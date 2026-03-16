@@ -27,7 +27,7 @@ export interface INoticiaForm {
   titulo: string;
   contenido: string;
   imagen?: string | null;
-  fecha_publicacion: string;
-  fecha_evento: string;
+  fecha_publicacion?: string;
+  fecha_evento?: string | null;
   destacada: boolean;
 }
