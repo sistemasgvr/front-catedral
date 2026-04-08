@@ -1,61 +1,37 @@
-import { isAxiosError } from "axios";
-import apiClient from "../../../api/apiClient";
+import { supabase } from '../../../api/supabase'
 
-/**
- * Payload para verificar contraseña (formato API Supabase - snake_case)
- */
 export interface LoginPayload {
-  p_correo: string;
-  p_contrasena: string;
+  p_correo: string
+  p_contrasena: string
 }
 
-/**
- * Respuesta del login
- */
 export interface LoginResponse {
-  idusuarios: number;
-  nombre: string;
-  correo: string;
+  idusuarios: number
+  nombre: string
+  correo: string
+  auth_uid: string
 }
 
-/**
- * Verifica las credenciales del usuario
- * @param payload - Correo y contraseña
- * @returns Datos del usuario autenticado
- */
-export const loginUser = async (
-  payload: LoginPayload
-): Promise<LoginResponse> => {
-  try {
-    const response = await apiClient.post<LoginResponse[]>(
-      "/rpc/verificar_contrasena",
-      payload
-    );
+export const loginUser = async (payload: LoginPayload): Promise<LoginResponse> => {
+  // 1. Autenticar con Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email: payload.p_correo,
+    password: payload.p_contrasena,
+  })
 
-    // Verificar si la respuesta tiene datos
-    if (!response.data || response.data.length === 0) {
-      throw new Error("Credenciales inválidas");
-    }
-
-    // Retornar el primer elemento de forma segura
-    const userData = response.data[0];
-    
-    if (!userData) {
-      throw new Error("Credenciales inválidas");
-    }
-
-    return userData;
-  } catch (error) {
-    if (
-      isAxiosError(error) &&
-      [400, 401, 403, 422].includes(error.response?.status ?? 0)
-    ) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Credenciales inválidas";
-      throw new Error(errorMessage);
-    }
-    throw new Error("No se pudo iniciar sesión. Intente nuevamente.");
+  if (authError || !authData.user) {
+    throw new Error('Credenciales inválidas')
   }
-};
+
+  // 2. Obtener datos del perfil desde tu tabla
+  const { data: perfilData, error: perfilError } = await supabase
+    .rpc('obtener_perfil_usuario', { p_correo: payload.p_correo })
+
+  if (perfilError || !perfilData || perfilData.length === 0) {
+    // Si falla el perfil, cerrar sesión para no dejar estado inconsistente
+    await supabase.auth.signOut()
+    throw new Error('No se encontró el perfil del usuario')
+  }
+
+  return perfilData[0] as LoginResponse
+}

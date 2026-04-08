@@ -105,68 +105,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { ChevronDown, User, Settings, Sun, Moon, LogOut } from 'lucide-vue-next';
-import { useDropdown } from '@/modules/admin/composables/useDropdown';
-import { useDarkMode } from '@/composables/useDarkMode';
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'  // ← clave
+import { useRouter } from 'vue-router'
+import { ChevronDown, User, Settings, Sun, Moon, LogOut } from 'lucide-vue-next'
+import { useDropdown } from '@/modules/admin/composables/useDropdown'
+import { useDarkMode } from '@/composables/useDarkMode'
+import { useUserStore } from '@/modules/admin/stores/user.store'
+import { clearSession } from '@/utils/auth'
 
-interface User {
-  nombre: string;
-  correo: string;
+const { isOpen, toggle, close } = useDropdown()
+const { darkMode, toggleDarkMode } = useDarkMode()
+const router = useRouter()
+const userStore = useUserStore()
+
+const { user, userInitials } = storeToRefs(userStore)  // ← reactivo correctamente
+
+const goToProfile = () => { close(); router.push('/perfil') }
+const goToSettings = () => { close(); router.push('/configuracion') }
+
+const handleLogout = async () => {
+  if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+    await clearSession()
+    userStore.clearUser()
+    close()
+    router.push('/login')
+  }
 }
 
-const { isOpen, toggle, close } = useDropdown();
-const { darkMode, toggleDarkMode } = useDarkMode();
-const router = useRouter();
-
-const user = ref<User | null>(null);
-
-const userInitials = computed(() => {
-  if (!user.value?.nombre) return 'U';
-  const names = user.value.nombre.trim().split(' ').filter(n => n.length > 0);
-  if (names.length >= 2) {
-    return ((names[0]?.[0] ?? '') + (names[1]?.[0] ?? '')).toUpperCase();
-  }
-  return (names[0]?.[0] ?? 'U').toUpperCase();
-});
-
-const goToProfile = () => {
-  close();
-  router.push('/perfil');
-};
-
-const goToSettings = () => {
-  close();
-  router.push('/configuracion');
-};
-
-const handleLogout = () => {
-  if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-    // Limpiar localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    
-    // Redirigir al login
-    router.push('/login');
-    
-    close();
-  }
-};
-
-// Cargar usuario desde localStorage
-const loadUser = () => {
-  const savedUser = localStorage.getItem('user');
-  if (savedUser) {
-    try {
-      user.value = JSON.parse(savedUser);
-    } catch (error) {
-      console.error('Error parsing user from localStorage:', error);
-    }
-  }
-};
-
 onMounted(() => {
-  loadUser();
-});
+  userStore.loadFromStorage()
+})
 </script>

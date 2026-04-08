@@ -1,10 +1,6 @@
 <template>
 
-  <body :class="{ 'dark bg-gray-900': darkMode === true }">
-    <!-- ===== Preloader Start ===== -->
-    <include src="./partials/preloader.html"></include>
-    <!-- ===== Preloader End ===== -->
-
+  <div :class="{ 'dark bg-gray-900': darkMode === true }">
     <!-- ===== Page Wrapper Start ===== -->
     <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div class="relative flex flex-col justify-center w-full h-screen dark:bg-gray-900 sm:p-0 lg:flex-row">
@@ -138,13 +134,16 @@
       </div>
     </div>
     <!-- ===== Page Wrapper End ===== -->
-  </body>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { loginUser } from "../actions/iniciarSesion.action";
+import { useUserStore } from '@/modules/admin/stores/user.store'
+
+const userStore = useUserStore()
 
 // Variables reactivas para el formulario
 const email = ref("");
@@ -181,37 +180,31 @@ watch(darkMode, (newValue) => {
 // Función de inicio de sesión
 const handleLogin = async () => {
   try {
-    // Limpiar mensaje de error anterior
-    errorMessage.value = "";
-    isLoading.value = true;
+    errorMessage.value = ''
+    isLoading.value = true
 
-    // Llamar a la acción de login
     const userData = await loginUser({
       p_correo: email.value,
       p_contrasena: password.value,
-    });
+    })    
+    
+    userStore.updateUser(userData)  // ← esto guarda en store Y en localStorage
 
-    // Guardar datos del usuario en localStorage
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("isAuthenticated", "true");
-
-    // Guardar correo si se marcó "Mantener sesión iniciada"
     if (rememberMe.value) {
-      localStorage.setItem("savedEmail", email.value);
+      localStorage.setItem('savedEmail', email.value)
     } else {
-      localStorage.removeItem("savedEmail");
+      localStorage.removeItem('savedEmail')
     }
 
-    // Redirigir al dashboard o página principal
-    router.push("/dashboard");
+    await router.push('/dashboard')
+
   } catch (error) {
-    // Mostrar mensaje de error
     errorMessage.value =
-      error instanceof Error ? error.message : "Error al iniciar sesión";
+      error instanceof Error ? error.message : 'Error al iniciar sesión'
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-};
+}
 </script>
 
 <style scoped>

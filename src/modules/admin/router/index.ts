@@ -11,42 +11,50 @@ const routes = [
   {
     path: "/login",
     name: "Login",
-    component: LoginAdminView
+    component: LoginAdminView,
+    meta: { public: true } // ← ruta pública
   },
   {
     path: "/dashboard",
     name: "Dashboard",
-    component: DashboardAdminView
+    component: DashboardAdminView,
+    meta: { requiresAuth: true }
   },
   {
     path: "/solicitudes",
     name: "Solicitudes",
-    component: RequestAdminView
+    component: RequestAdminView,
+    meta: { requiresAuth: true }
   },
   {
     path: "/misas",
     name: "Misas",
-    component: MassesAdminView
+    component: MassesAdminView,
+    meta: { requiresAuth: true }
   },
   {
     path: "/tipos-misa",
     name: "TiposMisa",
-    component: MassesTypeAdminView
+    component: MassesTypeAdminView,
+    meta: { requiresAuth: true }
   },
   {
     path: "/noticias", 
     name: "Noticias", 
-    component: NewsAdminView
+    component: NewsAdminView,
+    meta: { requiresAuth: true }
   },
   {
     path: "/perfil",
     name: "Perfil",
-    component: ProfileAdminView
+    component: ProfileAdminView,
+    meta: { requiresAuth: true }
   },
   {
     path: "/configuracion",
     name: "Configuracion",
-    component: SettingsAdminView
+    component: SettingsAdminView,
+    meta: { requiresAuth: true }
   }
 ];
 

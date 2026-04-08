@@ -107,18 +107,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia'  // ← clave
 import AdminLayout from '../layouts/AdminLayout.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import { actualizarPerfil } from '../actions/actualizarPerfil.action';
+import { useUserStore } from '@/modules/admin/stores/user.store'
 
-interface User {
-  idusuarios: number;
-  nombre: string;
-  correo: string;
-}
+const userStore = useUserStore()
+const { user, userInitials } = storeToRefs(userStore)  // ← reactivo, sin duplicar
 
-const user = ref<User | null>(null);
 const guardando = ref(false);
 
 const form = ref({
@@ -139,41 +137,24 @@ const confirmModal = ref({
   type: 'info' as 'info' | 'warning' | 'danger' | 'success',
 });
 
-const userInitials = computed(() => {
-  if (!user.value?.nombre) return 'U';
-  const names = user.value.nombre.trim().split(' ').filter(n => n.length > 0);
-  if (names.length >= 2) {
-    return ((names[0]?.[0] ?? '') + (names[1]?.[0] ?? '')).toUpperCase();
-  }
-  return (names[0]?.[0] ?? 'U').toUpperCase();
-});
-
 const showToast = (type: 'success' | 'error', message: string) => {
   toast.value = { visible: true, type, message };
   setTimeout(() => (toast.value.visible = false), 3500);
 };
 
 const loadUser = () => {
-  const savedUser = localStorage.getItem('user');
-  if (savedUser) {
-    try {
-      user.value = JSON.parse(savedUser);
-      form.value = {
-        nombre: user.value?.nombre || '',
-        correo: user.value?.correo || '',
-      };
-    } catch (error) {
-      console.error('Error parsing user:', error);
-    }
+  userStore.loadFromStorage()
+  form.value = {
+    nombre: user.value?.nombre || '',
+    correo: user.value?.correo || '',
   }
-};
+}
 
 const handleSubmit = () => {
   if (!form.value.nombre.trim() || !form.value.correo.trim()) {
     showToast('error', 'Por favor completa todos los campos.');
     return;
   }
-
   confirmModal.value = {
     open: true,
     title: 'Actualizar Perfil',
@@ -188,7 +169,6 @@ const executeUpdate = async () => {
     confirmModal.value.open = false;
     return;
   }
-
   guardando.value = true;
   try {
     await actualizarPerfil(user.value.idusuarios, {
@@ -196,13 +176,10 @@ const executeUpdate = async () => {
       correo: form.value.correo,
     });
 
-    const updatedUser: User = {
-      ...user.value,
+    userStore.updateUser({
       nombre: form.value.nombre,
       correo: form.value.correo,
-    };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    user.value = updatedUser;
+    });
 
     confirmModal.value.open = false;
     showToast('success', 'Perfil actualizado correctamente.');
