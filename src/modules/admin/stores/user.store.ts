@@ -5,6 +5,7 @@ interface User {
   idusuarios: number
   nombre: string
   correo: string
+  auth_uid?: string
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -21,12 +22,24 @@ export const useUserStore = defineStore('user', () => {
 
   const loadFromStorage = () => {
     const saved = localStorage.getItem('user')
-    if (saved) {
-      try {
-        user.value = JSON.parse(saved)
-      } catch {
-        user.value = null
+    if (!saved) return
+    try {
+      const parsed = JSON.parse(saved) as Record<string, unknown>
+      if (parsed && typeof parsed === 'object') {
+        if (
+          'user' in parsed &&
+          parsed.user &&
+          typeof parsed.user === 'object'
+        ) {
+          user.value = parsed.user as User
+        } else if ('idusuarios' in parsed) {
+          user.value = parsed as unknown as User
+        } else {
+          user.value = null
+        }
       }
+    } catch {
+      user.value = null
     }
   }
 

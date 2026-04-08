@@ -225,9 +225,12 @@ import AdminLayout from '../layouts/AdminLayout.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { cambiarContrasena } from '../actions/cambiarContrasena.action';
+import { useUserStore } from '../stores/user.store';
+import { clearSession } from '@/utils/auth';
 
 const router = useRouter();
 const { darkMode, toggleDarkMode } = useDarkMode();
+const userStore = useUserStore();
 
 const toast = ref({
   visible: false,
@@ -258,9 +261,10 @@ const confirmarLogout = () => {
   logoutModal.value.open = true;
 };
 
-const executeLogout = () => {
-  localStorage.removeItem('user');
+const executeLogout = async () => {
+  await clearSession();
   localStorage.removeItem('token');
+  logoutModal.value.open = false;
   router.push('/login');
 };
 
@@ -288,17 +292,16 @@ const handleCambiarContrasena = async () => {
     return;
   }
 
-  const savedUser = localStorage.getItem('user');
-  if (!savedUser) {
+  userStore.loadFromStorage();
+  const id = userStore.user?.idusuarios;
+  if (!id) {
     modalContrasena.value.error = 'No se encontró la sesión del usuario.';
     return;
   }
 
-  const user = JSON.parse(savedUser);
-
   guardandoContrasena.value = true;
   try {
-    await cambiarContrasena(user.idusuarios, formContrasena.value.nueva);
+    await cambiarContrasena(id, formContrasena.value.nueva);
     modalContrasena.value.open = false;
     showToast('success', 'Contraseña actualizada correctamente.');
   } catch (error: any) {

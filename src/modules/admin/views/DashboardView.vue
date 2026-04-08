@@ -267,12 +267,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import { storeToRefs } from "pinia";
 import AdminLayout from "../layouts/AdminLayout.vue";
 import ChartComponent from "../components/ChartComponent.vue";
 import { getDashboardData } from "../actions/dashboard.actions";
 import type { IDashboardData } from "../interfaces/dashboard.interface";
+import { useUserStore } from "../stores/user.store";
 
-const user = ref<any>(null);
+const userStore = useUserStore();
+const { user } = storeToRefs(userStore);
 const loading = ref(false);
 const error = ref<string | null>(null);
 let intervalId: number | null = null;
@@ -424,15 +427,7 @@ const getEstadoClass = (estado: string | null): string => {
 };
 
 onMounted(async () => {
-  // Usuario desde localStorage
-  const savedUser = localStorage.getItem("user");
-  if (savedUser) {
-    try {
-      user.value = JSON.parse(savedUser);
-    } catch (e) {
-      console.error('Error parsing user:', e);
-    }
-  }
+  userStore.loadFromStorage();
 
   // Cargar dashboard
   await loadDashboard();

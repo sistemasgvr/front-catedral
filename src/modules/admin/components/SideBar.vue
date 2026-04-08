@@ -177,7 +177,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSidebar } from "@/modules/admin/composables/useSidebar";
 import {
@@ -209,11 +209,6 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
-interface User {
-  nombre: string;
-  correo: string;
-}
-
 const route = useRoute();
 
 const {
@@ -224,7 +219,6 @@ const {
 } = useSidebar();
 
 const openSubmenuLocal = ref<string | null>(null);
-const user = ref<User | null>(null);
 
 // Computed para determinar cuándo mostrar el texto
 const shouldShowText = computed(() => {
@@ -342,21 +336,6 @@ const endTransition = (el: Element): void => {
   htmlEl.style.overflow = "";
 };
 
-// Cargar usuario desde localStorage
-const loadUser = () => {
-  const savedUser = localStorage.getItem("user");
-  if (savedUser) {
-    try {
-      user.value = JSON.parse(savedUser);
-    } catch (error) {
-      console.error('Error parsing user from localStorage:', error);
-    }
-  }
-};
-
-onMounted(() => {
-  loadUser();
-});
 </script>
 
 <style scoped>

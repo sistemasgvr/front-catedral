@@ -1,6 +1,10 @@
 <template>
 
-  <div :class="{ 'dark bg-gray-900': darkMode === true }">
+  <body :class="{ 'dark bg-gray-900': darkMode === true }">
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
     <!-- ===== Page Wrapper Start ===== -->
     <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div class="relative flex flex-col justify-center w-full h-screen dark:bg-gray-900 sm:p-0 lg:flex-row">
@@ -122,6 +126,7 @@
           class="relative items-center hidden w-full h-full bg-brand-950 dark:bg-white/5 lg:grid lg:w-1/2 overflow-hidden">
           <div class="absolute inset-0 z-0">
             <img src="/images/FondoCatedral.jpeg" alt="Catedral" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/40" />
           </div>
           <div class="relative z-10 flex items-center justify-center">
             <div class="flex flex-col items-center max-w-xs">
@@ -134,36 +139,31 @@
       </div>
     </div>
     <!-- ===== Page Wrapper End ===== -->
-  </div>
+  </body>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { loginUser } from "../actions/iniciarSesion.action";
-import { useUserStore } from '@/modules/admin/stores/user.store'
-
-const userStore = useUserStore()
+import { useDarkMode } from "@/composables/useDarkMode";
+import { useUserStore } from "../stores/user.store";
 
 // Variables reactivas para el formulario
 const email = ref("");
 const password = ref("");
 const rememberMe = ref(false);
 const showPassword = ref(false);
-const darkMode = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
 
 const router = useRouter();
+const { initDarkMode, darkMode } = useDarkMode();
+const userStore = useUserStore();
 
-// Inicializar dark mode desde localStorage
 onMounted(() => {
-  const savedDarkMode = localStorage.getItem("darkMode");
-  if (savedDarkMode !== null) {
-    darkMode.value = JSON.parse(savedDarkMode);
-  }
+  initDarkMode();
 
-  // Cargar credenciales guardadas si existe
   const savedEmail = localStorage.getItem("savedEmail");
   if (savedEmail) {
     email.value = savedEmail;
@@ -171,40 +171,42 @@ onMounted(() => {
   }
 });
 
-// Observar cambios en darkMode y guardar en localStorage
-watch(darkMode, (newValue) => {
-  localStorage.setItem("darkMode", JSON.stringify(newValue));
-});
-
 
 // Función de inicio de sesión
 const handleLogin = async () => {
   try {
-    errorMessage.value = ''
-    isLoading.value = true
+    // Limpiar mensaje de error anterior
+    errorMessage.value = "";
+    isLoading.value = true;
 
+    // Llamar a la acción de login
     const userData = await loginUser({
       p_correo: email.value,
       p_contrasena: password.value,
-    })    
-    
-    userStore.updateUser(userData)  // ← esto guarda en store Y en localStorage
+    });
 
+    // Guardar datos del usuario en localStorage
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("isAuthenticated", "true");
+    userStore.loadFromStorage();
+
+    // Guardar correo si se marcó "Mantener sesión iniciada"
     if (rememberMe.value) {
-      localStorage.setItem('savedEmail', email.value)
+      localStorage.setItem("savedEmail", email.value);
     } else {
-      localStorage.removeItem('savedEmail')
+      localStorage.removeItem("savedEmail");
     }
 
-    await router.push('/dashboard')
-
+    // Redirigir al dashboard o página principal
+    router.push("/dashboard");
   } catch (error) {
+    // Mostrar mensaje de error
     errorMessage.value =
-      error instanceof Error ? error.message : 'Error al iniciar sesión'
+      error instanceof Error ? error.message : "Error al iniciar sesión";
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>

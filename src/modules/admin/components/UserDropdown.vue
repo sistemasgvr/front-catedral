@@ -105,35 +105,41 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { storeToRefs } from 'pinia'  // ← clave
-import { useRouter } from 'vue-router'
-import { ChevronDown, User, Settings, Sun, Moon, LogOut } from 'lucide-vue-next'
-import { useDropdown } from '@/modules/admin/composables/useDropdown'
-import { useDarkMode } from '@/composables/useDarkMode'
-import { useUserStore } from '@/modules/admin/stores/user.store'
-import { clearSession } from '@/utils/auth'
+import { onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+import { ChevronDown, User, Settings, Sun, Moon, LogOut } from 'lucide-vue-next';
+import { useDropdown } from '@/modules/admin/composables/useDropdown';
+import { useDarkMode } from '@/composables/useDarkMode';
+import { useUserStore } from '@/modules/admin/stores/user.store';
+import { clearSession } from '@/utils/auth';
 
-const { isOpen, toggle, close } = useDropdown()
-const { darkMode, toggleDarkMode } = useDarkMode()
-const router = useRouter()
-const userStore = useUserStore()
+const { isOpen, toggle, close } = useDropdown();
+const { darkMode, toggleDarkMode } = useDarkMode();
+const router = useRouter();
 
-const { user, userInitials } = storeToRefs(userStore)  // ← reactivo correctamente
+const userStore = useUserStore();
+const { user, userInitials } = storeToRefs(userStore);
 
-const goToProfile = () => { close(); router.push('/perfil') }
-const goToSettings = () => { close(); router.push('/configuracion') }
+const goToProfile = () => {
+  close();
+  router.push('/perfil');
+};
+
+const goToSettings = () => {
+  close();
+  router.push('/configuracion');
+};
 
 const handleLogout = async () => {
-  if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-    await clearSession()
-    userStore.clearUser()
-    close()
-    router.push('/login')
-  }
-}
+  if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
+  await clearSession();
+  localStorage.removeItem('token');
+  router.push('/login');
+  close();
+};
 
 onMounted(() => {
-  userStore.loadFromStorage()
-})
+  userStore.loadFromStorage();
+});
 </script>
