@@ -68,7 +68,7 @@ const pageTitle = computed(() => {
     '/perfil': 'Mi Perfil',
     '/configuracion': 'Configuración',
   };
-  return titles[route.path] || 'Catedral San Pedro';
+  return titles[route.path] || 'Parroquia San Pedro';
 });
 
 const handleMobileToggle = () => {

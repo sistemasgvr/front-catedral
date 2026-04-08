@@ -12,7 +12,7 @@
                   Gestión de Noticias
                 </h1>
                 <p class="text-gray-500 dark:text-gray-400 text-sm">
-                  Administra anuncios y eventos de la catedral
+                  Administra anuncios y eventos de la parroquia
                 </p>
               </div>
               <button @click="abrirModalCrear"

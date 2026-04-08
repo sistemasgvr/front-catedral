@@ -45,14 +45,14 @@
         </div> -->
         <h1
           class="text-[clamp(1.75rem,5vw,3rem)] font-serif font-bold text-white mb-3 text-center drop-shadow-2xl animate-slide-up">
-          Catedral San Pedro
+          Parroquia San Pedro
         </h1>
         <div
           class="w-20 h-1 bg-gradient-to-r from-transparent via-[#D39E3A] to-transparent rounded mb-4 shadow-md animate-slide-up"
           style="animation-delay: 0.1s"></div>
         <h2
           class="text-[clamp(1.125rem,3.5vw,1.75rem)] text-[#D39E3A] font-semibold mb-2 drop-shadow-lg animate-slide-up"
-          style="animation-delay: 0.2s">Lambayeque</h2>
+          style="animation-delay: 0.2s">Mórrope</h2>
         <p class="text-amber-100/90 text-center text-[clamp(0.875rem,2.5vw,1.125rem)] max-w-md drop-shadow-md animate-slide-up"
           style="animation-delay: 0.3s">
           Sistema de solicitudes de misas y celebraciones
@@ -159,7 +159,7 @@
             Lambayeque, Perú
           </p>
           <span class="hidden sm:inline text-amber-200/40">•</span>
-          <p>© 2026 Catedral San Pedro</p>
+          <p>© 2026 Parroquia San Pedro</p>
         </div>
       </footer>
     </div>

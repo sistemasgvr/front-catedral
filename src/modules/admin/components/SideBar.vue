@@ -32,7 +32,7 @@
           leave-from-class="opacity-100 translate-x-0" leave-to-class="opacity-0 -translate-x-4">
           <span v-if="shouldShowText"
             class="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent whitespace-nowrap">
-            Catedral San Pedro
+            Parroquia San Pedro
           </span>
         </transition>
       </router-link>

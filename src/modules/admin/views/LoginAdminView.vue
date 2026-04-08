@@ -15,7 +15,7 @@
               <div class="mb-5 sm:mb-8">
                 <h1
                   class="text-[clamp(1.25rem,3vw,1.75rem)] font-serif font-bold text-gray-800 dark:text-white mb-3 text-center animate-slide-up">
-                  Catedral San Pedro
+                  Parroquia San Pedro
                 </h1>
                 <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
                   Inicie Sesión
