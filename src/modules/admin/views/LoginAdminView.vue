@@ -125,7 +125,7 @@
         <div
           class="relative items-center hidden w-full h-full bg-brand-950 dark:bg-white/5 lg:grid lg:w-1/2 overflow-hidden">
           <div class="absolute inset-0 z-0">
-            <img src="/images/FondoCatedral.jpeg" alt="Catedral" class="w-full h-full object-cover" />
+            <img src="/images/FondoParroquia.png" alt="Catedral" class="w-full h-full object-cover" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/40" />
           </div>
           <div class="relative z-10 flex items-center justify-center">

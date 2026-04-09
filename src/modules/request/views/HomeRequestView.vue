@@ -2,7 +2,7 @@
   <div class="min-h-screen relative flex flex-col">
     <!-- Background -->
     <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-      :style="{ backgroundImage: `url('/images/FondoCatedral.jpeg')` }">
+      :style="{ backgroundImage: `url('/images/FondoParroquia.png')` }">
       <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/45 to-black/60"></div>
     </div>
 
@@ -156,7 +156,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            Lambayeque, Perú
+            Mórrope, Lambayeque - Perú
           </p>
           <span class="hidden sm:inline text-amber-200/40">•</span>
           <p>© 2026 Parroquia San Pedro</p>

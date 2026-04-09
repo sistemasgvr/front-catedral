@@ -3,7 +3,7 @@
 
     <!-- Background Image with Overlay -->
     <div class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
-      :style="{ backgroundImage: `url('/images/FondoCatedral.jpeg')` }">
+      :style="{ backgroundImage: `url('/images/FondoParroquia.png')` }">
       <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
