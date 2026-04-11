@@ -8,7 +8,7 @@ import type { IMisaDetalle, ICrearMisaForm, IEditarMisaForm } from "../interface
 export const obtenerDetalleMisa = async (idMisa: number): Promise<IMisaDetalle> => {
   try {
     const { data } = await apiClient.get<IMisaDetalle[]>(
-      `/misas?select=*,tipomisa:idtipomisa(*),menciones:mencionesmisa(idmencionmisa,mencion:idmencion(idmencion,descripcion,solicitud:idsolicitud(idsolicitud,nombres,apellidos,celular,correo,nrodocumento,intencion)))&idmisa=eq.${idMisa}`
+      `/misas?select=*,tipomisa:idtipomisa(*),menciones:mencionesmisa(idmencionmisa,mencion:idmencion(idmencion,descripcion,solicitud:idsolicitud(idsolicitud,idestadoproceso,nombres,apellidos,celular,correo,nrodocumento,intencion)))&idmisa=eq.${idMisa}`
     );
 
     if (!Array.isArray(data) || data.length === 0) throw new Error("No se encontró la misa");

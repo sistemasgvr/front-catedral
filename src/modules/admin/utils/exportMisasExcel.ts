@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import type { IMisaDetalle } from '../interfaces/misa.interface';
+import type { IMisaDetalle, IMencionMisa } from '../interfaces/misa.interface';
 
 export interface MisaReportFiltrosExcel {
   fechaDesde: string;
@@ -9,6 +9,9 @@ export interface MisaReportFiltrosExcel {
   tipoMisaNombre: string | null;
   estadoLabel: string | null;
 }
+
+/** Coincide con `aprobar` en cambiarEstadoSolicitud.action.ts */
+const ID_ESTADO_SOLICITUD_APROBADA = 18;
 
 const HEADER_FILL: ExcelJS.Fill = {
   type: 'pattern',
@@ -22,13 +25,26 @@ const HEADER_FONT: Partial<ExcelJS.Font> = {
   size: 11,
 };
 
-function styleHeaderRow(row: ExcelJS.Row) {
-  row.eachCell((cell) => {
+/**
+ * OOXML no admite caracteres de control en shared strings (Excel puede marcar el libro como dañado).
+ */
+function textoExcelSeguro(value: string | null | undefined): string {
+  if (value == null) return '';
+  return String(value).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+}
+
+function numeroSeguro(n: number): number {
+  return Number.isFinite(n) ? n : 0;
+}
+
+function styleHeaderRow(row: ExcelJS.Row, lastCol: number) {
+  for (let c = 1; c <= lastCol; c++) {
+    const cell = row.getCell(c);
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT as ExcelJS.Font;
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-  });
-  row.height = 22;
+  }
+  row.height = 24;
 }
 
 function parseTimeParts(hora: string): { h: number; m: number } {
@@ -37,7 +53,6 @@ function parseTimeParts(hora: string): { h: number; m: number } {
   return { h: parseInt(hh, 10) || 0, m: parseInt(mm, 10) || 0 };
 }
 
-/** Hora como fracción de día (Excel) a partir de time "HH:MM:SS" */
 function horaComoFraccionDia(hora: string): number {
   const { h, m } = parseTimeParts(hora);
   return (h * 3600 + m * 60) / 86400;
@@ -48,27 +63,35 @@ function precioUnitarioTipo(misa: IMisaDetalle): number {
   return Number.isFinite(p) ? p : 0;
 }
 
-function cantidadMenciones(misa: IMisaDetalle): number {
-  return (misa.menciones ?? []).length;
+function esSolicitudAprobada(
+  solicitud: { idestadoproceso?: number } | null | undefined
+): boolean {
+  return solicitud != null && solicitud.idestadoproceso === ID_ESTADO_SOLICITUD_APROBADA;
 }
 
-/** Ingreso total: tarifa del tipo × cada mención (0 si no hay menciones). */
-function ingresoTotalPorMenciones(misa: IMisaDetalle): number {
-  return precioUnitarioTipo(misa) * cantidadMenciones(misa);
+function mencionesAprobadas(misa: IMisaDetalle): IMencionMisa[] {
+  return (misa.menciones ?? []).filter((mm) => esSolicitudAprobada(mm.mencion?.solicitud));
+}
+
+function cantidadMencionesAprobadas(misa: IMisaDetalle): number {
+  return mencionesAprobadas(misa).length;
+}
+
+/** Ingreso: tarifa del tipo × cada mención con solicitud aprobada. */
+function ingresoPorMencionesAprobadas(misa: IMisaDetalle): number {
+  return precioUnitarioTipo(misa) * cantidadMencionesAprobadas(misa);
 }
 
 /**
- * Genera un libro Excel con hojas listas para filtrar / tablas dinámicas:
- * — Resumen por día: ingresos = Σ (precio tipo × menciones), total menciones, solicitudes únicas
- * — Detalle de misas
- * — Menciones y solicitudes (granularidad por solicitud)
+ * Excel: Información + detalle de misas + menciones aprobadas.
+ * Ingresos y menciones solo con solicitud aprobada.
  */
 export async function generarYDescargarReporteMisasExcel(
   misasDetalle: IMisaDetalle[],
   meta: { filtros: MisaReportFiltrosExcel; totalEnListadoFiltrado: number }
 ): Promise<void> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Gestión de Misas';
+  wb.creator = 'Gestion de Misas';
   wb.created = new Date();
 
   const ordenadas = [...misasDetalle].sort((a, b) => {
@@ -77,133 +100,74 @@ export async function generarYDescargarReporteMisasExcel(
     return (a.horainicio || '').localeCompare(b.horainicio || '');
   });
 
-  type DiaAgg = {
-    misas: IMisaDetalle[];
-    solicitudesIds: Set<number>;
-    totalMenciones: number;
-    ingresosPorMenciones: number;
-  };
-  const porDia = new Map<string, DiaAgg>();
-
-  for (const misa of ordenadas) {
-    const key = misa.fechacelebracion;
-    if (!porDia.has(key)) {
-      porDia.set(key, {
-        misas: [],
-        solicitudesIds: new Set(),
-        totalMenciones: 0,
-        ingresosPorMenciones: 0,
-      });
-    }
-    const g = porDia.get(key)!;
-    g.misas.push(misa);
-    const nMen = cantidadMenciones(misa);
-    g.totalMenciones += nMen;
-    g.ingresosPorMenciones += ingresoTotalPorMenciones(misa);
-    for (const mm of misa.menciones ?? []) {
-      const id = mm.mencion?.solicitud?.idsolicitud;
-      if (id != null) g.solicitudesIds.add(id);
-    }
-  }
-
-  const diasOrdenados = [...porDia.keys()].sort();
-
   // ——— Hoja información ———
-  const wsInfo = wb.addWorksheet('Información', {
-    views: [{ state: 'frozen', ySplit: 0 }],
-  });
+  const wsInfo = wb.addWorksheet('Informacion', {});
   wsInfo.getColumn(1).width = 28;
   wsInfo.getColumn(2).width = 72;
   const infoRows: [string, string][] = [
-    ['Reporte', 'Misas — ingresos, celebraciones y solicitudes vinculadas (menciones)'],
+    ['Reporte', 'Misas - solo solicitudes aprobadas en ingresos y menciones'],
     ['Generado', new Date().toLocaleString('es-PE')],
     [
-      'Uso en Excel',
-      'Active filtros (encabezados) o inserte tabla dinámica usando las hojas de detalle. Las columnas de fecha están tipadas como fecha para filtrar por rango.',
+      'Criterio',
+      'Solo se consideran menciones cuya solicitud tiene estado APROBADA.',
     ],
-    ['Rango fechas (filtro UI)', `${meta.filtros.fechaDesde || '—'} → ${meta.filtros.fechaHasta || '—'}`],
-    ['Búsqueda', meta.filtros.busqueda || '—'],
+    [
+      'Uso',
+      'La hoja "Detalle misas" lista cada celebracion; puede filtrar y agrupar en Excel. La hoja "Menciones aprobadas" detalla cada linea.',
+    ],
+    ['Rango fechas (filtro UI)', `${meta.filtros.fechaDesde || '-'} -> ${meta.filtros.fechaHasta || '-'}`],
+    ['Busqueda', meta.filtros.busqueda || '-'],
     ['Tipo de misa', meta.filtros.tipoMisaNombre || 'Todos'],
-    ['Estado', meta.filtros.estadoLabel || 'Todos'],
-    ['Registros en exportación', String(misasDetalle.length)],
+    ['Estado misa (UI)', meta.filtros.estadoLabel || 'Todos'],
+    ['Registros en exportacion', String(misasDetalle.length)],
     ['Total en listado filtrado (UI)', String(meta.totalEnListadoFiltrado)],
     [
-      'Ingresos por día',
-      'Suma de (precio del tipo de misa × cantidad de menciones) por cada celebración ese día. Sin menciones = S/ 0 para esa misa.',
-    ],
-    [
-      'Precio e ingreso',
-      'Precio unitario = tarifa del tipo de misa. Ingreso total (por misa) = precio unitario × cantidad de menciones. En la hoja de menciones, cada fila suma una vez el precio unitario (una mención = un cobro).',
-    ],
-    [
-      'Solicitudes por día',
-      'Cantidad distinta de IDs de solicitud aparecidas en menciones de misas celebradas ese día.',
+      'Ingresos',
+      'Precio del tipo de misa por cada mencion con solicitud aprobada. Sin menciones aprobadas = 0 en esa misa.',
     ],
   ];
   infoRows.forEach(([a, b], i) => {
     const row = wsInfo.getRow(i + 1);
-    row.getCell(1).value = a;
+    row.getCell(1).value = textoExcelSeguro(a);
     row.getCell(1).font = { bold: true };
-    row.getCell(2).value = b;
+    row.getCell(2).value = textoExcelSeguro(b);
     row.getCell(2).alignment = { wrapText: true, vertical: 'top' };
   });
 
-  // ——— Resumen por día ———
-  const wsRes = wb.addWorksheet('Resumen por día', {
-    views: [{ state: 'frozen', ySplit: 1 }],
-  });
-  wsRes.columns = [
-    { header: 'Fecha', key: 'fecha', width: 14 },
-    { header: 'Cantidad de misas', key: 'nMisas', width: 18 },
-    { header: 'Total menciones', key: 'nMen', width: 16 },
-    { header: 'Ingresos (precio × menciones)', key: 'ingresos', width: 26 },
-    { header: 'Solicitudes únicas (menciones)', key: 'nSol', width: 30 },
-  ];
-  const headerRes = wsRes.getRow(1);
-  styleHeaderRow(headerRes);
-
-  let rowRes = 2;
-  for (const dia of diasOrdenados) {
-    const g = porDia.get(dia)!;
-    const r = wsRes.getRow(rowRes);
-    r.getCell(1).value = new Date(`${dia}T12:00:00`);
-    r.getCell(1).numFmt = 'yyyy-mm-dd';
-    r.getCell(2).value = g.misas.length;
-    r.getCell(3).value = g.totalMenciones;
-    r.getCell(4).value = g.ingresosPorMenciones;
-    r.getCell(4).numFmt = '#,##0.00';
-    r.getCell(5).value = g.solicitudesIds.size;
-    rowRes++;
-  }
-  if (diasOrdenados.length > 0) {
-    wsRes.autoFilter = {
-      from: { row: 1, column: 1 },
-      to: { row: rowRes - 1, column: 5 },
-    };
+  // ——— Detalle misas (una sola tabla; sin resumen por dia) ———
+  const ws = wb.addWorksheet('Detalle misas', {});
+  const colCount = 11;
+  const colWidths = [10, 18, 12, 12, 28, 20, 18, 18, 12, 38, 28];
+  for (let c = 1; c <= colCount; c++) {
+    ws.getColumn(c).width = colWidths[c - 1] ?? 14;
   }
 
-  // ——— Detalle misas ———
-  const wsDet = wb.addWorksheet('Detalle misas', {
-    views: [{ state: 'frozen', ySplit: 1 }],
-  });
-  wsDet.columns = [
-    { header: 'ID Misa', key: 'id', width: 10 },
-    { header: 'Fecha celebración', key: 'fecha', width: 18 },
-    { header: 'Hora inicio', key: 'hi', width: 12 },
-    { header: 'Hora fin', key: 'hf', width: 12 },
-    { header: 'Tipo de misa', key: 'tipo', width: 26 },
-    { header: 'Precio unitario tipo (S/)', key: 'precio', width: 22 },
-    { header: 'Cant. menciones', key: 'nMen', width: 16 },
-    { header: 'Ingreso total (S/)', key: 'ingTotal', width: 20 },
-    { header: 'Estado', key: 'estado', width: 10 },
-    { header: 'Título', key: 'titulo', width: 36 },
-    { header: 'IDs solicitud (menciones)', key: 'ids', width: 36 },
-  ];
-  styleHeaderRow(wsDet.getRow(1));
+  ws.getCell(1, 1).value = textoExcelSeguro('Reporte de misas (solo solicitudes aprobadas)');
+  ws.getCell(1, 1).font = { bold: true, size: 14 };
 
-  let rowDet = 2;
+  const detalleHeaderRow = 2;
+  const hdrDet = ws.getRow(detalleHeaderRow);
+  const detHeaders = [
+    'ID Misa',
+    'Fecha celebracion',
+    'Hora inicio',
+    'Hora fin',
+    'Tipo de misa',
+    'Precio unitario (S/)',
+    'Menc. aprobadas',
+    'Ingreso total (S/)',
+    'Estado misa',
+    'Titulo',
+    'IDs solicitud aprobadas',
+  ];
+  detHeaders.forEach((text, i) => {
+    hdrDet.getCell(i + 1).value = textoExcelSeguro(text);
+  });
+  styleHeaderRow(hdrDet, colCount);
+
+  let r = detalleHeaderRow + 1;
   for (const misa of ordenadas) {
-    const menciones = misa.menciones ?? [];
+    const menciones = mencionesAprobadas(misa);
     const idsSol = [
       ...new Set(
         menciones
@@ -211,83 +175,99 @@ export async function generarYDescargarReporteMisasExcel(
           .filter((id): id is number => id != null)
       ),
     ].sort((a, b) => a - b);
-    const r = wsDet.getRow(rowDet);
-    r.getCell(1).value = misa.idmisa;
-    r.getCell(2).value = new Date(`${misa.fechacelebracion}T12:00:00`);
-    r.getCell(2).numFmt = 'yyyy-mm-dd';
-    r.getCell(3).value = horaComoFraccionDia(misa.horainicio);
-    r.getCell(3).numFmt = 'hh:mm';
-    r.getCell(4).value = horaComoFraccionDia(misa.horafin);
-    r.getCell(4).numFmt = 'hh:mm';
-    r.getCell(5).value = misa.tipomisa?.nombre ?? '—';
+    const row = ws.getRow(r);
+    row.getCell(1).value = misa.idmisa;
+    row.getCell(2).value = new Date(`${misa.fechacelebracion}T12:00:00`);
+    row.getCell(2).numFmt = 'yyyy-mm-dd';
+    row.getCell(3).value = horaComoFraccionDia(misa.horainicio);
+    row.getCell(3).numFmt = 'hh:mm';
+    row.getCell(4).value = horaComoFraccionDia(misa.horafin);
+    row.getCell(4).numFmt = 'hh:mm';
+    row.getCell(5).value = textoExcelSeguro(misa.tipomisa?.nombre || '-');
     const pUnit = precioUnitarioTipo(misa);
     const nMen = menciones.length;
-    const ingresoTotal = ingresoTotalPorMenciones(misa);
-    r.getCell(6).value = pUnit;
-    r.getCell(6).numFmt = '#,##0.00';
-    r.getCell(7).value = nMen;
-    r.getCell(8).value = ingresoTotal;
-    r.getCell(8).numFmt = '#,##0.00';
-    r.getCell(9).value = misa.estado ? 'Activo' : 'Inactivo';
-    r.getCell(10).value = misa.titulo ?? '—';
-    r.getCell(11).value = idsSol.length ? idsSol.join(', ') : '—';
-    rowDet++;
-  }
-  if (ordenadas.length > 0) {
-    wsDet.autoFilter = {
-      from: { row: 1, column: 1 },
-      to: { row: rowDet - 1, column: 11 },
-    };
+    const ingresoTotal = ingresoPorMencionesAprobadas(misa);
+    row.getCell(6).value = numeroSeguro(pUnit);
+    row.getCell(6).numFmt = '#,##0.00';
+    row.getCell(7).value = nMen;
+    row.getCell(8).value = numeroSeguro(ingresoTotal);
+    row.getCell(8).numFmt = '#,##0.00';
+    row.getCell(9).value = textoExcelSeguro(misa.estado ? 'Activo' : 'Inactivo');
+    row.getCell(10).value = textoExcelSeguro(misa.titulo ?? '-');
+    row.getCell(11).value = textoExcelSeguro(idsSol.length ? idsSol.join(', ') : '-');
+    r++;
   }
 
-  // ——— Menciones / solicitudes ———
-  const wsMen = wb.addWorksheet('Menciones y solicitudes', {
-    views: [{ state: 'frozen', ySplit: 1 }],
-  });
-  wsMen.columns = [
-    { header: 'Fecha misa', key: 'fecha', width: 16 },
-    { header: 'ID Misa', key: 'idm', width: 10 },
-    { header: 'ID Solicitud', key: 'ids', width: 14 },
-    { header: 'Precio unitario tipo (S/)', key: 'pUnit', width: 22 },
-    { header: 'Importe línea (S/)', key: 'imp', width: 18 },
-    { header: 'Nombres', key: 'nom', width: 22 },
-    { header: 'Apellidos', key: 'ape', width: 22 },
-    { header: 'Intención', key: 'int', width: 40 },
-    { header: 'Descripción mención', key: 'desc', width: 36 },
+  const lastDataRow = r - 1;
+  if (ordenadas.length > 0 && lastDataRow > detalleHeaderRow) {
+    ws.autoFilter = {
+      from: { row: detalleHeaderRow, column: 1 },
+      to: { row: lastDataRow, column: colCount },
+    };
+  }
+  ws.views = [{ state: 'frozen', ySplit: detalleHeaderRow - 1 }];
+
+  // ——— Menciones aprobadas (cabecera manual; sin columns{} para evitar XML duplicado) ———
+  const wsMen = wb.addWorksheet('Menciones aprobadas', {});
+  const menCols = 10;
+  const menWidths = [16, 10, 14, 14, 20, 18, 22, 22, 40, 36];
+  for (let c = 1; c <= menCols; c++) {
+    wsMen.getColumn(c).width = menWidths[c - 1] ?? 14;
+  }
+  const menHdr = wsMen.getRow(1);
+  const menHeaders = [
+    'Fecha misa',
+    'ID Misa',
+    'ID Solicitud',
+    'Estado',
+    'Precio unit. (S/)',
+    'Importe (S/)',
+    'Nombres',
+    'Apellidos',
+    'Intencion',
+    'Descripcion mencion',
   ];
-  styleHeaderRow(wsMen.getRow(1));
+  menHeaders.forEach((text, i) => {
+    menHdr.getCell(i + 1).value = textoExcelSeguro(text);
+  });
+  styleHeaderRow(menHdr, menCols);
 
   let rowMen = 2;
   for (const misa of ordenadas) {
     const unit = precioUnitarioTipo(misa);
-    for (const item of misa.menciones ?? []) {
+    for (const item of mencionesAprobadas(misa)) {
       const sol = item.mencion?.solicitud;
       if (!sol) continue;
-      const r = wsMen.getRow(rowMen);
-      r.getCell(1).value = new Date(`${misa.fechacelebracion}T12:00:00`);
-      r.getCell(1).numFmt = 'yyyy-mm-dd';
-      r.getCell(2).value = misa.idmisa;
-      r.getCell(3).value = sol.idsolicitud;
-      r.getCell(4).value = unit;
-      r.getCell(4).numFmt = '#,##0.00';
-      r.getCell(5).value = unit;
-      r.getCell(5).numFmt = '#,##0.00';
-      r.getCell(6).value = sol.nombres;
-      r.getCell(7).value = sol.apellidos;
-      r.getCell(8).value = sol.intencion ?? '—';
-      r.getCell(9).value = item.mencion?.descripcion ?? '—';
+      const rr = wsMen.getRow(rowMen);
+      rr.getCell(1).value = new Date(`${misa.fechacelebracion}T12:00:00`);
+      rr.getCell(1).numFmt = 'yyyy-mm-dd';
+      rr.getCell(2).value = misa.idmisa;
+      rr.getCell(3).value = sol.idsolicitud;
+      rr.getCell(4).value = textoExcelSeguro('Aprobada');
+      rr.getCell(5).value = numeroSeguro(unit);
+      rr.getCell(5).numFmt = '#,##0.00';
+      rr.getCell(6).value = numeroSeguro(unit);
+      rr.getCell(6).numFmt = '#,##0.00';
+      rr.getCell(7).value = textoExcelSeguro(sol.nombres);
+      rr.getCell(8).value = textoExcelSeguro(sol.apellidos);
+      rr.getCell(9).value = textoExcelSeguro(sol.intencion ?? '-');
+      rr.getCell(10).value = textoExcelSeguro(item.mencion?.descripcion ?? '-');
       rowMen++;
     }
   }
   if (rowMen > 2) {
     wsMen.autoFilter = {
       from: { row: 1, column: 1 },
-      to: { row: rowMen - 1, column: 9 },
+      to: { row: rowMen - 1, column: menCols },
     };
   }
+  wsMen.views = [{ state: 'frozen', ySplit: 1 }];
 
-  const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], {
+  const raw = await wb.xlsx.writeBuffer({
+    useSharedStrings: false,
+  });
+  const u8 = raw instanceof Uint8Array ? raw : new Uint8Array(raw as ArrayBuffer);
+  const blob = new Blob([u8], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
   const stamp = new Date().toISOString().split('T')[0];
