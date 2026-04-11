@@ -9,7 +9,7 @@ import type { IMisaConRelaciones } from "../interfaces/misa.interface";
 export const listarMisas = async (): Promise<IMisaConRelaciones[]> => {
   try {
     const { data } = await apiClient.get<IMisaConRelaciones[]>(
-    `/misas?select=*,tipomisa(nombre,precio),usuario_creador:authusuarios!misas_idusuariocreacion_fkey(nombre,correo)&order=fechacelebracion.asc,horainicio.asc`
+    `/misas?select=*,tipomisa(nombre,precio),usuario_creador:authusuarios!misas_idusuariocreacion_fkey(nombre,correo)&order=fechacelebracion.desc,horainicio.desc`
     );
     return Array.isArray(data) ? data : [];
   } catch (error) {

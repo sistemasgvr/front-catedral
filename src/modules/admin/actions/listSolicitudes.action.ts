@@ -10,7 +10,7 @@ import type { ISolicitudDb } from "../interfaces/listSolicitudes.interface";
 export const listarSolicitudes = async (): Promise<ISolicitudDb[]> => {
   try {
     const { data } = await apiClient.get<ISolicitudDb[]>(
-      `/solicitudes?select=*`
+      `/solicitudes?select=*&order=fechacreacion.desc`
     );
     return Array.isArray(data) ? data : [];
   } catch (error) {

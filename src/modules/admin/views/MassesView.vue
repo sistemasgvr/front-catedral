@@ -428,6 +428,14 @@ const misasFiltradas = computed(() => {
     resultado = resultado.filter(m => m.fechacelebracion <= filtros.value.fechaHasta);
   }
 
+  resultado.sort((a, b) => {
+    const c = b.fechacelebracion.localeCompare(a.fechacelebracion);
+    if (c !== 0) return c;
+    const h = (b.horainicio || '').localeCompare(a.horainicio || '');
+    if (h !== 0) return h;
+    return b.idmisa - a.idmisa;
+  });
+
   return resultado;
 });
 

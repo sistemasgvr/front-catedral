@@ -307,6 +307,9 @@ import type { ISelectOption } from "../../interfaces/opcionLista.interface";
 import type { ISolicitudDb } from "../../interfaces/listSolicitudes.interface";
 import type { ITipoMisa } from "../../interfaces/tipoMisa.interface";
 
+/** Mismo valor que `revision` en cambiarEstadoSolicitud.action (lista estados, id opción). */
+const ID_ESTADO_EN_REVISION = 17;
+
 /* ================================
    STATE
 ================================ */
@@ -359,6 +362,18 @@ const solicitudesFiltradas = computed(() => {
       s.fechamisadeseada <= filtros.value.fechaHasta
     );
   }
+
+  resultado.sort((a, b) => {
+    const aRevision = a.idestadoproceso === ID_ESTADO_EN_REVISION;
+    const bRevision = b.idestadoproceso === ID_ESTADO_EN_REVISION;
+    if (aRevision !== bRevision) return aRevision ? -1 : 1;
+
+    const ta = Date.parse(a.fechacreacion) || 0;
+    const tb = Date.parse(b.fechacreacion) || 0;
+    if (tb !== ta) return tb - ta;
+
+    return b.idsolicitud - a.idsolicitud;
+  });
 
   return resultado;
 });
