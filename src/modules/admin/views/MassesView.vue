@@ -13,6 +13,19 @@
                   <p class="text-gray-600 dark:text-gray-400">Administra el calendario de misas y celebraciones</p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <!-- Exportar Excel -->
+                  <button @click="exportarExcel" :disabled="misasFiltradas.length === 0 || exportandoExcel"
+                    class="w-full sm:w-auto px-5 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+                    <svg v-if="exportandoExcel" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 17v-6a2 2 0 012-2h7m-9 8h10a2 2 0 002-2v-8l-6-6H9a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {{ exportandoExcel ? 'Generando Excel...' : `Exportar Excel (${misasFiltradas.length})` }}
+                  </button>
                   <!-- Exportar Word -->
                   <button @click="exportarWord" :disabled="misasFiltradas.length === 0 || exportando"
                     class="w-full sm:w-auto px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
@@ -359,6 +372,7 @@ import ConfirmModal from '../components/ConfirmModal.vue';
 import DetailMassModal from '../components/DetailMassModal.vue';
 import FormMassModal from '../components/FormMassModal.vue';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
+import { generarYDescargarReporteMisasExcel } from '../utils/exportMisasExcel';
 
 /* ================================
    STATE
@@ -367,6 +381,7 @@ const misas = ref<IMisaConRelaciones[]>([]);
 const tiposMisa = ref<ITipoMisa[]>([]);
 const loading = ref(false);
 const exportando = ref(false);
+const exportandoExcel = ref(false);
 
 const modalDetalle = ref({ isOpen: false, misaId: null as number | null });
 const modalForm = ref({ isOpen: false, misaId: null as number | null });
@@ -443,6 +458,40 @@ const formatearHora = (hora: string): string => {
   const d = new Date();
   d.setHours(parseInt(hh), parseInt(mm));
   return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true });
+};
+
+/* ================================
+   EXPORT EXCEL (exceljs)
+================================ */
+const exportarExcel = async () => {
+  if (misasFiltradas.value.length === 0) return;
+  exportandoExcel.value = true;
+  try {
+    const misasDetalle = await Promise.all(
+      misasFiltradas.value.map((m) => obtenerDetalleMisa(m.idmisa))
+    );
+    const tipoNombre =
+      filtros.value.tipoMisa !== null
+        ? tiposMisa.value.find((t) => t.idtipomisa === filtros.value.tipoMisa)?.nombre ?? null
+        : null;
+    const estadoLabel =
+      filtros.value.estado === null ? null : filtros.value.estado ? 'Activo' : 'Inactivo';
+    await generarYDescargarReporteMisasExcel(misasDetalle, {
+      filtros: {
+        fechaDesde: filtros.value.fechaDesde,
+        fechaHasta: filtros.value.fechaHasta,
+        busqueda: filtros.value.busqueda,
+        tipoMisaNombre: tipoNombre,
+        estadoLabel,
+      },
+      totalEnListadoFiltrado: misasFiltradas.value.length,
+    });
+  } catch (error) {
+    console.error('Error exportando Excel:', error);
+    alert('Error al generar el archivo Excel');
+  } finally {
+    exportandoExcel.value = false;
+  }
 };
 
 /* ================================
