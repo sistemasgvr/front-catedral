@@ -12,7 +12,24 @@
                   <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Gestión de Misas</h1>
                   <p class="text-gray-600 dark:text-gray-400">Administra el calendario de misas y celebraciones</p>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto">
+                  <div
+                    class="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm">
+                    <button type="button" @click="vistaCalendario = false"
+                      class="px-4 py-3 text-sm font-semibold transition-colors min-h-[48px]"
+                      :class="!vistaCalendario
+                        ? 'bg-[#C88A2A] text-white'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                      Lista
+                    </button>
+                    <button type="button" @click="vistaCalendario = true"
+                      class="px-4 py-3 text-sm font-semibold transition-colors min-h-[48px] border-l border-gray-300 dark:border-gray-600"
+                      :class="vistaCalendario
+                        ? 'bg-[#C88A2A] text-white'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                      Calendario
+                    </button>
+                  </div>
                   <!-- Exportar Excel -->
                   <button @click="exportarExcel" :disabled="misasFiltradas.length === 0 || exportandoExcel"
                     class="w-full sm:w-auto px-5 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
@@ -180,8 +197,16 @@
               </div>
             </div>
 
+            <!-- Calendario -->
+            <MassCalendarPanel
+              v-if="vistaCalendario"
+              ref="calendarRef"
+              :filtros="filtros"
+              @select-misa="verDetalle"
+            />
+
             <!-- Table -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-colors">
+            <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-colors">
               <div v-if="loading" class="p-12 text-center">
                 <div
                   class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-[#C88A2A]">
@@ -371,6 +396,7 @@ import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import DetailMassModal from '../components/DetailMassModal.vue';
 import FormMassModal from '../components/FormMassModal.vue';
+import MassCalendarPanel from '../components/MassCalendarPanel.vue';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
 import { generarYDescargarReporteMisasExcel } from '../utils/exportMisasExcel';
 
@@ -386,6 +412,9 @@ const exportandoExcel = ref(false);
 const modalDetalle = ref({ isOpen: false, misaId: null as number | null });
 const modalForm = ref({ isOpen: false, misaId: null as number | null });
 const modalConfirm = ref({ isOpen: false, misaId: null as number | null, loading: false });
+
+const vistaCalendario = ref(false);
+const calendarRef = ref<InstanceType<typeof MassCalendarPanel> | null>(null);
 
 const filtros = ref({
   busqueda: '',
@@ -731,7 +760,9 @@ const handleEliminar = async () => {
   }
 };
 
-const handleMisaGuardada = async () => { await cargarMisas(); };
+const handleMisaGuardada = async () => {
+  await cargarMisas();
+};
 
 const limpiarFiltros = () => {
   filtros.value = { busqueda: '', tipoMisa: null, estado: null, fechaDesde: '', fechaHasta: '' };
@@ -745,6 +776,7 @@ const cargarMisas = async () => {
   try { misas.value = await listarMisas(); }
   catch (e) { console.error('Error cargando misas:', e); }
   finally { loading.value = false; }
+  calendarRef.value?.recargar();
 };
 
 const cargarTiposMisa = async () => {
