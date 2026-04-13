@@ -273,3 +273,131 @@ export async function generarYDescargarReporteMisasExcel(
   const stamp = new Date().toISOString().split('T')[0];
   saveAs(blob, `reporte_misas_${stamp}.xlsx`);
 }
+
+function etiquetaEstadoSolicitud(id: number | undefined | null): string {
+  if (id == null) return '-';
+  if (id === ID_ESTADO_SOLICITUD_APROBADA) return 'Aprobada';
+  return `Estado ${id}`;
+}
+
+/**
+ * Excel dedicado: una misa y todas sus líneas de mención (con estado de solicitud).
+ * Importe económico solo cuando la solicitud está aprobada (misma regla que el reporte global).
+ */
+export async function generarYDescargarExcelMencionesUnaMisa(misa: IMisaDetalle): Promise<void> {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'Gestion de Misas';
+  wb.created = new Date();
+
+  const menciones = misa.menciones ?? [];
+  const aprobadas = menciones.filter((mm) => esSolicitudAprobada(mm.mencion?.solicitud));
+
+  const wsInfo = wb.addWorksheet('Informacion', {});
+  wsInfo.getColumn(1).width = 28;
+  wsInfo.getColumn(2).width = 72;
+  const infoRows: [string, string][] = [
+    ['Reporte', 'Menciones por misa especifica'],
+    ['Generado', new Date().toLocaleString('es-PE')],
+    ['ID Misa', String(misa.idmisa)],
+    ['Fecha celebracion', misa.fechacelebracion],
+    ['Hora', `${misa.horainicio || '-'} - ${misa.horafin || '-'}`],
+    ['Tipo de misa', misa.tipomisa?.nombre || '-'],
+    ['Titulo', misa.titulo ?? '-'],
+    ['Estado misa', misa.estado ? 'Activo' : 'Inactivo'],
+    ['Total menciones (lineas)', String(menciones.length)],
+    ['Menciones con solicitud aprobada', String(aprobadas.length)],
+    [
+      'Criterio importe',
+      'Precio unitario del tipo de misa solo cuenta como importe por linea si la solicitud vinculada esta APROBADA.',
+    ],
+    [
+      'Uso',
+      'Hoja "Menciones": filtre o ordene en Excel por estado, solicitante o intencion.',
+    ],
+  ];
+  infoRows.forEach(([a, b], i) => {
+    const row = wsInfo.getRow(i + 1);
+    row.getCell(1).value = textoExcelSeguro(a);
+    row.getCell(1).font = { bold: true };
+    row.getCell(2).value = textoExcelSeguro(b);
+    row.getCell(2).alignment = { wrapText: true, vertical: 'top' };
+  });
+
+  const wsMen = wb.addWorksheet('Menciones', {});
+  const menCols = 16;
+  const menWidths = [14, 10, 14, 14, 16, 18, 14, 14, 16, 18, 18, 16, 14, 24, 36, 36];
+  for (let c = 1; c <= menCols; c++) {
+    wsMen.getColumn(c).width = menWidths[c - 1] ?? 14;
+  }
+  const menHdr = wsMen.getRow(1);
+  const menHeaders = [
+    'Fecha misa',
+    'ID Misa',
+    'ID Mencion misa',
+    'ID Solicitud',
+    'ID estado solicitud',
+    'Estado solicitud',
+    'Aprobada (Si/No)',
+    'Precio unit. (S/)',
+    'Importe linea (S/)',
+    'Nombres',
+    'Apellidos',
+    'Documento',
+    'Celular',
+    'Correo',
+    'Intencion',
+    'Descripcion mencion',
+  ];
+  menHeaders.forEach((text, i) => {
+    menHdr.getCell(i + 1).value = textoExcelSeguro(text);
+  });
+  styleHeaderRow(menHdr, menCols);
+
+  const unit = precioUnitarioTipo(misa);
+  let rowMen = 2;
+  for (const item of menciones) {
+    const sol = item.mencion?.solicitud;
+    const aprobada = esSolicitudAprobada(sol);
+    const idEst = sol?.idestadoproceso;
+    const rr = wsMen.getRow(rowMen);
+    rr.getCell(1).value = new Date(`${misa.fechacelebracion}T12:00:00`);
+    rr.getCell(1).numFmt = 'yyyy-mm-dd';
+    rr.getCell(2).value = misa.idmisa;
+    rr.getCell(3).value = item.idmencionmisa;
+    rr.getCell(4).value = sol?.idsolicitud ?? '-';
+    rr.getCell(5).value = idEst != null ? idEst : '-';
+    rr.getCell(6).value = textoExcelSeguro(etiquetaEstadoSolicitud(idEst));
+    rr.getCell(7).value = textoExcelSeguro(aprobada ? 'Si' : 'No');
+    rr.getCell(8).value = numeroSeguro(unit);
+    rr.getCell(8).numFmt = '#,##0.00';
+    const importe = aprobada ? unit : 0;
+    rr.getCell(9).value = numeroSeguro(importe);
+    rr.getCell(9).numFmt = '#,##0.00';
+    rr.getCell(10).value = textoExcelSeguro(sol?.nombres ?? '-');
+    rr.getCell(11).value = textoExcelSeguro(sol?.apellidos ?? '-');
+    rr.getCell(12).value = textoExcelSeguro(sol?.nrodocumento != null ? String(sol.nrodocumento) : '-');
+    rr.getCell(13).value = sol?.celular != null ? sol.celular : '-';
+    rr.getCell(14).value = textoExcelSeguro(sol?.correo ?? '-');
+    rr.getCell(15).value = textoExcelSeguro(sol?.intencion ?? '-');
+    rr.getCell(16).value = textoExcelSeguro(item.mencion?.descripcion ?? '-');
+    rowMen++;
+  }
+
+  if (rowMen > 2) {
+    wsMen.autoFilter = {
+      from: { row: 1, column: 1 },
+      to: { row: rowMen - 1, column: menCols },
+    };
+  }
+  wsMen.views = [{ state: 'frozen', ySplit: 1 }];
+
+  const raw = await wb.xlsx.writeBuffer({
+    useSharedStrings: false,
+  });
+  const u8 = raw instanceof Uint8Array ? raw : new Uint8Array(raw as ArrayBuffer);
+  const blob = new Blob([u8], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const stamp = new Date().toISOString().split('T')[0];
+  saveAs(blob, `menciones_misa_${misa.idmisa}_${stamp}.xlsx`);
+}

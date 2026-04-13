@@ -129,6 +129,43 @@
                   Limpiar filtros
                 </button>
               </div>
+
+              <!-- Exportar menciones por misa (Excel) -->
+              <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-1">
+                  Exportar menciones por misa (Excel)
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                  Libro con resumen de la misa y hoja <span class="font-medium">Menciones</span> (todas las líneas;
+                  importe solo si la solicitud está aprobada). Usa el listado filtrado actual.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+                  <div class="flex-1 min-w-0">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Misa</label>
+                    <select v-model="idMisaExportMenciones"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent transition-all">
+                      <option value="">Seleccione una misa…</option>
+                      <option v-for="m in misasFiltradas" :key="m.idmisa" :value="String(m.idmisa)">
+                        #{{ m.idmisa }} — {{ m.fechacelebracion }} · {{ etiquetaOpcionMisa(m) }}
+                      </option>
+                    </select>
+                  </div>
+                  <button type="button" @click="exportarExcelMencionesSeleccion"
+                    :disabled="idMisaExportMenciones === '' || misasFiltradas.length === 0 || exportandoExcelMencionesMisa !== null"
+                    class="w-full sm:w-auto shrink-0 px-5 py-2.5 bg-emerald-800 text-white font-semibold rounded-lg hover:bg-emerald-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 min-h-[48px]">
+                    <svg v-if="exportandoExcelMencionesMisa === 'select'" class="animate-spin w-5 h-5" fill="none"
+                      viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    <svg v-else class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 17v-6a2 2 0 012-2h7m-9 8h10a2 2 0 002-2v-8l-6-6H9a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Descargar Excel
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Stats Cards -->
@@ -244,7 +281,7 @@
                         class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                         Estado</th>
                       <th
-                        class="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider min-w-[11rem]">
                         Acciones</th>
                     </tr>
                   </thead>
@@ -303,6 +340,21 @@
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button>
+                          <button @click="exportarExcelMencionesDeMisa(misa.idmisa, 'fila')"
+                            :disabled="exportandoExcelMencionesMisa !== null"
+                            class="p-2 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors disabled:opacity-40"
+                            title="Excel: menciones de esta misa">
+                            <svg v-if="exportandoExcelMencionesMisa === misa.idmisa" class="animate-spin w-5 h-5"
+                              fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4" />
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-6a2 2 0 012-2h7m-9 8h10a2 2 0 002-2v-8l-6-6H9a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </button>
                           <button @click="confirmarEliminar(misa.idmisa)"
                             class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Eliminar">
@@ -346,11 +398,16 @@
                         misa.solicitud?.intencion || 'Sin título' }}</div>
                     </div>
                   </div>
-                  <div class="flex gap-2">
+                  <div class="flex flex-wrap gap-2">
                     <button @click="verDetalle(misa.idmisa)"
-                      class="flex-1 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1">Ver</button>
+                      class="flex-1 min-w-[4.5rem] px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1">Ver</button>
                     <button @click="editarMisa(misa.idmisa)"
-                      class="flex-1 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1">Editar</button>
+                      class="flex-1 min-w-[4.5rem] px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1">Editar</button>
+                    <button type="button" @click="exportarExcelMencionesDeMisa(misa.idmisa, 'fila')"
+                      :disabled="exportandoExcelMencionesMisa !== null"
+                      class="px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-40">
+                      {{ exportandoExcelMencionesMisa === misa.idmisa ? '…' : 'Excel' }}
+                    </button>
                     <button @click="confirmarEliminar(misa.idmisa)"
                       class="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,7 +437,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
   TextRun, AlignmentType, WidthType, BorderStyle,
@@ -399,7 +456,10 @@ import DetailMassModal from '../components/DetailMassModal.vue';
 import FormMassModal from '../components/FormMassModal.vue';
 import MassCalendarPanel, { type AccionMisaCalendario } from '../components/MassCalendarPanel.vue';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
-import { generarYDescargarReporteMisasExcel } from '../utils/exportMisasExcel';
+import {
+  generarYDescargarReporteMisasExcel,
+  generarYDescargarExcelMencionesUnaMisa,
+} from '../utils/exportMisasExcel';
 
 /* ================================
    STATE
@@ -409,6 +469,9 @@ const tiposMisa = ref<ITipoMisa[]>([]);
 const loading = ref(false);
 const exportando = ref(false);
 const exportandoExcel = ref(false);
+/** null = inactivo; número = fila en carga; 'select' = export desde desplegable */
+const exportandoExcelMencionesMisa = ref<number | 'select' | null>(null);
+const idMisaExportMenciones = ref<string>('');
 
 const modalDetalle = ref({ isOpen: false, misaId: null as number | null });
 const modalForm = ref({ isOpen: false, misaId: null as number | null });
@@ -531,6 +594,47 @@ const exportarExcel = async () => {
     exportandoExcel.value = false;
   }
 };
+
+const etiquetaOpcionMisa = (m: IMisaConRelaciones): string => {
+  const t = m.titulo || m.tipomisa?.nombre || 'Sin título';
+  return t.length > 56 ? `${t.slice(0, 53)}…` : t;
+};
+
+const exportarExcelMencionesDeMisa = async (idmisa: number, origen: 'fila' | 'select') => {
+  if (exportandoExcelMencionesMisa.value !== null) return;
+  exportandoExcelMencionesMisa.value = origen === 'select' ? 'select' : idmisa;
+  try {
+    const detalle = await obtenerDetalleMisa(idmisa);
+    await generarYDescargarExcelMencionesUnaMisa(detalle);
+  } catch (error) {
+    console.error('Error exportando Excel de menciones por misa:', error);
+    alert('Error al generar el Excel de menciones');
+  } finally {
+    exportandoExcelMencionesMisa.value = null;
+  }
+};
+
+const exportarExcelMencionesSeleccion = async () => {
+  const id = Number(idMisaExportMenciones.value);
+  if (!Number.isFinite(id) || id <= 0) {
+    alert('Seleccione una misa del listado filtrado.');
+    return;
+  }
+  await exportarExcelMencionesDeMisa(id, 'select');
+};
+
+watch(
+  misasFiltradas,
+  (list) => {
+    const cur = idMisaExportMenciones.value;
+    if (cur === '') return;
+    const id = Number(cur);
+    if (!Number.isFinite(id) || !list.some((m) => m.idmisa === id)) {
+      idMisaExportMenciones.value = '';
+    }
+  },
+  { deep: true }
+);
 
 /* ================================
    EXPORT WORD
