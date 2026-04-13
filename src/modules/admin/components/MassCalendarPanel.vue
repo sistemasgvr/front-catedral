@@ -9,7 +9,7 @@
             Calendario de Misas
           </h2>
           <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Vista mensual · Clic para ver el detalle · Clic derecho para más acciones
+            Vista mensual · Clic para ver el detalle · Clic derecho para más acciones · Varios eventos: desplázate dentro del día
           </p>
         </div>
 
@@ -59,7 +59,7 @@
 
       <div v-if="loading" class="space-y-2 sm:space-y-3">
         <div v-for="i in 5" :key="i" class="animate-pulse">
-          <div class="h-20 sm:h-28 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+          <div class="h-24 sm:h-32 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
         </div>
       </div>
 
@@ -67,22 +67,22 @@
         <div
           v-for="i in leadingBlankDays"
           :key="'blank-' + i"
-          class="h-20 sm:h-28 lg:h-32"
+          class="h-24 sm:h-32 lg:h-36"
         ></div>
 
         <div
           v-for="day in daysInMonth"
           :key="day.dateKey"
-          class="border rounded-lg p-1.5 sm:p-2 h-20 sm:h-28 lg:h-32 overflow-hidden transition-all duration-200 hover:shadow-md"
+          class="border rounded-lg p-1.5 sm:p-2 h-24 sm:h-32 lg:h-36 flex flex-col min-h-0 overflow-hidden transition-all duration-200 hover:shadow-md"
           :class="[
             day.isToday
               ? 'bg-amber-50 dark:bg-amber-900/20 border-[#C88A2A]/50 ring-1 ring-[#C88A2A]/30'
               : 'bg-white dark:bg-gray-900/50 border-gray-200 dark:border-gray-600 hover:border-[#C88A2A]/40',
           ]"
         >
-          <div class="flex items-center justify-between mb-1 sm:mb-1.5">
+          <div class="flex items-center justify-between mb-1 sm:mb-1.5 shrink-0 gap-1">
             <span
-              class="text-xs sm:text-sm font-bold w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center"
+              class="text-xs sm:text-sm font-bold w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0"
               :class="
                 day.isToday
                   ? 'bg-[#C88A2A] text-white rounded-full'
@@ -93,18 +93,26 @@
             </span>
             <span
               v-if="day.misas.length > 0"
-              class="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-medium px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full"
+              class="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-medium px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full shrink-0"
             >
               {{ day.misas.length }}
             </span>
           </div>
 
-          <div class="space-y-0.5 sm:space-y-1">
+          <div
+            v-if="day.misas.length === 0"
+            class="flex-1 min-h-0"
+          ></div>
+
+          <div
+            v-else
+            class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain space-y-0.5 sm:space-y-1 pr-0.5 -mr-0.5 [scrollbar-width:thin] [scrollbar-color:rgba(200,138,42,0.45)_transparent] dark:[scrollbar-color:rgba(232,184,106,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C88A2A]/45 dark:[&::-webkit-scrollbar-thumb]:bg-[#E8B86A]/45 [&::-webkit-scrollbar-track]:bg-transparent"
+          >
             <button
-              v-for="misa in day.misas.slice(0, 2)"
+              v-for="misa in day.misas"
               :key="misa.id"
               type="button"
-              class="w-full text-left px-1.5 sm:px-2 py-1 sm:py-1.5 rounded border transition-all duration-200"
+              class="w-full text-left px-1.5 sm:px-2 py-1 sm:py-1.5 rounded border transition-all duration-200 shrink-0 min-h-[2.25rem] sm:min-h-[2.5rem]"
               :class="
                 misa.esPrivada
                   ? 'bg-gray-50 dark:bg-gray-800/80 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400'
@@ -113,25 +121,18 @@
               @click="emitSelect(misa)"
               @contextmenu.prevent="abrirMenuContextoMisa($event, misa)"
             >
-              <div class="flex items-center justify-between gap-1 mb-0.5">
-                <span class="text-[9px] sm:text-[10px] font-semibold truncate">
+              <div class="flex items-center justify-between gap-1 mb-0.5 min-w-0">
+                <span class="text-[9px] sm:text-[10px] font-semibold truncate min-w-0">
                   {{ misa.horario }}
                 </span>
-                <span class="text-[8px] sm:text-[9px] font-bold px-1 py-0.5 bg-white/60 dark:bg-gray-800/80 rounded">
+                <span class="text-[8px] sm:text-[9px] font-bold px-1 py-0.5 bg-white/60 dark:bg-gray-800/80 rounded shrink-0">
                   {{ misa.menciones }}
                 </span>
               </div>
-              <div class="text-[9px] sm:text-[10px] leading-tight truncate opacity-90">
+              <div class="text-[9px] sm:text-[10px] leading-snug line-clamp-2 break-words opacity-90">
                 {{ misa.titulo }}
               </div>
             </button>
-
-            <div
-              v-if="day.misas.length > 2"
-              class="text-[9px] sm:text-[10px] text-center text-gray-500 font-medium py-0.5"
-            >
-              +{{ day.misas.length - 2 }} más
-            </div>
           </div>
         </div>
       </div>
