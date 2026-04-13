@@ -9,7 +9,7 @@
             Calendario de Misas
           </h2>
           <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Vista mensual · Clic en una misa para ver el detalle
+            Vista mensual · Clic para ver el detalle · Clic derecho para más acciones
           </p>
         </div>
 
@@ -111,6 +111,7 @@
                   : 'bg-amber-50/80 dark:bg-amber-900/20 border-[#C88A2A]/30 text-gray-800 dark:text-gray-100 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 cursor-pointer'
               "
               @click="emitSelect(misa)"
+              @contextmenu.prevent="abrirMenuContextoMisa($event, misa)"
             >
               <div class="flex items-center justify-between gap-1 mb-0.5">
                 <span class="text-[9px] sm:text-[10px] font-semibold truncate">
@@ -161,11 +162,57 @@
         </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="menuContexto"
+        ref="menuContextoEl"
+        class="fixed z-[200] min-w-[168px] py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-xl"
+        :style="{ left: `${menuContexto.x}px`, top: `${menuContexto.y}px` }"
+        role="menu"
+        @click.stop
+      >
+        <button
+          type="button"
+          role="menuitem"
+          class="w-full text-left px-3 py-2 text-sm text-gray-800 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-900/25 flex items-center gap-2"
+          @click="ejecutarAccionContexto('ver')"
+        >
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Ver
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          class="w-full text-left px-3 py-2 text-sm text-gray-800 dark:text-gray-100 hover:bg-amber-50 dark:hover:bg-amber-900/25 flex items-center gap-2"
+          @click="ejecutarAccionContexto('editar')"
+        >
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Editar
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          class="w-full text-left px-3 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/25 flex items-center gap-2"
+          @click="ejecutarAccionContexto('eliminar')"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Eliminar
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { getMisasCalendario } from '../../request/actions/getMisasCalendario.action';
 import type { IMisaCalendario } from '../../request/interfaces/misa.interface';
 
@@ -194,13 +241,66 @@ const props = defineProps<{
   filtros: FiltrosCalendarioMisa;
 }>();
 
+export type AccionMisaCalendario = 'ver' | 'editar' | 'eliminar';
+
 const emit = defineEmits<{
   'select-misa': [idMisa: number];
+  'accion-misa': [payload: { accion: AccionMisaCalendario; idMisa: number }];
 }>();
 
 const loading = ref(false);
 const errorMessage = ref('');
 const misasRaw = ref<CalendarMisaItem[]>([]);
+
+const menuContexto = ref<{ idMisa: number; x: number; y: number } | null>(null);
+const menuContextoEl = ref<HTMLElement | null>(null);
+let removeMenuListeners: (() => void) | null = null;
+
+function cerrarMenuContexto() {
+  menuContexto.value = null;
+}
+
+function abrirMenuContextoMisa(e: MouseEvent, misa: CalendarMisaItem) {
+  const menuW = 180;
+  const menuH = 132;
+  const pad = 8;
+  let x = e.clientX;
+  let y = e.clientY;
+  if (x + menuW > window.innerWidth - pad) x = Math.max(pad, window.innerWidth - menuW - pad);
+  if (y + menuH > window.innerHeight - pad) y = Math.max(pad, window.innerHeight - menuH - pad);
+  menuContexto.value = { idMisa: misa.id, x, y };
+}
+
+function ejecutarAccionContexto(accion: AccionMisaCalendario) {
+  if (!menuContexto.value) return;
+  const idMisa = menuContexto.value.idMisa;
+  cerrarMenuContexto();
+  emit('accion-misa', { accion, idMisa });
+}
+
+watch(menuContexto, async (v) => {
+  removeMenuListeners?.();
+  removeMenuListeners = null;
+  if (!v) return;
+  await nextTick();
+  const onDocPointerDown = (e: PointerEvent) => {
+    const el = menuContextoEl.value;
+    if (el && !el.contains(e.target as Node)) cerrarMenuContexto();
+  };
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') cerrarMenuContexto();
+  };
+  document.addEventListener('pointerdown', onDocPointerDown, true);
+  document.addEventListener('keydown', onKey);
+  removeMenuListeners = () => {
+    document.removeEventListener('pointerdown', onDocPointerDown, true);
+    document.removeEventListener('keydown', onKey);
+  };
+});
+
+onUnmounted(() => {
+  removeMenuListeners?.();
+});
 
 const today = new Date();
 const currentMonth = ref(new Date(today.getFullYear(), today.getMonth(), 1));

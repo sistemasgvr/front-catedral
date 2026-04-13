@@ -203,6 +203,7 @@
               ref="calendarRef"
               :filtros="filtros"
               @select-misa="verDetalle"
+              @accion-misa="onAccionMisaCalendario"
             />
 
             <!-- Table -->
@@ -396,7 +397,7 @@ import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import DetailMassModal from '../components/DetailMassModal.vue';
 import FormMassModal from '../components/FormMassModal.vue';
-import MassCalendarPanel from '../components/MassCalendarPanel.vue';
+import MassCalendarPanel, { type AccionMisaCalendario } from '../components/MassCalendarPanel.vue';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
 import { generarYDescargarReporteMisasExcel } from '../utils/exportMisasExcel';
 
@@ -744,6 +745,13 @@ const abrirModalCrear = () => { modalForm.value = { isOpen: true, misaId: null }
 const verDetalle = (id: number) => { modalDetalle.value = { isOpen: true, misaId: id }; };
 const editarMisa = (id: number) => { modalForm.value = { isOpen: true, misaId: id }; };
 const confirmarEliminar = (id: number) => { modalConfirm.value = { isOpen: true, misaId: id, loading: false }; };
+
+const onAccionMisaCalendario = (payload: { accion: AccionMisaCalendario; idMisa: number }) => {
+  const { accion, idMisa } = payload;
+  if (accion === 'ver') verDetalle(idMisa);
+  else if (accion === 'editar') editarMisa(idMisa);
+  else confirmarEliminar(idMisa);
+};
 
 const handleEliminar = async () => {
   if (!modalConfirm.value.misaId) return;
