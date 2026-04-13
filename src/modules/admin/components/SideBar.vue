@@ -187,7 +187,8 @@ import {
   Box,
   ChevronDown,
   X,
-  Newspaper
+  Newspaper,
+  QrCode,
 } from "lucide-vue-next";
 
 interface SubItem {
@@ -258,6 +259,11 @@ const menuGroups = ref<MenuGroup[]>([
         name: "Solicitudes",
         path: "/solicitudes",
         icon: FileText,
+      },
+      {
+        name: "Código QR",
+        path: "/codigo-qr",
+        icon: QrCode,
       },
     ]
   },

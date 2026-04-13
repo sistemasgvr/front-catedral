@@ -6,6 +6,7 @@ import MassesTypeAdminView from "../views/MassTypesAdminView.vue";
 import NewsAdminView from "../views/NewsAdminView.vue";
 import ProfileAdminView from "../views/ProfileView.vue";
 import SettingsAdminView from "../views/SettingsView.vue";
+import QrWebLinkView from "../views/QrWebLinkView.vue";
 
 const routes = [
   {
@@ -54,6 +55,12 @@ const routes = [
     path: "/configuracion",
     name: "Configuracion",
     component: SettingsAdminView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/codigo-qr",
+    name: "CodigoQrPortal",
+    component: QrWebLinkView,
     meta: { requiresAuth: true }
   }
 ];
