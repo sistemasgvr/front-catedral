@@ -21,13 +21,13 @@
                       Código QR del portal web
                     </h1>
                     <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400 sm:text-base">
-                      Código listo para imprimir o compartir. Apunta a la URL pública configurada en
-                      <code
+                      Código listo para imprimir o compartir.
+                      <!-- <code
                         class="rounded-md bg-gray-200/80 px-1.5 py-0.5 text-xs font-mono text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                       >
                         VITE_PUBLIC_WEB_URL
-                      </code>
-                      .
+                      </code> -->
+                      
                     </p>
                   </div>
                 </div>
@@ -120,10 +120,10 @@
                       <Icon icon="mdi:image-size-select-large" class="mt-0.5 h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
                       <span>El PNG se genera a buena resolución; evita reducirlo demasiado en el diseño.</span>
                     </li>
-                    <li class="flex gap-2">
+                    <!-- <li class="flex gap-2">
                       <Icon icon="mdi:cog-outline" class="mt-0.5 h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
                       <span>Si cambias la URL en <code class="rounded bg-gray-200 px-1 text-xs dark:bg-gray-700">.env</code>, vuelve a cargar esta página para regenerar el código.</span>
-                    </li>
+                    </li> -->
                   </ul>
                 </section>
               </div>
