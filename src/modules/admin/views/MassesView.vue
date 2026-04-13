@@ -7,71 +7,85 @@
 
             <!-- Header -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 transition-colors">
-              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
+              <div
+                class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+                <div class="min-w-0 flex-1">
                   <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Gestión de Misas</h1>
                   <p class="text-gray-600 dark:text-gray-400">Administra el calendario de misas y celebraciones</p>
                 </div>
-                <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto">
+                <!-- Barra de acciones: dos grupos (vista/filtros | exportar/crear) para evitar filas huérfanas -->
+                <div
+                  class="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end lg:w-auto lg:max-w-[min(100%,44rem)] xl:max-w-none xl:flex-nowrap xl:gap-3">
                   <div
-                    class="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm">
-                    <button type="button" @click="vistaCalendario = false"
-                      class="px-4 py-3 text-sm font-semibold transition-colors min-h-[48px]"
-                      :class="!vistaCalendario
-                        ? 'bg-[#C88A2A] text-white'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
-                      Lista
-                    </button>
-                    <button type="button" @click="vistaCalendario = true"
-                      class="px-4 py-3 text-sm font-semibold transition-colors min-h-[48px] border-l border-gray-300 dark:border-gray-600"
-                      :class="vistaCalendario
-                        ? 'bg-[#C88A2A] text-white'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
-                      Calendario
+                    class="flex flex-wrap items-center justify-stretch gap-2 sm:justify-end rounded-xl border border-gray-200/80 bg-gray-50/80 p-1.5 dark:border-gray-600 dark:bg-gray-900/40 sm:inline-flex sm:shrink-0">
+                    <div
+                      class="flex min-w-0 flex-1 shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm sm:flex-initial sm:min-w-0">
+                      <button type="button" @click="vistaCalendario = false"
+                        class="flex-1 px-4 py-2.5 text-sm font-semibold transition-colors min-h-[44px] sm:flex-initial sm:px-4"
+                        :class="!vistaCalendario
+                          ? 'bg-[#C88A2A] text-white'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                        Lista
+                      </button>
+                      <button type="button" @click="vistaCalendario = true"
+                        class="flex-1 px-4 py-2.5 text-sm font-semibold transition-colors min-h-[44px] border-l border-gray-300 dark:border-gray-600 sm:flex-initial"
+                        :class="vistaCalendario
+                          ? 'bg-[#C88A2A] text-white'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                        Calendario
+                      </button>
+                    </div>
+                    <button type="button" @click="toggleFiltrosPanel"
+                      class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 sm:flex-initial sm:min-w-0"
+                      :aria-expanded="filtrosPanelAbiertos"
+                      :title="filtrosPanelAbiertos ? 'Ocultar panel de filtros' : 'Mostrar panel de filtros'">
+                      <Icon :icon="filtrosPanelAbiertos ? 'mdi:filter-off-outline' : 'mdi:filter-variant'"
+                        class="h-5 w-5 shrink-0 text-[#C88A2A]" aria-hidden="true" />
+                      <span class="whitespace-nowrap">{{ filtrosPanelAbiertos ? 'Ocultar filtros' : 'Filtros' }}</span>
+                      <span v-if="filtrosActivosCount > 0"
+                        class="min-w-[1.25rem] rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-bold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+                        {{ filtrosActivosCount }}
+                      </span>
                     </button>
                   </div>
-                  <!-- Exportar Excel -->
-                  <button @click="exportarExcel" :disabled="misasFiltradas.length === 0 || exportandoExcel"
-                    class="w-full sm:w-auto px-5 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                    <svg v-if="exportandoExcel" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 17v-6a2 2 0 012-2h7m-9 8h10a2 2 0 002-2v-8l-6-6H9a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {{ exportandoExcel ? 'Generando Excel...' : `Exportar Excel (${misasFiltradas.length})` }}
-                  </button>
-                  <!-- Exportar Word -->
-                  <button @click="exportarWord" :disabled="misasFiltradas.length === 0 || exportando"
-                    class="w-full sm:w-auto px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                    <svg v-if="exportando" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    </svg>
-                    {{ exportando ? 'Exportando...' : `Exportar Word (${misasFiltradas.length})` }}
-                  </button>
-                  <!-- Nueva Misa -->
-                  <button @click="abrirModalCrear"
-                    class="w-full sm:w-auto px-6 py-3 bg-[#C88A2A] text-white font-semibold rounded-lg hover:bg-[#B6791F] transition-all flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nueva Misa
-                  </button>
+                  <div class="hidden h-9 w-px shrink-0 bg-gray-200 dark:bg-gray-600 sm:block" aria-hidden="true" />
+                  <div
+                    class="flex flex-wrap items-center justify-stretch gap-2 sm:justify-end sm:inline-flex sm:shrink-0">
+                    <button type="button" @click="exportarExcel" :disabled="misasFiltradas.length === 0 || exportandoExcel"
+                      class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-initial sm:px-4">
+                      <Icon v-if="exportandoExcel" icon="mdi:loading" class="h-5 w-5 shrink-0 animate-spin" aria-hidden="true" />
+                      <Icon v-else icon="mdi:microsoft-excel" class="h-5 w-5 shrink-0" aria-hidden="true" />
+                      <span class="text-left leading-tight sm:whitespace-nowrap">
+                        {{ exportandoExcel ? 'Generando Excel…' : `Exportar Excel (${misasFiltradas.length})` }}
+                      </span>
+                    </button>
+                    <button type="button" @click="exportarWord" :disabled="misasFiltradas.length === 0 || exportando"
+                      class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-initial sm:px-4">
+                      <Icon v-if="exportando" icon="mdi:loading" class="h-5 w-5 shrink-0 animate-spin" aria-hidden="true" />
+                      <Icon v-else icon="mdi:microsoft-word" class="h-5 w-5 shrink-0" aria-hidden="true" />
+                      <span class="text-left leading-tight sm:whitespace-nowrap">
+                        {{ exportando ? 'Exportando…' : `Exportar Word (${misasFiltradas.length})` }}
+                      </span>
+                    </button>
+                    <button type="button" @click="abrirModalCrear"
+                      class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-[#C88A2A] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#B6791F] sm:w-auto sm:shrink-0">
+                      <Icon icon="mdi:plus" class="h-5 w-5 shrink-0" aria-hidden="true" />
+                      Nueva Misa
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 transition-colors">
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Filtros</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <!-- Filters (panel colapsable) -->
+            <Transition enter-active-class="transition duration-200 ease-out"
+              enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1">
+              <div v-show="filtrosPanelAbiertos"
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 transition-colors overflow-hidden">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Filtros</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
 
                 <!-- Búsqueda -->
                 <div>
@@ -123,9 +137,7 @@
               <div class="mt-4 flex justify-end">
                 <button @click="limpiarFiltros"
                   class="text-sm text-gray-500 dark:text-gray-400 hover:text-[#C88A2A] dark:hover:text-[#C88A2A] transition-colors flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <Icon icon="mdi:filter-remove-outline" class="w-4 h-4 shrink-0" aria-hidden="true" />
                   Limpiar filtros
                 </button>
               </div>
@@ -153,20 +165,15 @@
                   <button type="button" @click="exportarExcelMencionesSeleccion"
                     :disabled="idMisaExportMenciones === '' || misasFiltradas.length === 0 || exportandoExcelMencionesMisa !== null"
                     class="w-full sm:w-auto shrink-0 px-5 py-2.5 bg-emerald-800 text-white font-semibold rounded-lg hover:bg-emerald-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 min-h-[48px]">
-                    <svg v-if="exportandoExcelMencionesMisa === 'select'" class="animate-spin w-5 h-5" fill="none"
-                      viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                    <svg v-else class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 17v-6a2 2 0 012-2h7m-9 8h10a2 2 0 002-2v-8l-6-6H9a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <Icon v-if="exportandoExcelMencionesMisa === 'select'" icon="mdi:loading"
+                      class="w-5 h-5 animate-spin shrink-0" aria-hidden="true" />
+                    <Icon v-else icon="mdi:microsoft-excel" class="w-5 h-5 shrink-0" aria-hidden="true" />
                     Descargar Excel
                   </button>
                 </div>
               </div>
             </div>
+            </Transition>
 
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -177,11 +184,7 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ estadisticas.total }}</p>
                   </div>
                   <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <Icon icon="mdi:calendar-month-outline" class="w-6 h-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -193,11 +196,7 @@
                   </div>
                   <div
                     class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Icon icon="mdi:clock-outline" class="w-6 h-6 text-yellow-600 dark:text-yellow-400" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -209,11 +208,7 @@
                   </div>
                   <div
                     class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Icon icon="mdi:calendar-check-outline" class="w-6 h-6 text-green-600 dark:text-green-400" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -225,10 +220,7 @@
                   </div>
                   <div
                     class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
+                    <Icon icon="mdi:check-decagram-outline" class="w-6 h-6 text-purple-600 dark:text-purple-400" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -246,17 +238,12 @@
             <!-- Table -->
             <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-colors">
               <div v-if="loading" class="p-12 text-center">
-                <div
-                  class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-[#C88A2A]">
-                </div>
+                <Icon icon="mdi:loading" class="inline-block h-12 w-12 text-[#C88A2A] animate-spin" aria-hidden="true" />
                 <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando misas...</p>
               </div>
 
               <div v-else-if="misasFiltradas.length === 0" class="p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <Icon icon="mdi:calendar-blank-outline" class="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
                 <p class="mt-4 text-gray-600 dark:text-gray-400">No se encontraron misas</p>
               </div>
 
@@ -325,43 +312,25 @@
                           <button @click="verDetalle(misa.idmisa)"
                             class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title="Ver">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                            <Icon icon="mdi:eye-outline" class="w-5 h-5" aria-hidden="true" />
                           </button>
                           <button @click="editarMisa(misa.idmisa)"
                             class="p-2 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
                             title="Editar">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                            <Icon icon="mdi:pencil-outline" class="w-5 h-5" aria-hidden="true" />
                           </button>
                           <button @click="exportarExcelMencionesDeMisa(misa.idmisa, 'fila')"
                             :disabled="exportandoExcelMencionesMisa !== null"
                             class="p-2 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors disabled:opacity-40"
                             title="Excel: menciones de esta misa">
-                            <svg v-if="exportandoExcelMencionesMisa === misa.idmisa" class="animate-spin w-5 h-5"
-                              fill="none" viewBox="0 0 24 24">
-                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4" />
-                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 17v-6a2 2 0 012-2h7m-9 8h10a2 2 0 002-2v-8l-6-6H9a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                            <Icon v-if="exportandoExcelMencionesMisa === misa.idmisa" icon="mdi:loading"
+                              class="w-5 h-5 animate-spin" aria-hidden="true" />
+                            <Icon v-else icon="mdi:microsoft-excel" class="w-5 h-5" aria-hidden="true" />
                           </button>
                           <button @click="confirmarEliminar(misa.idmisa)"
                             class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Eliminar">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            <Icon icon="mdi:delete-outline" class="w-5 h-5" aria-hidden="true" />
                           </button>
                         </div>
                       </td>
@@ -410,10 +379,7 @@
                     </button>
                     <button @click="confirmarEliminar(misa.idmisa)"
                       class="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      <Icon icon="mdi:delete-outline" class="w-4 h-4 shrink-0" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -438,6 +404,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { Icon } from '@iconify/vue';
 import {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
   TextRun, AlignmentType, WidthType, BorderStyle,
@@ -460,6 +427,19 @@ import {
   generarYDescargarReporteMisasExcel,
   generarYDescargarExcelMencionesUnaMisa,
 } from '../utils/exportMisasExcel';
+
+const LS_PANEL_FILTROS = 'misas:filtros-panel-abierto';
+
+function leerPreferenciaPanelFiltros(): boolean {
+  try {
+    const v = localStorage.getItem(LS_PANEL_FILTROS);
+    if (v === '1') return true;
+    if (v === '0') return false;
+  } catch {
+    /* ignore */
+  }
+  return false;
+}
 
 /* ================================
    STATE
@@ -488,9 +468,34 @@ const filtros = ref({
   fechaHasta: '',
 });
 
+/** Panel de filtros visible; por defecto oculto para ahorrar espacio; se recuerda en localStorage. */
+const filtrosPanelAbiertos = ref(leerPreferenciaPanelFiltros());
+
+watch(filtrosPanelAbiertos, (abierto) => {
+  try {
+    localStorage.setItem(LS_PANEL_FILTROS, abierto ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+});
+
+const toggleFiltrosPanel = () => {
+  filtrosPanelAbiertos.value = !filtrosPanelAbiertos.value;
+};
+
 /* ================================
    COMPUTED
 ================================ */
+const filtrosActivosCount = computed(() => {
+  let n = 0;
+  if (filtros.value.busqueda.trim()) n++;
+  if (filtros.value.tipoMisa !== null) n++;
+  if (filtros.value.estado !== null) n++;
+  if (filtros.value.fechaDesde) n++;
+  if (filtros.value.fechaHasta) n++;
+  return n;
+});
+
 const misasFiltradas = computed(() => {
   let resultado = [...misas.value];
 

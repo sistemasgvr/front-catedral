@@ -84,9 +84,7 @@
                     class="flex-1 sm:flex-initial px-6 py-2.5 bg-[#C88A2A] text-white font-semibold rounded-lg hover:bg-[#B6791F] transition-all focus:ring-2 focus:ring-offset-2 focus:ring-[#C88A2A] dark:focus:ring-offset-gray-900"
                   >
                     <span class="flex items-center justify-center gap-2">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+                      <Icon icon="mdi:magnify" class="w-5 h-5 shrink-0" aria-hidden="true" />
                       Buscar
                     </span>
                   </button>
@@ -97,9 +95,7 @@
                     class="flex-1 sm:flex-initial px-6 py-2.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 dark:focus:ring-gray-600 dark:focus:ring-offset-gray-900"
                   >
                     <span class="flex items-center justify-center gap-2">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <Icon icon="mdi:close" class="w-5 h-5 shrink-0" aria-hidden="true" />
                       Limpiar
                     </span>
                   </button>
@@ -117,9 +113,7 @@
 
               <!-- Empty State -->
               <div v-else-if="solicitudesFiltradas.length === 0" class="text-center py-8">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
+                <Icon icon="mdi:clipboard-text-off-outline" class="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
                 <p class="mt-2 text-gray-600 dark:text-gray-400">No se encontraron solicitudes</p>
               </div>
 
@@ -197,10 +191,7 @@
                           @click="verDetalle(solicitud.idsolicitud)"
                           class="inline-flex items-center px-3 py-1.5 bg-[#C88A2A] text-white text-sm font-medium rounded-lg hover:bg-[#B6791F] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#C88A2A] dark:focus:ring-offset-gray-800"
                         >
-                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
+                          <Icon icon="mdi:eye-outline" class="w-4 h-4 mr-1 shrink-0" aria-hidden="true" />
                           Ver
                         </button>
                       </td>
@@ -232,9 +223,7 @@
 
                   <div class="space-y-2 mb-3">
                     <div class="flex items-start">
-                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                      <Icon icon="mdi:calendar-month-outline" class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5 shrink-0" aria-hidden="true" />
                       <div class="flex-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
                         <span class="text-sm text-gray-900 dark:text-white ml-1">
@@ -244,9 +233,7 @@
                     </div>
 
                     <div class="flex items-start">
-                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <Icon icon="mdi:clock-outline" class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5 shrink-0" aria-hidden="true" />
                       <div class="flex-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Fecha:</span>
                         <span class="text-sm text-gray-900 dark:text-white ml-1">
@@ -256,9 +243,7 @@
                     </div>
 
                     <div class="flex items-start">
-                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <Icon icon="mdi:cash" class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5 shrink-0" aria-hidden="true" />
                       <div class="flex-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Monto:</span>
                         <span class="text-sm font-semibold text-gray-900 dark:text-white ml-1">
@@ -272,10 +257,7 @@
                     @click="verDetalle(solicitud.idsolicitud)"
                     class="w-full flex items-center justify-center px-4 py-2 bg-[#C88A2A] text-white text-sm font-medium rounded-lg hover:bg-[#B6791F] transition-colors"
                   >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <Icon icon="mdi:eye-outline" class="w-4 h-4 mr-2 shrink-0" aria-hidden="true" />
                     Ver Detalles
                   </button>
                 </div>
@@ -297,6 +279,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { Icon } from "@iconify/vue";
 import AdminLayout from "../../layouts/AdminLayout.vue";
 import DetailRequestModal from "../../components/DetailRequestModal.vue";
 import { getOpcionesLista } from "../../actions/getOpcionesLista.action";
