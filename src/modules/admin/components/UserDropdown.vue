@@ -50,8 +50,9 @@
             Mi Perfil
           </button>
 
-          <!-- Configuración -->
+          <!-- Configuración (solo administradores) -->
           <button
+            v-if="isAdmin"
             @click="goToSettings"
             class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
           >
@@ -119,7 +120,7 @@ const { darkMode, toggleDarkMode } = useDarkMode();
 const router = useRouter();
 
 const userStore = useUserStore();
-const { user, userInitials } = storeToRefs(userStore);
+const { user, userInitials, isAdmin } = storeToRefs(userStore);
 
 const goToProfile = () => {
   close();

@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { isTokenValid, clearSession } from '../utils/auth'
 import requestRoutes from '../modules/request/router/index'
 import adminRoutes from '../modules/admin/router/index'
+import { useUserStore } from '../modules/admin/stores/user.store'
+import { isAdminRole, isPathAllowedForOperador } from '../modules/admin/auth/roles'
 
 const routes = [...requestRoutes, ...adminRoutes]
 
@@ -22,7 +24,18 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   if (isPublic && valid) {
-    return next({ name: 'Dashboard' })
+    const userStore = useUserStore()
+    userStore.loadFromStorage()
+    const dest = isAdminRole(userStore.user?.rol) ? 'Dashboard' : 'Misas'
+    return next({ name: dest })
+  }
+
+  if (requiresAuth && valid) {
+    const userStore = useUserStore()
+    userStore.loadFromStorage()
+    if (!isAdminRole(userStore.user?.rol) && !isPathAllowedForOperador(to.path)) {
+      return next({ name: 'Misas' })
+    }
   }
 
   next()

@@ -177,9 +177,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useSidebar } from "@/modules/admin/composables/useSidebar";
+import { useUserStore } from "@/modules/admin/stores/user.store";
+import { isAdminRole } from "@/modules/admin/auth/roles";
 import {
   LayoutDashboard,
   FileText,
@@ -211,6 +213,7 @@ interface MenuGroup {
 }
 
 const route = useRoute();
+const userStore = useUserStore();
 
 const {
   isExpanded,
@@ -218,6 +221,10 @@ const {
   setIsHovered,
   toggleMobileSidebar,
 } = useSidebar();
+
+onMounted(() => {
+  userStore.loadFromStorage();
+});
 
 const openSubmenuLocal = ref<string | null>(null);
 
@@ -246,7 +253,7 @@ const shouldShowText = computed(() => {
 //   return user.value?.correo || 'usuario@ejemplo.com';
 // });
 
-const menuGroups = ref<MenuGroup[]>([
+const menuGroupsAdmin: MenuGroup[] = [
   {
     title: "Principal",
     items: [
@@ -287,7 +294,21 @@ const menuGroups = ref<MenuGroup[]>([
       },
     ]
   }
-]);
+];
+
+const menuGroupsOperador: MenuGroup[] = [
+  {
+    title: "Operación",
+    items: [
+      { name: "Misas", path: "/misas", icon: Church },
+      { name: "Solicitudes", path: "/solicitudes", icon: FileText },
+    ],
+  },
+];
+
+const menuGroups = computed(() =>
+  isAdminRole(userStore.user?.rol) ? menuGroupsAdmin : menuGroupsOperador
+);
 
 const isActive = (path: string): boolean => route.path === path;
 

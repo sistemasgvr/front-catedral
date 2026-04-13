@@ -197,8 +197,8 @@ const handleLogin = async () => {
       localStorage.removeItem("savedEmail");
     }
 
-    // Redirigir al dashboard o página principal
-    router.push("/dashboard");
+    const esAdmin = userData.rol === "admin";
+    router.push(esAdmin ? "/dashboard" : "/misas");
   } catch (error) {
     // Mostrar mensaje de error
     errorMessage.value =

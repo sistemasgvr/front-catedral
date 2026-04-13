@@ -1,4 +1,5 @@
 import { supabase } from '../../../api/supabase'
+import { normalizeRol, type AppRole } from '../auth/roles'
 
 export interface LoginPayload {
   p_correo: string
@@ -10,6 +11,7 @@ export interface LoginResponse {
   nombre: string
   correo: string
   auth_uid: string
+  rol: AppRole
 }
 
 export const loginUser = async (payload: LoginPayload): Promise<LoginResponse> => {
@@ -33,5 +35,19 @@ export const loginUser = async (payload: LoginPayload): Promise<LoginResponse> =
     throw new Error('No se encontró el perfil del usuario')
   }
 
-  return perfilData[0] as LoginResponse
+  const row = perfilData[0] as Record<string, unknown>
+  const meta = (authData.user.user_metadata ?? {}) as Record<string, unknown>
+  const appMeta = (authData.user.app_metadata ?? {}) as Record<string, unknown>
+  const rolFromRow = typeof row.rol === 'string' ? row.rol : undefined
+  const rolFromUserMeta = typeof meta.rol === 'string' ? meta.rol : undefined
+  const rolFromAppMeta = typeof appMeta.role === 'string' ? appMeta.role : undefined
+  const rol = normalizeRol(rolFromRow ?? rolFromUserMeta ?? rolFromAppMeta)
+
+  return {
+    idusuarios: Number(row.idusuarios),
+    nombre: String(row.nombre),
+    correo: String(row.correo),
+    auth_uid: String(row.auth_uid ?? ''),
+    rol,
+  }
 }

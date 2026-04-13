@@ -67,6 +67,7 @@ const pageTitle = computed(() => {
     '/noticias': 'Noticias',
     '/perfil': 'Mi Perfil',
     '/configuracion': 'Configuración',
+    '/codigo-qr': 'Código QR',
   };
   return titles[route.path] || 'Catedral San Pedro';
 });

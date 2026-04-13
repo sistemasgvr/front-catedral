@@ -19,7 +19,7 @@ const routes = [
     path: "/dashboard",
     name: "Dashboard",
     component: DashboardAdminView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, adminOnly: true }
   },
   {
     path: "/solicitudes",
@@ -37,13 +37,13 @@ const routes = [
     path: "/tipos-misa",
     name: "TiposMisa",
     component: MassesTypeAdminView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, adminOnly: true }
   },
   {
     path: "/noticias", 
     name: "Noticias", 
     component: NewsAdminView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, adminOnly: true }
   },
   {
     path: "/perfil",
@@ -55,13 +55,13 @@ const routes = [
     path: "/configuracion",
     name: "Configuracion",
     component: SettingsAdminView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, adminOnly: true }
   },
   {
     path: "/codigo-qr",
     name: "CodigoQrPortal",
     component: QrWebLinkView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, adminOnly: true }
   }
 ];
 

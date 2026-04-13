@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { normalizeRol, isAdminRole, type AppRole } from '../auth/roles'
 
 interface User {
   idusuarios: number
   nombre: string
   correo: string
   auth_uid?: string
+  /** Si falta (sesiones antiguas), se trata como `admin` hasta el próximo login. */
+  rol?: AppRole
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -20,6 +23,9 @@ export const useUserStore = defineStore('user', () => {
     return (names[0]?.[0] ?? 'U').toUpperCase()
   })
 
+  const rol = computed(() => normalizeRol(user.value?.rol))
+  const isAdmin = computed(() => isAdminRole(user.value?.rol))
+
   const loadFromStorage = () => {
     const saved = localStorage.getItem('user')
     if (!saved) return
@@ -31,9 +37,11 @@ export const useUserStore = defineStore('user', () => {
           parsed.user &&
           typeof parsed.user === 'object'
         ) {
-          user.value = parsed.user as User
+          const u = parsed.user as User
+          user.value = { ...u, rol: normalizeRol(u.rol) }
         } else if ('idusuarios' in parsed) {
-          user.value = parsed as unknown as User
+          const u = parsed as unknown as User
+          user.value = { ...u, rol: normalizeRol(u.rol) }
         } else {
           user.value = null
         }
@@ -45,7 +53,9 @@ export const useUserStore = defineStore('user', () => {
 
   const updateUser = (data: Partial<User>) => {
     if (!user.value) return
-    user.value = { ...user.value, ...data }
+    const next = { ...user.value, ...data }
+    if (data.rol !== undefined) next.rol = normalizeRol(data.rol)
+    user.value = next
     localStorage.setItem('user', JSON.stringify(user.value))
   }
 
@@ -54,5 +64,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('user')
   }
 
-  return { user, userInitials, loadFromStorage, updateUser, clearUser }
+  return { user, userInitials, rol, isAdmin, loadFromStorage, updateUser, clearUser }
 })
