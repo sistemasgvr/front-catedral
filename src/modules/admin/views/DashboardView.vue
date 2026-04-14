@@ -9,7 +9,7 @@
               ¡Bienvenido, {{ user?.nombre || 'Administrador' }}!
             </h1>
             <p class="text-white/90">
-              Panel de Administración de la Catedral
+              Panel de Administración de la Parroquia
             </p>
           </div>
           <div class="hidden md:block">

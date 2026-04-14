@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto flex items-center justify-between">
       <div class="text-center flex-1">
         <h1 class="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-md">
-          Iglesia de San Pedro de Lambayeque
+          Parroquia de San Pedro, Mórrope
         </h1>
         <p class="text-amber-100/90 text-sm mt-1">Nueva Solicitud de Misa</p>
       </div>

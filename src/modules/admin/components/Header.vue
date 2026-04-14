@@ -69,7 +69,7 @@ const pageTitle = computed(() => {
     '/configuracion': 'Configuración',
     '/codigo-qr': 'Código QR',
   };
-  return titles[route.path] || 'Catedral San Pedro';
+  return titles[route.path] || 'Parroquia San Pedro';
 });
 
 const handleMobileToggle = () => {
