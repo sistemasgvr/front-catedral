@@ -41,15 +41,12 @@
       </select>
 
       <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-        <svg 
-          class="w-5 h-5 transition-colors duration-200" 
-          :class="errorMessage ? 'text-red-400' : 'text-gray-400 dark:text-gray-500'" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
+        <Icon
+          icon="mdi:chevron-down"
+          class="w-5 h-5 transition-colors duration-200"
+          :class="errorMessage ? 'text-red-400' : 'text-gray-400 dark:text-gray-500'"
+          aria-hidden="true"
+        />
       </div>
     </div>
     
@@ -60,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
+
 interface Option {
   id: number;
   nombre: string;

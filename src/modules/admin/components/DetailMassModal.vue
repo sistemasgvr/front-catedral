@@ -33,9 +33,7 @@
                   @click="closeModal"
                   class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
+                  <Icon icon="mdi:close" class="w-6 h-6" aria-hidden="true" />
                 </button>
               </div>
 
@@ -52,9 +50,7 @@
 
                 <!-- Error -->
                 <div v-else-if="error" class="text-center py-12">
-                  <svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
+                  <Icon icon="mdi:alert-circle-outline" class="mx-auto h-12 w-12 text-red-500" aria-hidden="true" />
                   <p class="mt-4 text-red-600 dark:text-red-400">{{ error }}</p>
                   <button @click="cargarDetalle" class="mt-4 px-4 py-2 bg-[#C88A2A] text-white rounded-lg hover:bg-[#B6791F] transition-colors">
                     Reintentar
@@ -67,9 +63,7 @@
                   <!-- Información de la Misa -->
                   <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <svg class="w-5 h-5 mr-2 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
+                      <Icon icon="mdi:information-outline" class="w-5 h-5 mr-2 text-[#C88A2A]" aria-hidden="true" />
                       Información de la Misa
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -101,9 +95,7 @@
                   <!-- Menciones con datos del solicitante -->
                   <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <svg class="w-5 h-5 mr-2 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      </svg>
+                      <Icon icon="mdi:account-group-outline" class="w-5 h-5 mr-2 text-[#C88A2A]" aria-hidden="true" />
                       Menciones
                       <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-[#C88A2A]/10 text-[#C88A2A] rounded-full">
                         {{ misa.menciones?.length ?? 0 }}
@@ -115,9 +107,7 @@
                       v-if="!misa.menciones || misa.menciones.length === 0"
                       class="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 italic"
                     >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
+                      <Icon icon="mdi:emoticon-sad-outline" class="w-4 h-4 shrink-0" aria-hidden="true" />
                       No hay menciones registradas para esta misa.
                     </div>
 
@@ -150,27 +140,21 @@
                               v-if="item.mencion.solicitud.celular"
                               class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400"
                             >
-                              <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                              </svg>
+                              <Icon icon="mdi:phone-outline" class="w-3.5 h-3.5 text-[#C88A2A] shrink-0" aria-hidden="true" />
                               {{ item.mencion.solicitud.celular }}
                             </span>
                             <span
                               v-if="item.mencion.solicitud.correo"
                               class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400"
                             >
-                              <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                              </svg>
+                              <Icon icon="mdi:email-outline" class="w-3.5 h-3.5 text-[#C88A2A] shrink-0" aria-hidden="true" />
                               {{ item.mencion.solicitud.correo }}
                             </span>
                             <span
                               v-if="item.mencion.solicitud.nrodocumento"
                               class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400"
                             >
-                              <svg class="w-3.5 h-3.5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2"/>
-                              </svg>
+                              <Icon icon="mdi:card-account-details-outline" class="w-3.5 h-3.5 text-[#C88A2A] shrink-0" aria-hidden="true" />
                               Doc: {{ item.mencion.solicitud.nrodocumento }}
                             </span>
                           </div>
@@ -182,9 +166,7 @@
                   <!-- Auditoría -->
                   <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <svg class="w-5 h-5 mr-2 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
+                      <Icon icon="mdi:history" class="w-5 h-5 mr-2 text-[#C88A2A]" aria-hidden="true" />
                       Información de Auditoría
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -223,6 +205,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
 import type { IMisaDetalle } from '../interfaces/misa.interface';
 

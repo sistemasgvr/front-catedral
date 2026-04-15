@@ -22,10 +22,7 @@
     </div>
 
     <div v-else-if="noticias.length === 0" class="empty-state">
-      <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="opacity-50">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-          d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-      </svg>
+      <Icon icon="mdi:newspaper-variant-outline" class="w-12 h-12 opacity-50" aria-hidden="true" />
       <p class="font-medium">No hay noticias disponibles</p>
     </div>
 
@@ -49,6 +46,7 @@
               />
               <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors pointer-events-none"></div>
             </div>
+            <div v-else class="card-img-wrap card-img-placeholder" aria-hidden="true" />
 
             <div class="card-body">
               <h4 class="card-title">{{ noticia.titulo }}</h4>
@@ -67,17 +65,11 @@
 
               <div class="card-meta">
                 <span class="meta-date">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <Icon icon="mdi:calendar" class="w-3 h-3 shrink-0" aria-hidden="true" />
                   {{ formatearFecha(noticia.fecha_publicacion) }}
                 </span>
                 <span v-if="noticia.fecha_evento" class="meta-event">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <Icon icon="mdi:clock-outline" class="w-3 h-3 shrink-0" aria-hidden="true" />
                   Evento: {{ formatearFecha(noticia.fecha_evento) }}
                 </span>
               </div>
@@ -99,6 +91,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { Icon } from '@iconify/vue';
 import { obtenerNoticiasPublicas } from '../actions/noticias.action';
 import NoticiaImageModal from './NoticiaImageModal.vue';
 import type { INoticiaResumen } from '@/interfaces/noticia.interface';
@@ -232,16 +225,20 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
 }
 .slider-track {
   display: flex;
+  align-items: stretch;
   gap: 16px;
   will-change: transform;
   padding: 8px 24px;
   width: max-content;
 }
 
-/* News card */
+/* News card — misma altura que la tarjeta más alta del carril; el pie queda abajo */
 .news-card {
   flex-shrink: 0;
   width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid rgba(0,0,0,0.06);
@@ -275,8 +272,10 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
 }
 
 .card-inner {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .card-img-wrap {
@@ -284,6 +283,10 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
   height: 140px;
   overflow: hidden;
   flex-shrink: 0;
+}
+.card-img-placeholder {
+  background: linear-gradient(135deg, rgba(200,138,42,0.12) 0%, rgba(182,121,31,0.08) 100%);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 .card-img {
   width: 100%;
@@ -298,9 +301,11 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
 
 .card-body {
   padding: 14px 16px 12px;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
 }
 
 .card-title {
@@ -351,7 +356,9 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: auto;
+  padding-top: 8px;
+  flex-shrink: 0;
 }
 .meta-date, .meta-event {
   display: flex;
@@ -426,6 +433,11 @@ onUnmounted(() => { cancelAnimationFrame(animFrame); });
   background: #1e293b;
   border: 1px solid rgba(211, 158, 58, 0.2);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .card-img-placeholder {
+  background: linear-gradient(135deg, rgba(200, 138, 42, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .dark-mode .card-title {

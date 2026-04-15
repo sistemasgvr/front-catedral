@@ -37,9 +37,7 @@
                   @click="handleClose"
                   class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <Icon icon="mdi:close" class="w-6 h-6" aria-hidden="true" />
                 </button>
               </div>
 
@@ -168,12 +166,12 @@
         
         <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"
              :class="toast.tipo === 'success' ? 'text-green-500 bg-green-100 dark:bg-green-800/30' : 'text-red-500 bg-red-100 dark:bg-red-800/30'">
-          <svg v-if="toast.tipo === 'success'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-          <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/></svg>
+          <Icon v-if="toast.tipo === 'success'" icon="mdi:check-circle" class="w-5 h-5" aria-hidden="true" />
+          <Icon v-else icon="mdi:alert-circle" class="w-5 h-5" aria-hidden="true" />
         </div>
         <div class="ms-3 text-sm font-medium text-gray-900 dark:text-white">{{ toast.mensaje }}</div>
         <button @click="toast.visible = false" class="ms-auto bg-transparent text-gray-400 hover:text-gray-900 rounded-lg p-1.5 inline-flex h-8 w-8 dark:hover:text-white">
-          <svg class="w-3 h-3" fill="none" viewBox="0 0 14 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/></svg>
+          <Icon icon="mdi:close" class="w-3 h-3" aria-hidden="true" />
         </button>
       </div>
     </Transition>
@@ -182,6 +180,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onUnmounted } from 'vue';
+import { Icon } from '@iconify/vue';
 import { crearMisa, actualizarMisa, obtenerDetalleMisa } from '../actions/crudMisa.action';
 import { listarTiposMisa } from '../actions/tipoMisa.action';
 import type { ICrearMisaForm } from '../interfaces/misa.interface';

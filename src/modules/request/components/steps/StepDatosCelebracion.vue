@@ -22,10 +22,7 @@
             <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-lg p-4 border border-[#D39E3A]/30 dark:border-amber-700/30">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <svg class="w-5 h-5 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
+                  <Icon icon="mdi:cash-register" class="w-5 h-5 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
                   <span class="text-[#4A4A4A] dark:text-gray-200 font-medium">{{ etiquetaBloqueCosto }}</span>
                 </div>
                 <span class="text-[#C88A2A] dark:text-[#E5A84A] font-bold text-xl">S/ {{ precioTipoMisa.toFixed(2) }}</span>
@@ -90,17 +87,11 @@
                   </div>
                   <div class="mt-2 flex gap-4 text-sm text-gray-600 dark:text-gray-400">
                     <span class="flex items-center gap-1">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                      <Icon icon="mdi:calendar" class="w-4 h-4 shrink-0" aria-hidden="true" />
                       {{ formatDate(misa.fecha) }}
                     </span>
                     <span class="flex items-center gap-1">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <Icon icon="mdi:clock-outline" class="w-4 h-4 shrink-0" aria-hidden="true" />
                       {{ misa.horario }}
                     </span>
                   </div>
@@ -109,10 +100,7 @@
 
               <!-- Sin misas disponibles -->
               <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
-                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Icon icon="mdi:emoticon-sad-outline" class="w-12 h-12 mx-auto mb-2 text-gray-300 dark:text-gray-600" aria-hidden="true" />
                 <p>No hay misas comunitarias disponibles</p>
               </div>
 
@@ -134,11 +122,7 @@
         <!-- Validation Message -->
         <div v-if="hasInteracted && hasErrors"
           class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4 flex items-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+          <Icon icon="mdi:alert-outline" class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" aria-hidden="true" />
           <p class="text-amber-700 dark:text-amber-300 text-sm">
             Complete todos los campos para continuar
           </p>
@@ -150,6 +134,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed, reactive } from "vue";
+import { Icon } from "@iconify/vue";
 import { useRoute } from "vue-router";
 import { useSolicitudStore } from "../../stores/solicitud.store";
 import { getMisas } from "../../actions/getMisas.action";

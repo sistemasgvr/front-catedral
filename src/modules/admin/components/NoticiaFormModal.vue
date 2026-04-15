@@ -16,17 +16,12 @@
               <!-- Header -->
               <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <svg class="w-5 h-5 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
+                  <Icon icon="mdi:newspaper-variant-outline" class="w-5 h-5 text-[#C88A2A]" aria-hidden="true" />
                   {{ isEditing ? 'Editar Noticia' : 'Nueva Noticia' }}
                 </h2>
                 <button @click="cerrar"
                   class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <Icon icon="mdi:close" class="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
 
@@ -74,10 +69,7 @@
                       class="h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-600" />
                     <button type="button" @click="quitarImagen"
                       class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <Icon icon="mdi:close" class="w-3 h-3" aria-hidden="true" />
                     </button>
                   </div>
 
@@ -118,6 +110,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { Icon } from '@iconify/vue';
 import InputText from '@/components/inputs/InputText.vue';
 import InputTextarea from '@/components/inputs/InputTextarea.vue';
 import InputDate from '@/components/inputs/InputDate.vue';

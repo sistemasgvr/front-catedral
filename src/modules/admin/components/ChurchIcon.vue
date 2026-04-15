@@ -1,20 +1,29 @@
 <template>
-    <svg width="256px" height="256px" viewBox="0 0 48.00 48.00" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC"
-            stroke-width="2.784"></g>
-        <g id="SVGRepo_iconCarrier">
-            <path d="M24 4V16" stroke="#000000" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M20 8L28 8" stroke="#000000" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M15 28H9C7.89543 28 7 28.8954 7 30V44" stroke="#000000" stroke-width="2.4" stroke-linejoin="round">
-            </path>
-            <path d="M33 28H39C40.1046 28 41 28.8954 41 30V44" stroke="#000000" stroke-width="2.4"
-                stroke-linejoin="round"></path>
-            <path d="M4 44L44 44" stroke="#000000" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M15 23L24 15L33 23V44H15V23Z" fill="#ff9d14" stroke="#000000" stroke-width="2.4"
-                stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M24 34V44" stroke="white" stroke-width="2.4" stroke-linecap="round"></path>
-            <path d="M20 44L28 44" stroke="#000000" stroke-width="2.4" stroke-linecap="round"></path>
-        </g>
-    </svg>
+  <Icon
+    :icon="iconId"
+    :width="size"
+    :height="size"
+    class="inline-block shrink-0"
+    :class="variant === 'filled' ? 'text-[#ff9d14]' : undefined"
+    aria-hidden="true"
+  />
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { Icon } from "@iconify/vue";
+
+const props = withDefaults(
+  defineProps<{
+    /** Lado del icono en px (cuadrado) */
+    size?: number;
+    /** `filled`: color ámbar tipo tejado; `outline`: hereda el color del contenedor (p. ej. `class="text-white/20"`) */
+    variant?: "filled" | "outline";
+  }>(),
+  { size: 256, variant: "filled" }
+);
+
+const iconId = computed(() =>
+  props.variant === "outline" ? "mdi:church-outline" : "mdi:church"
+);
+</script>

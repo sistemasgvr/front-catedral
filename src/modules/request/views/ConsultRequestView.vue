@@ -18,9 +18,7 @@
           <!-- Search Card - Más compacto -->
           <section class="bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-[#E0D5C5] p-5">
             <!-- <h2 class="text-lg md:text-xl font-serif font-bold text-[#8C1D40] mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <Icon icon="mdi:magnify" class="w-5 h-5 shrink-0" aria-hidden="true" />
               Consultar Solicitud
             </h2> -->
 
@@ -45,10 +43,7 @@
                     class="min-h-[42px] px-6 rounded-lg bg-[#8C1D40] hover:bg-[#741735] text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     :disabled="loading"
                   >
-                    <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>{{ loading ? "Buscando..." : "Buscar" }}</span>
                   </button>
                   <button
@@ -63,9 +58,7 @@
               </div>
 
               <p v-if="fetchError" class="text-sm text-red-600 flex items-center gap-1 mt-2">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
+                <Icon icon="mdi:close-circle" class="w-4 h-4 shrink-0 text-red-600" aria-hidden="true" />
                 {{ fetchError }}
               </p>
             </form>
@@ -79,9 +72,7 @@
             <!-- Header de resultados -->
             <div class="bg-gradient-to-r from-[#8C1D40] to-[#741735] px-5 py-3 flex items-center justify-between">
               <h3 class="text-base font-semibold text-white flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <Icon icon="mdi:file-document-outline" class="w-5 h-5 shrink-0" aria-hidden="true" />
                 Resultados
               </h3>
               <span class="text-sm text-white/90 font-medium bg-white/20 px-3 py-1 rounded-full">
@@ -101,9 +92,7 @@
               v-else-if="solicitudes.length === 0"
               class="text-center py-12 px-4"
             >
-              <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <Icon icon="mdi:file-document-remove-outline" class="w-16 h-16 mx-auto text-gray-300 mb-3" aria-hidden="true" />
               <p class="text-gray-500 font-medium">No se encontraron solicitudes</p>
               <p class="text-sm text-gray-400 mt-1">Intente con otro número de documento</p>
             </div>
@@ -181,9 +170,7 @@
                       class="text-[#8C1D40] hover:underline font-medium flex items-center gap-1"
                     >
                       Ver comprobante
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
+                      <Icon icon="mdi:open-in-new" class="w-3 h-3 shrink-0" aria-hidden="true" />
                     </a>
                   </div>
                   -->
@@ -224,6 +211,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { Icon } from "@iconify/vue";
 import { InputText } from "@/components/inputs";
 import { getSolicitudesByDocumento } from "../actions/getSolicitudesByDocumento.action";
 import type { ISolicitudDb } from "../interfaces/solicitudDb.interface";
@@ -285,7 +273,7 @@ const formatDateShort = (value: string | null): string => {
 //   if (typeof value !== "number") return "0.00";
 //   return value.toFixed(2);
 // };
-// </script>
+</script>
 
 <style scoped>
 @media (max-width: 768px) {

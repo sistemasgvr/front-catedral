@@ -27,9 +27,7 @@
           @click="abrirModal"
           class="flex items-center gap-2 px-4 py-2 bg-[#3B5998] hover:bg-[#344e86] text-white rounded-lg transition-colors font-medium"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+          <Icon icon="mdi:plus" class="w-5 h-5" aria-hidden="true" />
           Nuevo
         </button>
       </div>
@@ -38,9 +36,7 @@
       <div class="space-y-3 mb-6">
         <!-- Sin menciones -->
         <div v-if="store.solicitud.menciones.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg">
-          <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
+          <Icon icon="mdi:clipboard-text-outline" class="w-12 h-12 mx-auto mb-2 opacity-60" aria-hidden="true" />
           <p>Aún no ha agregado ningún registro</p>
           <p class="text-sm mt-1">Use «Nuevo» para agregar {{ articuloNuevo }}</p>
         </div>
@@ -68,18 +64,14 @@
                 class="p-2 text-[#3B5998] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                 title="Editar"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
+                <Icon icon="mdi:pencil-outline" class="w-4 h-4" aria-hidden="true" />
               </button>
               <button
                 @click="confirmarEliminar(mencion.id)"
                 class="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 title="Eliminar"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <Icon icon="mdi:delete-outline" class="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -97,9 +89,7 @@
 
       <!-- Mensaje informativo -->
       <div v-if="store.solicitud.menciones.length > 0" class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg p-3 flex items-start gap-2">
-        <svg class="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <Icon icon="mdi:information-outline" class="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" aria-hidden="true" />
         <p class="text-sm text-blue-700 dark:text-blue-300">
           Has agregado <strong>{{ store.solicitud.menciones.length }}</strong> {{ etiquetaLinea.toLowerCase() }}(s).
           El costo se sumará al monto total de la solicitud.
@@ -128,9 +118,7 @@
               @click="cerrarModal"
               class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <Icon icon="mdi:close" class="w-6 h-6" aria-hidden="true" />
             </button>
           </div>
 
@@ -185,6 +173,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { Icon } from '@iconify/vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { type IMencion } from '../../interfaces/solicitud.interface';
 import {

@@ -40,9 +40,7 @@
                     @click="goPrevMonth"
                     :disabled="!canGoPrev"
                   >
-                    <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <Icon icon="mdi:chevron-left" class="w-4 h-4 sm:mr-1.5 shrink-0" aria-hidden="true" />
                     <span class="hidden sm:inline">Anterior</span>
                   </button>
 
@@ -57,9 +55,7 @@
                     @click="goNextMonth"
                   >
                     <span class="hidden sm:inline">Siguiente</span>
-                    <svg class="w-4 h-4 sm:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <Icon icon="mdi:chevron-right" class="w-4 h-4 sm:ml-1.5 shrink-0" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -169,9 +165,7 @@
                 class="mt-4 sm:mt-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg"
               >
                 <div class="flex items-start gap-2 sm:gap-3">
-                  <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                  </svg>
+                  <Icon icon="mdi:close-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <p class="text-xs sm:text-sm text-red-700 font-medium">
                     {{ errorMessage }}
                   </p>
@@ -210,6 +204,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
 import HeaderSolicitud from "../components/HeaderSolicitud.vue";
 import FooterSolicitud from "../components/FooterSolicitud.vue";

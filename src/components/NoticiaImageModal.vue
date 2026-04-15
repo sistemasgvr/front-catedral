@@ -34,9 +34,7 @@
               @click="$emit('close')"
               class="absolute -top-3 -right-3 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-md border border-white/20"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <Icon icon="mdi:close" class="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </Transition>
@@ -46,6 +44,8 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
+
 defineProps<{
   isOpen: boolean;
   src?: string | null;

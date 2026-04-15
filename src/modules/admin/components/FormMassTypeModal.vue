@@ -40,9 +40,7 @@
                   @click="handleClose"
                   class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <Icon icon="mdi:close" class="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
 
@@ -121,6 +119,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onUnmounted } from 'vue';
+import { Icon } from '@iconify/vue';
 import { crearTipoMisa, actualizarTipoMisa, obtenerTipoMisa } from '../actions/tipoMisa.action';
 
 interface Props {

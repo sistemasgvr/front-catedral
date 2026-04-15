@@ -11,23 +11,14 @@
       <button @click="toggleDarkMode"
         class="flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 shadow-lg hover:shadow-xl group"
         title="Cambiar modo de color">
-        <svg v-if="darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-        </svg>
-        <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
+        <Icon v-if="darkMode" icon="mdi:weather-sunny" class="w-5 h-5 text-white" aria-hidden="true" />
+        <Icon v-else icon="mdi:weather-night" class="w-5 h-5 text-white" aria-hidden="true" />
       </button>
 
       <router-link to="/login" class="group" title="Acceso administrativo">
         <div
           class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 shadow-lg hover:shadow-xl">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
+          <Icon icon="mdi:lock-outline" class="w-5 h-5 text-white" aria-hidden="true" />
           <span class="hidden sm:inline text-white text-sm font-medium">Admin</span>
         </div>
       </router-link>
@@ -38,10 +29,8 @@
 
       <!-- Header -->
       <header class="flex-shrink-0 flex flex-col items-center justify-center px-4 pt-12 pb-6">
-        <!-- <div class="w-24 h-24 bg-gradient-to-br from-[#C88A2A]/40 to-[#B6791F]/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 border-2 border-[#D39E3A]/50 shadow-2xl animate-fade-in">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-amber-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L12 6M12 6L8 10M12 6L16 10M8 10V18H6V22H18V18H16V10M8 10H16M12 10V18M10 22V18M14 22V18" />
-          </svg>
+        <!-- <div class="w-24 h-24 ... rounded-full ... animate-fade-in">
+          <Icon icon="mdi:church" class="w-12 h-12 text-amber-200" aria-hidden="true" />
         </div> -->
         <h1
           class="text-[clamp(1.75rem,5vw,3rem)] font-serif font-bold text-white mb-3 text-center drop-shadow-2xl animate-slide-up">
@@ -68,9 +57,7 @@
           style="animation-delay: 0.4s">
 
           <h3 class="flex items-center gap-2 mb-6 text-xl font-bold text-gray-800 transition-colors dark:text-white">
-            <svg class="w-6 h-6 text-[#C88A2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+            <Icon icon="mdi:lightning-bolt-outline" class="w-6 h-6 text-[#C88A2A]" aria-hidden="true" />
             Servicios Disponibles
           </h3>
 
@@ -80,19 +67,17 @@
               <div class="flex items-center gap-3">
                 <div
                   class="flex items-center justify-center w-10 h-10 transition-colors rounded-lg bg-white/20 group-hover:bg-white/30">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
+                  <Icon icon="mdi:plus" class="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div class="text-left">
                   <p class="text-base font-bold">Nueva Solicitud</p>
                   <p class="text-xs text-white/80">Solicita una misa o celebración</p>
                 </div>
               </div>
-              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+              <Icon icon="mdi:chevron-right"
+                class="w-5 h-5 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </router-link>
 
             <router-link to="/consultar"
@@ -100,20 +85,17 @@
               <div class="flex items-center gap-3">
                 <div
                   class="flex items-center justify-center w-10 h-10 transition-colors rounded-lg bg-white/20 group-hover:bg-white/30">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                  <Icon icon="mdi:magnify" class="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div class="text-left">
                   <p class="text-base font-bold">Consultar Solicitud</p>
                   <p class="text-xs text-white/80">Verifica el estado de tu solicitud</p>
                 </div>
               </div>
-              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+              <Icon icon="mdi:chevron-right"
+                class="w-5 h-5 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </router-link>
 
             <router-link to="/menciones"
@@ -121,20 +103,17 @@
               <div class="flex items-center gap-3">
                 <div
                   class="flex items-center justify-center w-10 h-10 transition-colors rounded-lg bg-white/20 group-hover:bg-white/30">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <Icon icon="mdi:calendar-month-outline" class="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div class="text-left">
                   <p class="text-base font-bold">Misas Comunitarias</p>
                   <p class="text-xs text-white/80">Solicita mencion(es) en una misa pública</p>
                 </div>
               </div>
-              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+              <Icon icon="mdi:chevron-right"
+                class="w-5 h-5 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </router-link>
           </div>
         </div>
@@ -150,12 +129,7 @@
       <footer class="flex-shrink-0 text-center py-6 px-4 border-t border-white/10 backdrop-blur-sm">
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-amber-200/70 text-sm">
           <p class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <Icon icon="mdi:map-marker-outline" class="w-4 h-4 shrink-0" aria-hidden="true" />
             Mórrope, Lambayeque - Perú
           </p>
           <span class="hidden sm:inline text-amber-200/40">•</span>
@@ -168,6 +142,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import { Icon } from '@iconify/vue';
 import NewsSection from '@/components/NewsSection.vue';
 import { useDarkMode } from '@/composables/useDarkMode';
 

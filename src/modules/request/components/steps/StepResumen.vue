@@ -5,9 +5,7 @@
       <!-- Success Header -->
       <div class="text-center mb-8">
         <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-10 h-10 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
+          <Icon icon="mdi:check-circle-outline" class="w-10 h-10 text-green-500 dark:text-green-400" aria-hidden="true" />
         </div>
         <h2 class="text-2xl md:text-3xl font-serif font-bold text-[#C88A2A] dark:text-[#E5A84A]">
           ¡Solicitud Registrada!
@@ -22,9 +20,7 @@
         <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-7 h-7 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
-              <svg class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              <Icon icon="mdi:account-outline" class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
             </div>
             <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">Datos del Solicitante</h3>
           </div>
@@ -52,9 +48,7 @@
         <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-7 h-7 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
-              <svg class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+              <Icon icon="mdi:church-outline" class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
             </div>
             <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">Datos de la Celebración</h3>
           </div>
@@ -86,9 +80,7 @@
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
-                <svg class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+                <Icon icon="mdi:clipboard-text-outline" class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
               </div>
               <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">{{ store.etiquetaPasoLineas }} ({{ store.solicitud.menciones.length }})</h3>
             </div>
@@ -110,9 +102,7 @@
         <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30" :class="{ 'md:col-span-2': store.esPagoSoloTarifaPlana || store.solicitud.menciones.length === 0 }">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-7 h-7 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
-              <svg class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <Icon icon="mdi:credit-card-outline" class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
             </div>
             <div>
               <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">Información de Pago</h3>
@@ -158,6 +148,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { Icon } from '@iconify/vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
 import { getOpcionesLista } from '../../actions/getOpcionesLista.action';

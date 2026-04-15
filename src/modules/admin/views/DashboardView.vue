@@ -13,7 +13,7 @@
             </p>
           </div>
           <div class="hidden md:block">
-            <Icon icon="mdi:church-outline" class="w-20 h-20 text-white/20" aria-hidden="true" />
+            <ChurchIcon variant="outline" :size="80" class="text-white/20" />
           </div>
         </div>
       </div>
@@ -254,6 +254,7 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import { Icon } from "@iconify/vue";
 import { storeToRefs } from "pinia";
 import AdminLayout from "../layouts/AdminLayout.vue";
+import ChurchIcon from "../components/ChurchIcon.vue";
 import ChartComponent from "../components/ChartComponent.vue";
 import { getDashboardData } from "../actions/dashboard.actions";
 import type { IDashboardData } from "../interfaces/dashboard.interface";

@@ -124,14 +124,10 @@
           <!-- Icono -->
           <div class="flex justify-center mb-3">
             <div v-if="archivoSeleccionado" class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <Icon icon="mdi:check-circle-outline" class="w-6 h-6 text-green-500 dark:text-green-400" aria-hidden="true" />
             </div>
             <div v-else class="w-12 h-12 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
+              <Icon icon="mdi:cloud-upload-outline" class="w-6 h-6 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
             </div>
           </div>
 
@@ -157,9 +153,7 @@
                 @click.stop="eliminarArchivo"
                 class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
               >
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <Icon icon="mdi:close" class="w-3 h-3" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -197,9 +191,7 @@
         v-if="hasInteracted && hasErrors" 
         class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4 flex items-center gap-3"
       >
-        <svg class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
+        <Icon icon="mdi:alert-outline" class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" aria-hidden="true" />
         <p class="text-amber-700 dark:text-amber-300 text-sm">Debe subir el comprobante de pago para continuar</p>
       </div>
 
@@ -208,9 +200,7 @@
         v-if="submitError" 
         class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg p-4 flex items-start gap-3"
       >
-        <svg class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <Icon icon="mdi:alert-circle-outline" class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
         <p class="text-red-700 dark:text-red-300 text-sm">{{ submitError }}</p>
       </div>
     </div>
@@ -219,6 +209,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue';
+import { Icon } from '@iconify/vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
 import { registrarSolicitudCompleta } from '../../actions/registrarSolicitudCompleta.action';
