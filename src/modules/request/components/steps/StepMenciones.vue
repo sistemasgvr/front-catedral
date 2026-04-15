@@ -4,14 +4,21 @@
       
       <!-- Title -->
       <h2 class="text-2xl font-serif font-bold text-[#C88A2A] dark:text-[#E5A84A] mb-2 text-center">
-        Menciones
+        {{ tituloPaso }}
       </h2>
       <div class="w-12 h-1 bg-[#C88A2A] dark:bg-[#E5A84A] rounded mx-auto mb-6"></div>
 
       <!-- Descripción -->
       <p class="text-sm text-[#7A7A7A] dark:text-gray-400 text-center mb-6">
-        Agregue las menciones que desea incluir en la misa. Cada mención tiene un costo de 
-        <span class="font-semibold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
+        {{ descripcionPaso }}
+        <template v-if="store.modoRegistroLineas === 'mencion'">
+          Cada mención tiene un costo de
+          <span class="font-semibold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_UNITARIO.toFixed(2) }}</span>.
+        </template>
+        <template v-else>
+          Cada registro tiene un costo de
+          <span class="font-semibold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_UNITARIO.toFixed(2) }}</span>.
+        </template>
       </p>
       
       <!-- Botón Agregar -->
@@ -34,8 +41,8 @@
           <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p>No hay menciones agregadas</p>
-          <p class="text-sm mt-1">Haga clic en "+ Nuevo" para agregar una</p>
+          <p>Aún no ha agregado ningún registro</p>
+          <p class="text-sm mt-1">Use «Nuevo» para agregar {{ articuloNuevo }}</p>
         </div>
 
         <!-- Lista -->
@@ -46,8 +53,8 @@
         >
           <!-- Header con costo -->
           <div class="bg-gray-50 dark:bg-gray-700/60 px-4 py-2 flex justify-between items-center border-b border-[#E0D5C5] dark:border-gray-700">
-            <span class="text-xs text-gray-500 dark:text-gray-400">Mención</span>
-            <span class="text-sm font-semibold text-[#4A4A4A] dark:text-gray-200">Costo: S/ {{ mencion.costo }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ etiquetaLinea }}</span>
+            <span class="text-sm font-semibold text-[#4A4A4A] dark:text-gray-200">Costo: S/ {{ mencion.costo.toFixed(2) }}</span>
           </div>
           
           <!-- Contenido -->
@@ -94,8 +101,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <p class="text-sm text-blue-700 dark:text-blue-300">
-          Has agregado <strong>{{ store.solicitud.menciones.length }}</strong> mención(es). 
-          El costo de las menciones se sumará al monto total de la solicitud.
+          Has agregado <strong>{{ store.solicitud.menciones.length }}</strong> {{ etiquetaLinea.toLowerCase() }}(s).
+          El costo se sumará al monto total de la solicitud.
         </p>
       </div>
     </div>
@@ -115,7 +122,7 @@
           <!-- Header -->
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-serif font-bold text-[#C88A2A] dark:text-[#E5A84A]">
-              {{ editando ? 'Editar Mención' : 'Nueva Mención' }}
+              {{ editando ? `Editar ${etiquetaLinea}` : `Nueva ${etiquetaLinea}` }}
             </h3>
             <button 
               @click="cerrarModal"
@@ -131,13 +138,13 @@
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-[#4A4A4A] dark:text-gray-300 mb-1">
-                Descripción <span class="text-red-500">*</span>
+                Datos <span class="text-red-500">*</span>
               </label>
               <textarea
                 v-model="nuevaDescripcion"
                 rows="4"
                 maxlength="200"
-                placeholder="Ej: En memoria de Juan Pérez, Por la salud de María..."
+                :placeholder="placeholderLineaVal"
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#C88A2A]/30 focus:border-[#C88A2A] transition-all resize-none bg-white dark:bg-gray-700 text-[#4A4A4A] dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 :class="errorDescripcion ? 'border-red-300 dark:border-red-500' : 'border-[#E0D5C5] dark:border-gray-600'"
               ></textarea>
@@ -150,8 +157,8 @@
 
             <!-- Costo -->
             <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-lg p-3 flex justify-between items-center border border-transparent dark:border-amber-700/30">
-              <span class="text-[#4A4A4A] dark:text-gray-200">Costo de la mención:</span>
-              <span class="font-bold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_MENCION.toFixed(2) }}</span>
+              <span class="text-[#4A4A4A] dark:text-gray-200">Costo por {{ etiquetaLinea.toLowerCase() }}:</span>
+              <span class="font-bold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_UNITARIO.toFixed(2) }}</span>
             </div>
           </div>
 
@@ -180,10 +187,42 @@
 import { computed, ref } from 'vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { type IMencion } from '../../interfaces/solicitud.interface';
+import {
+  descripcionPasoRegistro,
+  etiquetaLineaSingular,
+  etiquetaPasoRegistro,
+  getModoRegistroLineas,
+  placeholderLinea,
+} from '../../constants/tipoMisaRegistro';
+import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
 
 const store = useSolicitudStore();
 
-const COSTO_MENCION = computed(() => store.solicitud.costoMencion || 0);
+const tituloPaso = computed(() =>
+  etiquetaPasoRegistro(store.solicitud.idTipoMisa, store.solicitud.nombreTipoMisa),
+);
+const descripcionPaso = computed(() =>
+  descripcionPasoRegistro(store.solicitud.idTipoMisa, store.solicitud.nombreTipoMisa),
+);
+const etiquetaLinea = computed(() =>
+  etiquetaLineaSingular(store.solicitud.idTipoMisa, store.solicitud.nombreTipoMisa),
+);
+const placeholderLineaVal = computed(() =>
+  placeholderLinea(store.solicitud.idTipoMisa, store.solicitud.nombreTipoMisa),
+);
+const COSTO_UNITARIO = computed(() =>
+  store.solicitud.costoMencion > 0 ? store.solicitud.costoMencion : COSTO_MENCION,
+);
+
+const articuloNuevo = computed(() => {
+  const m = getModoRegistroLineas(
+    store.solicitud.idTipoMisa,
+    store.solicitud.nombreTipoMisa,
+  );
+  if (m === 'nino') return 'un niño/a';
+  if (m === 'pareja') return 'una pareja';
+  return 'una mención';
+});
 
 // Modal
 const modalVisible = ref(false);
@@ -240,15 +279,23 @@ const guardarMencion = () => {
 };
 
 const confirmarEliminar = (id: number) => {
-  if (confirm('¿Está seguro de eliminar esta mención?')) {
+  if (confirm(`¿Está seguro de eliminar ${etiquetaLinea.value.toLowerCase()}?`)) {
     store.eliminarMencion(id);
   }
 };
 
-// Exponer método de validación para el wizard
 defineExpose({
   validate: async () => {
-    // Las menciones son opcionales, siempre válido
+    const modo = getModoRegistroLineas(
+      store.solicitud.idTipoMisa,
+      store.solicitud.nombreTipoMisa,
+    );
+    if (modo === 'nino' || modo === 'pareja') {
+      if (store.solicitud.menciones.length < 1) {
+        alert(`Debe registrar al menos ${articuloNuevo.value}`);
+        return false;
+      }
+    }
     return true;
   },
 });

@@ -26,7 +26,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <span class="text-[#4A4A4A] dark:text-gray-200 font-medium">Costo de Misa Privada</span>
+                  <span class="text-[#4A4A4A] dark:text-gray-200 font-medium">{{ etiquetaBloqueCosto }}</span>
                 </div>
                 <span class="text-[#C88A2A] dark:text-[#E5A84A] font-bold text-xl">S/ {{ precioTipoMisa.toFixed(2) }}</span>
               </div>
@@ -41,11 +41,20 @@
                 @blur="touchField('idHorario')" />
             </div>
 
-            <!-- Intención -->
-            <InputTextarea v-model="intencion" name="intencion" label="Intención"
-              placeholder="Escriba la intención de la misa (ej: Acción de gracias, por la salud de...)" :rows="3"
-              :maxlength="500" :show-count="true" :required="true" :error-message="fieldErrors.intencion"
-              @blur="touchField('intencion')" />
+            <!-- Intención: solo misa privada y funeral (no bautizo/matrimonio) -->
+            <InputTextarea
+              v-if="requiereIntencion"
+              v-model="intencion"
+              name="intencion"
+              label="Intención"
+              placeholder="Escriba la intención de la misa (ej: Acción de gracias, por la salud de...)"
+              :rows="3"
+              :maxlength="500"
+              :show-count="true"
+              :required="true"
+              :error-message="fieldErrors.intencion"
+              @blur="touchField('intencion')"
+            />
           </template>
 
           <!-- MISA COMUNITARIA -->
@@ -157,6 +166,10 @@ import {
   mapTipoMisaToSelect,
   type ITipomisa,
 } from "../../interfaces/tipoMisa.interface";
+import {
+  omitePasoRegistroLineas,
+  requiereCampoIntencion,
+} from "../../constants/tipoMisaRegistro";
 
 const store = useSolicitudStore();
 const route = useRoute();
@@ -196,6 +209,21 @@ const precioTipoMisa = computed(() => {
   );
   return tipo?.precio ?? 0;
 });
+
+const nombreTipoSeleccionado = computed(
+  () =>
+    tiposMisaOriginales.value.find((t) => t.idtipomisa === idTipoMisa.value)
+      ?.nombre ?? "",
+);
+
+const etiquetaBloqueCosto = computed(() => {
+  const n = nombreTipoSeleccionado.value;
+  return n ? `Costo — ${n}` : "Costo";
+});
+
+const requiereIntencion = computed(() =>
+  requiereCampoIntencion(idTipoMisa.value, nombreTipoSeleccionado.value),
+);
 
 const hasErrors = computed(() => Object.values(fieldErrors).some((e) => e));
 
@@ -274,7 +302,7 @@ const validateField = (fieldName: string) => {
       }
       break;
     case "intencion":
-      if (esMisaPrivada.value) {
+      if (esMisaPrivada.value && requiereIntencion.value) {
         if (!intencion.value) {
           fieldErrors.intencion = "La intención es requerida";
         } else if (intencion.value.length < 10) {
@@ -282,6 +310,8 @@ const validateField = (fieldName: string) => {
         } else {
           fieldErrors.intencion = undefined;
         }
+      } else {
+        fieldErrors.intencion = undefined;
       }
       break;
   }
@@ -303,12 +333,23 @@ const validateAll = (): boolean => {
     if (!idHorario.value) {
       fieldErrors.idHorario = "Seleccione un horario";
     }
-    if (!intencion.value) {
-      fieldErrors.intencion = "La intención es requerida";
-    } else if (intencion.value.length < 10) {
-      fieldErrors.intencion = "Mínimo 10 caracteres";
+    if (requiereIntencion.value) {
+      if (!intencion.value) {
+        fieldErrors.intencion = "La intención es requerida";
+      } else if (intencion.value.length < 10) {
+        fieldErrors.intencion = "Mínimo 10 caracteres";
+      }
+    } else {
+      fieldErrors.intencion = undefined;
     }
-    store.solicitud.montoTotal = precioTipoMisa.value;
+    if (omitePasoRegistroLineas(idTipoMisa.value, nombreTipoSeleccionado.value)) {
+      store.solicitud.montoTotal = precioTipoMisa.value;
+    } else {
+      store.solicitud.montoTotal = store.solicitud.menciones.reduce(
+        (s, m) => s + m.costo,
+        0,
+      );
+    }
   } else if (idTipoMisa.value) {
     if (!idMisaSeleccionada.value) {
       fieldErrors.idMisaSeleccionada = "Seleccione una misa";
@@ -362,12 +403,20 @@ watch(idTipoMisa, async (newValue, oldValue) => {
 watch(
   [idTipoMisa, fechaCelebracion, idHorario, intencion, idMisaSeleccionada],
   () => {
+    const tipo = tiposMisaOriginales.value.find(
+      (t) => t.idtipomisa === idTipoMisa.value,
+    );
     store.updateDatosCelebracion({
       idTipoMisa: idTipoMisa.value,
+      nombreTipoMisa: tipo?.nombre ?? "",
       fechaCelebracion: fechaCelebracion.value,
       idHorario: idHorario.value,
-      intencion: esMisaPrivada.value ? intencion.value : "",
-      esMisaPrivada: esMisaPrivada.value,
+      intencion:
+        esMisaPrivada.value &&
+        requiereCampoIntencion(idTipoMisa.value, tipo?.nombre ?? "")
+          ? intencion.value
+          : "",
+      costoMencion: tipo?.precio ?? 0,
     });
   },
   { deep: true },

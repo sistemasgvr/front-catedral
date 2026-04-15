@@ -69,9 +69,9 @@
             </div>
             <div class="col-span-2">
               <p class="text-gray-500 dark:text-gray-400">Tipo de Misa</p>
-              <p class="font-medium text-[#4A4A4A] dark:text-gray-200">{{ store.esMisaPrivada ? 'Misa Privada' : 'Misa Comunitaria' }}</p>
+              <p class="font-medium text-[#4A4A4A] dark:text-gray-200">{{ store.solicitud.nombreTipoMisa || '—' }}</p>
             </div>
-            <div v-if="store.esMisaPrivada && store.solicitud.intencion" class="col-span-2">
+            <div v-if="store.solicitud.intencion" class="col-span-2">
               <p class="text-gray-500 dark:text-gray-400">Intención</p>
               <p class="font-medium text-[#4A4A4A] dark:text-gray-200 line-clamp-2">{{ store.solicitud.intencion }}</p>
             </div>
@@ -82,7 +82,7 @@
       <!-- Segunda fila: Menciones y Pago -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <!-- Menciones (solo si hay) -->
-        <div v-if="!store.esMisaPrivada && store.solicitud.menciones.length > 0" class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30">
+        <div v-if="!store.esPagoSoloTarifaPlana && store.solicitud.menciones.length > 0" class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
@@ -90,9 +90,9 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">Menciones ({{ store.solicitud.menciones.length }})</h3>
+              <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">{{ store.etiquetaPasoLineas }} ({{ store.solicitud.menciones.length }})</h3>
             </div>
-            <span class="text-xs text-[#C88A2A] dark:text-[#E5A84A] font-medium">S/ {{ COSTO_MENCION.toFixed(2) }} c/u</span>
+            <span class="text-xs text-[#C88A2A] dark:text-[#E5A84A] font-medium">S/ {{ unitCostoLinea.toFixed(2) }} c/u</span>
           </div>
           <div class="space-y-1 max-h-24 overflow-y-auto">
             <div 
@@ -107,7 +107,7 @@
         </div>
 
         <!-- Información de Pago -->
-        <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30" :class="{ 'md:col-span-2': store.esMisaPrivada || store.solicitud.menciones.length === 0 }">
+        <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-4 border border-[#D39E3A]/20 dark:border-amber-700/30" :class="{ 'md:col-span-2': store.esPagoSoloTarifaPlana || store.solicitud.menciones.length === 0 }">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-7 h-7 bg-[#C88A2A]/20 dark:bg-[#C88A2A]/10 rounded-full flex items-center justify-center">
               <svg class="w-3.5 h-3.5 text-[#C88A2A] dark:text-[#E5A84A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,12 +121,12 @@
           </div>
           
           <div class="space-y-2 text-xs">
-            <div v-if="store.esMisaPrivada" class="flex justify-between">
-              <span class="text-[#4A4A4A] dark:text-gray-300">Misa Privada</span>
+            <div v-if="store.esPagoSoloTarifaPlana" class="flex justify-between">
+              <span class="text-[#4A4A4A] dark:text-gray-300">{{ store.solicitud.nombreTipoMisa || 'Tarifa' }}</span>
               <span class="text-[#4A4A4A] dark:text-gray-300">S/ {{ store.solicitud.montoTotal.toFixed(2) }}</span>
             </div>
             <div v-else class="flex justify-between">
-              <span class="text-[#4A4A4A] dark:text-gray-300">Menciones ({{ store.solicitud.menciones.length }} x S/ {{ COSTO_MENCION.toFixed(2) }})</span>
+              <span class="text-[#4A4A4A] dark:text-gray-300">{{ store.etiquetaPasoLineas }} ({{ store.solicitud.menciones.length }} x S/ {{ unitCostoLinea.toFixed(2) }})</span>
               <span class="text-[#4A4A4A] dark:text-gray-300">S/ {{ store.totalMenciones.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between pt-2 border-t border-[#D39E3A]/20 dark:border-amber-700/30">
@@ -192,8 +192,12 @@ onMounted(async () => {
 });
 
 // Computed
+const unitCostoLinea = computed(() =>
+  store.solicitud.costoMencion > 0 ? store.solicitud.costoMencion : COSTO_MENCION,
+);
+
 const totalPagado = computed(() => {
-  if (store.esMisaPrivada) {
+  if (store.esPagoSoloTarifaPlana) {
     return store.solicitud.montoTotal;
   }
   return store.totalMenciones;

@@ -1,7 +1,11 @@
 import { isAxiosError } from "axios";
 import apiClient from "../../../api/apiClient";
 import { crearMisaDesdeSolicitud } from "./crudMisa.action";
-import { crearMencion, vincularMencionAMisa } from "./menciones.action";
+import {
+  crearMencion,
+  obtenerMencionesPorSolicitud,
+  vincularMencionAMisa,
+} from "./menciones.action";
 
 export interface IActualizarSolicitudData {
   nombres: string;
@@ -67,21 +71,34 @@ export const actualizarSolicitud = async (
 
         console.log('Misa creada con ID:', idMisaCreada);
 
-        // Crear la mención asociada a la solicitud
-        const idMencionCreada = await crearMencion({
-          idsolicitud: idSolicitud,
-          descripcion: data.intencion || `Intención de ${data.nombres} ${data.apellidos}`,
-        });
+        const mencionesPrevias = await obtenerMencionesPorSolicitud(idSolicitud);
 
-        console.log('Mención creada con ID:', idMencionCreada);
+        if (mencionesPrevias.length > 0) {
+          for (const row of mencionesPrevias) {
+            const idm = row?.idmencion as number | undefined;
+            if (idm != null) {
+              await vincularMencionAMisa({ idmencion: idm, idmisa: idMisaCreada });
+            }
+          }
+          console.log(
+            'Menciones existentes vinculadas a la misa:',
+            mencionesPrevias.length,
+          );
+        } else {
+          const idMencionCreada = await crearMencion({
+            idsolicitud: idSolicitud,
+            descripcion:
+              data.intencion ||
+              `Intención de ${data.nombres} ${data.apellidos}`,
+          });
 
-        // Vincular la mención con la misa
-        await vincularMencionAMisa({
-          idmencion: idMencionCreada,
-          idmisa: idMisaCreada,
-        });
+          await vincularMencionAMisa({
+            idmencion: idMencionCreada,
+            idmisa: idMisaCreada,
+          });
 
-        console.log('Mención vinculada a la misa exitosamente');
+          console.log('Mención creada y vinculada a la misa');
+        }
       } catch (errorMisa) {
         console.error('Error al crear misa automática:', errorMisa);
         // No lanzamos el error para no revertir la actualización de la solicitud

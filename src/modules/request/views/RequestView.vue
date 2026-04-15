@@ -26,7 +26,7 @@
               <StepDatosCelebracion ref="step2Ref" />
             </TabContent>
 
-            <TabContent title="Menciones" :before-change="validateStep3">
+            <TabContent :title="tituloPasoLineas" :before-change="validateStep3">
               <StepMenciones ref="step3Ref" />
             </TabContent>
 
@@ -35,8 +35,8 @@
             </TabContent>
 
             <TabContent title="Confirmación" :before-change="() => true">
-              <StepResumen ref="step5Ref" @ir-inicio="router.push('/')"
-                @nueva-solicitud="() => { store.resetSolicitud(); router.push('/nueva-solicitud'); }" />
+              <StepResumen ref="step5Ref" @ir-inicio="irAlInicioTrasExito"
+                @nueva-solicitud="() => { store.limpiarDatosSolicitud(); router.push('/nueva-solicitud'); }" />
             </TabContent>
             <template #finish>
             </template>
@@ -51,8 +51,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, nextTick, computed, watch, onMounted } from 'vue';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import { FormWizard, TabContent } from 'vue3-form-wizard';
 import 'vue3-form-wizard/dist/style.css';
 
@@ -68,8 +68,40 @@ import { useSolicitudStore } from '../stores/solicitud.store';
 const store = useSolicitudStore();
 const router = useRouter();
 
+const tituloPasoLineas = computed(() => store.etiquetaPasoLineas);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const wizardRef = ref<any>(null);
+
+/** vue3-form-wizard registra el título del tab solo al montar TabContent; no reacciona a cambios del prop `:title`. */
+function syncTituloPasoLineasEnBarraWizard(titulo: string) {
+  const aplicar = (): boolean => {
+    const root = wizardRef.value?.$el as HTMLElement | undefined;
+    if (!root?.querySelector) return false;
+    const el = root.querySelector(
+      '.wizard-nav-pills li:nth-of-type(3) .stepTitle'
+    );
+    if (el) {
+      el.textContent = titulo;
+      return true;
+    }
+    return false;
+  };
+
+  nextTick(() => {
+    if (aplicar()) return;
+    requestAnimationFrame(() => {
+      if (aplicar()) return;
+      setTimeout(() => aplicar(), 0);
+    });
+  });
+}
+
+watch(tituloPasoLineas, (t) => syncTituloPasoLineasEnBarraWizard(t), { immediate: true });
+
+onMounted(() => {
+  setTimeout(() => syncTituloPasoLineasEnBarraWizard(tituloPasoLineas.value), 80);
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const step1Ref = ref<any>(null);
@@ -121,9 +153,7 @@ const validateStep2 = async (): Promise<boolean> => {
     const isValid = await step2Ref.value.validate();
 
     if (isValid) {
-      const esMisaPrivada = step2Ref.value?.esMisaPrivada;
-
-      if (esMisaPrivada) {
+      if (store.esPagoSoloTarifaPlana) {
         await nextTick();
         setTimeout(() => {
           if (wizardRef.value) {
@@ -160,11 +190,12 @@ const validateStep4 = async (): Promise<boolean> => {
 
 // Manejar cambios de paso
 const onStepChange = (prevIndex: number, nextIndex: number) => {
+  syncTituloPasoLineasEnBarraWizard(tituloPasoLineas.value);
 
   hideFinishButton();
 
   // Si estamos yendo hacia atrás desde Pago (3) a Menciones (2) y es misa privada
-  if (prevIndex === 3 && nextIndex === 2 && store.esMisaPrivada) {
+  if (prevIndex === 3 && nextIndex === 2 && store.esPagoSoloTarifaPlana) {
     nextTick(() => {
       setTimeout(() => {
         if (wizardRef.value) {
@@ -191,13 +222,26 @@ const onStepChange = (prevIndex: number, nextIndex: number) => {
   }
 };
 
-const onComplete = () => {
-  localStorage.removeItem('solicitud');
-  localStorage.removeItem('solicitud_registered');
-  store.resetSolicitud();
+const limpiarTrasRegistro = () => {
+  store.limpiarDatosSolicitud();
   isRegistered.value = false;
+};
+
+/** Tras registro exitoso, la limpieza la hace `onBeforeRouteLeave` al salir de esta ruta. */
+const irAlInicioTrasExito = () => {
   router.push('/');
 };
+
+const onComplete = () => {
+  limpiarTrasRegistro();
+  router.push('/');
+};
+
+onBeforeRouteLeave(() => {
+  if (isRegistered.value) {
+    limpiarTrasRegistro();
+  }
+});
 </script>
 
 <style>

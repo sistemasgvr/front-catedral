@@ -1,3 +1,9 @@
+/** Relación embebida (select=tipomisa(...)) */
+export interface ITipomisaEmbeddedList {
+  idtipomisa: number;
+  nombre: string;
+}
+
 export interface ISolicitudDb {
   idsolicitud: number;
 
@@ -14,13 +20,16 @@ export interface ISolicitudDb {
   fechamisadeseada: string; // YYYY-MM-DD
   fechasolicitud: string;   // YYYY-MM-DD
 
-  idtipomisa: number;
-  idhorario: number;
+  idtipomisa: number | null;
+  idhorario: number | null;
+
+  /** Incluido cuando el listado usa select=*,tipomisa(...) */
+  tipomisa?: ITipomisaEmbeddedList | ITipomisaEmbeddedList[] | null;
 
   intencion: string;
   voucherpago: string;
 
-  montototal: number;
+  montototal: number | null;
 
   estado: boolean;
 

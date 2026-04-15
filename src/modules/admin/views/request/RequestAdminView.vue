@@ -168,7 +168,7 @@
                       </td>
                       <td class="px-6 py-4">
                         <span class="text-sm text-gray-900 dark:text-gray-200">
-                          {{ getNombreTipoMisa(solicitud.idtipomisa) }}
+                          {{ getNombreTipoMisa(solicitud) }}
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
@@ -183,7 +183,7 @@
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                          S/ {{ Number(solicitud.montototal).toFixed(2) }}
+                          S/ {{ Number(solicitud.montototal ?? 0).toFixed(2) }}
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -227,7 +227,7 @@
                       <div class="flex-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Tipo:</span>
                         <span class="text-sm text-gray-900 dark:text-white ml-1">
-                          {{ getNombreTipoMisa(solicitud.idtipomisa) }}
+                          {{ getNombreTipoMisa(solicitud) }}
                         </span>
                       </div>
                     </div>
@@ -247,7 +247,7 @@
                       <div class="flex-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Monto:</span>
                         <span class="text-sm font-semibold text-gray-900 dark:text-white ml-1">
-                          S/ {{ Number(solicitud.montototal).toFixed(2) }}
+                          S/ {{ Number(solicitud.montototal ?? 0).toFixed(2) }}
                         </span>
                       </div>
                     </div>
@@ -289,6 +289,7 @@ import { mapOpcionToSelect } from "../../interfaces/opcionLista.interface";
 import type { ISelectOption } from "../../interfaces/opcionLista.interface";
 import type { ISolicitudDb } from "../../interfaces/listSolicitudes.interface";
 import type { ITipoMisa } from "../../interfaces/tipoMisa.interface";
+import { resolveTipoMisaNombre } from "../../utils/resolveTipoMisaNombre";
 
 /** Mismo valor que `revision` en cambiarEstadoSolicitud.action (lista estados, id opción). */
 const ID_ESTADO_EN_REVISION = 17;
@@ -335,14 +336,18 @@ const solicitudesFiltradas = computed(() => {
   }
 
   if (filtros.value.fechaDesde) {
-    resultado = resultado.filter(s => 
-      s.fechamisadeseada >= filtros.value.fechaDesde
+    resultado = resultado.filter(
+      (s) =>
+        s.fechamisadeseada &&
+        s.fechamisadeseada >= filtros.value.fechaDesde,
     );
   }
 
   if (filtros.value.fechaHasta) {
-    resultado = resultado.filter(s => 
-      s.fechamisadeseada <= filtros.value.fechaHasta
+    resultado = resultado.filter(
+      (s) =>
+        s.fechamisadeseada &&
+        s.fechamisadeseada <= filtros.value.fechaHasta,
     );
   }
 
@@ -422,8 +427,8 @@ const cargarSolicitudes = async () => {
   }
 };
 
-const buscarSolicitudes = () => {
-  console.log("Buscando con filtros:", filtros.value);
+const buscarSolicitudes = async () => {
+  await cargarSolicitudes();
 };
 
 const limpiarFiltros = () => {
@@ -435,15 +440,14 @@ const limpiarFiltros = () => {
   };
 };
 
-const getNombreOpcion = (id: number): string => {
+const getNombreOpcion = (id: number | null | undefined): string => {
+  if (id == null) return "N/A";
   const opcion = opcionesCache.value.get(id);
   return opcion?.nombre || "N/A";
 };
 
-const getNombreTipoMisa = (id: number): string => {
-  const tipo = tiposMisa.value.find(t => t.idtipomisa === id);
-  return tipo?.nombre || "N/A";
-};
+const getNombreTipoMisa = (s: ISolicitudDb): string =>
+  resolveTipoMisaNombre(s.idtipomisa, s.tipomisa ?? null, tiposMisa.value);
 
 const getEstadoClass = (idEstado: number): string => {
   const estado = getNombreOpcion(idEstado).toUpperCase();

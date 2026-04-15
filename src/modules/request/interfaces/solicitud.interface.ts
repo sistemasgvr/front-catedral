@@ -10,6 +10,8 @@ export interface ISolicitud {
   // Datos de la celebración (Paso 2)
   fechaCelebracion: string;
   idTipoMisa: number | null;
+  /** Nombre del tipo de misa (tipomisa.nombre), para reglas de UI/cobro por nombre */
+  nombreTipoMisa: string;
   idHorario: number | null;
   intencion: string;
 
@@ -68,6 +70,7 @@ export const solicitudInicial: ISolicitud = {
   correo: '',
   fechaCelebracion: '',
   idTipoMisa: null,
+  nombreTipoMisa: '',
   idHorario: null,
   intencion: '',
   menciones: [],

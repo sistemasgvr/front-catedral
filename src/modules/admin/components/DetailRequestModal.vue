@@ -176,7 +176,7 @@
                           </option>
                         </select>
                         <p v-else class="text-sm font-medium text-gray-900 dark:text-white">
-                          {{ getNombreTipoMisa(solicitud.idtipomisa) }}
+                          {{ nombreTipoDisplay }}
                         </p>
                       </div>
                       <div>
@@ -207,15 +207,34 @@
                           {{ formatearFecha(solicitud.fechacelebracion) }}
                         </p>
                       </div>
-                      <div class="md:col-span-2">
+                      <div v-if="mostrarCampoIntencion" class="md:col-span-2">
                         <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Intención</label>
                         <textarea v-if="modoEdicion" v-model="formEdicion.intencion" rows="3"
                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent"
                           placeholder="Escribe la intención de la misa..."></textarea>
                         <p v-else class="text-sm font-medium text-gray-900 dark:text-white">
-                          {{ solicitud.intencion || "Sin intención especificada" }}
+                          {{ solicitud.intencion?.trim() || "—" }}
                         </p>
                       </div>
+                    </div>
+
+                    <div
+                      v-if="solicitud.menciones && solicitud.menciones.length > 0"
+                      class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600"
+                    >
+                      <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                        {{ etiquetaLineasTitulo }} ({{ solicitud.menciones.length }})
+                      </p>
+                      <ul class="space-y-2">
+                        <li
+                          v-for="(m, idx) in solicitud.menciones"
+                          :key="m.idmencion"
+                          class="text-sm text-gray-900 dark:text-gray-100 pl-2 border-l-2 border-[#C88A2A]/60"
+                        >
+                          <span class="text-gray-500 dark:text-gray-400 mr-2">{{ idx + 1 }}.</span>
+                          {{ m.descripcion?.trim() || "—" }}
+                        </li>
+                      </ul>
                     </div>
                   </div>
 
@@ -325,7 +344,7 @@
                               class="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent" />
                           </div>
                           <p v-else class="text-2xl font-bold text-[#C88A2A]">
-                            S/ {{ Number(solicitud.montototal).toFixed(2) }}
+                            S/ {{ Number(solicitud.montototal ?? 0).toFixed(2) }}
                           </p>
                         </div>
                         <div>
@@ -486,6 +505,8 @@ import type { IDetalleSolicitud } from "../interfaces/detalleSolicitud.interface
 import type { ISelectOption } from "../interfaces/opcionLista.interface";
 import type { ITipoMisa } from "../interfaces/tipoMisa.interface";
 import ConfirmModal from "./ConfirmModal.vue";
+import { etiquetaPasoRegistro, requiereCampoIntencion } from "../../request/constants/tipoMisaRegistro";
+import { resolveTipoMisaNombre } from "../utils/resolveTipoMisaNombre";
 
 /* ================================
    PROPS & EMITS
@@ -569,6 +590,41 @@ const formEdicion = ref({
 const mensajeWhatsApp = computed(() => {
   if (!solicitud.value) return "";
   return `Hola ${solicitud.value.nombres}, te contacto respecto a tu solicitud de misa #${solicitud.value.idsolicitud}.`;
+});
+
+const nombreTipoDisplay = computed(() => {
+  if (!solicitud.value) return "N/A";
+  return resolveTipoMisaNombre(
+    solicitud.value.idtipomisa,
+    solicitud.value.tipomisa ?? null,
+    tiposMisa.value,
+  );
+});
+
+const muestraIntencion = computed(() => {
+  if (!solicitud.value) return false;
+  return requiereCampoIntencion(
+    solicitud.value.idtipomisa,
+    nombreTipoDisplay.value === "N/A" ? null : nombreTipoDisplay.value,
+  );
+});
+
+const mostrarCampoIntencion = computed(() => {
+  if (modoEdicion.value) {
+    const nombre = tiposMisa.value.find(
+      (t) => t.idtipomisa === formEdicion.value.idtipomisa,
+    )?.nombre;
+    return requiereCampoIntencion(formEdicion.value.idtipomisa, nombre);
+  }
+  return muestraIntencion.value;
+});
+
+const etiquetaLineasTitulo = computed(() => {
+  if (!solicitud.value) return "Registros";
+  return etiquetaPasoRegistro(
+    solicitud.value.idtipomisa,
+    nombreTipoDisplay.value === "N/A" ? null : nombreTipoDisplay.value,
+  );
 });
 
 /* ================================
@@ -686,13 +742,13 @@ const activarModoEdicion = () => {
     nrodocumento: solicitud.value.nrodocumento,
     celular: solicitud.value.celular,
     correo: solicitud.value.correo,
-    idtipomisa: solicitud.value.idtipomisa,
-    idhorario: solicitud.value.idhorario,
+    idtipomisa: solicitud.value.idtipomisa ?? 0,
+    idhorario: solicitud.value.idhorario ?? 0,
     fechamisadeseada: solicitud.value.fechamisadeseada,
     fechacelebracion: solicitud.value.fechacelebracion,
     fechasolicitud: solicitud.value.fechasolicitud,
     intencion: solicitud.value.intencion || "",
-    montototal: solicitud.value.montototal,
+    montototal: solicitud.value.montototal ?? 0,
     voucherpago: solicitud.value.voucherpago,
     idestadoproceso: solicitud.value.idestadoproceso,
     estado: solicitud.value.estado,
@@ -810,14 +866,10 @@ const closeModal = () => {
   emit("close");
 };
 
-const getNombreOpcion = (id: number): string => {
+const getNombreOpcion = (id: number | null | undefined): string => {
+  if (id == null) return "N/A";
   const opcion = opcionesCache.value.get(id);
   return opcion?.nombre || "N/A";
-};
-
-const getNombreTipoMisa = (id: number): string => {
-  const tipo = tiposMisa.value.find(t => t.idtipomisa === id);
-  return tipo?.nombre || "N/A";
 };
 
 const getEstadoClass = (idEstado: number): string => {

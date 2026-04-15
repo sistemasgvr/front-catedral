@@ -30,9 +30,7 @@ const store = useSolicitudStore();
 const onGoHome = () => {
   const wasRegistered = localStorage.getItem("solicitud_registered") === "true";
   if (wasRegistered) {
-    localStorage.removeItem("solicitud");
-    localStorage.removeItem("solicitud_registered");
-    store.resetSolicitud();
+    store.limpiarDatosSolicitud();
   }
 };
 </script>

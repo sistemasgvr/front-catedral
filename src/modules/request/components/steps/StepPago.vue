@@ -8,12 +8,19 @@
           <div>
             <p class="text-sm opacity-90">Concepto:</p>
             <h3 class="text-xl font-bold">
-              {{ store.esMisaPrivada ? 'Misa Privada' : `Menciones (${store.solicitud.menciones.length})` }}
+              {{
+                store.esPagoSoloTarifaPlana
+                  ? (store.solicitud.nombreTipoMisa || 'Celebración')
+                  : `${store.etiquetaPasoLineas} (${store.solicitud.menciones.length})`
+              }}
             </h3>
-            <p v-if="!store.esMisaPrivada && store.solicitud.menciones.length > 0" class="text-sm opacity-80 mt-1">
-              S/ {{ COSTO_MENCION.toFixed(2) }} por mención
+            <p
+              v-if="!store.esPagoSoloTarifaPlana && store.solicitud.menciones.length > 0"
+              class="text-sm opacity-80 mt-1"
+            >
+              S/ {{ unitCostoLinea.toFixed(2) }} por {{ etiquetaUnidad }}
             </p>
-            <p v-if="store.esMisaPrivada" class="text-sm opacity-80 mt-1">
+            <p v-if="store.esPagoSoloTarifaPlana" class="text-sm opacity-80 mt-1">
               {{ store.solicitud.intencion ? store.solicitud.intencion.substring(0, 50) + '...' : '' }}
             </p>
           </div>
@@ -162,13 +169,13 @@
         <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-5 border border-[#D39E3A]/30 dark:border-amber-700/30">
           <h4 class="font-semibold text-[#4A4A4A] dark:text-gray-200 mb-4">Resumen de Pago</h4>
           <div class="space-y-3">
-            <div v-if="store.esMisaPrivada" class="flex justify-between text-[#4A4A4A] dark:text-gray-300">
-              <span>Misa Privada</span>
+            <div v-if="store.esPagoSoloTarifaPlana" class="flex justify-between text-[#4A4A4A] dark:text-gray-300">
+              <span>{{ store.solicitud.nombreTipoMisa || 'Tarifa' }}</span>
               <span>S/ {{ store.solicitud.montoTotal.toFixed(2) }}</span>
             </div>
             <div v-else-if="store.solicitud.menciones.length > 0">
               <div class="flex justify-between text-[#4A4A4A] dark:text-gray-300 mb-2">
-                <span>Menciones ({{ store.solicitud.menciones.length }})</span>
+                <span>{{ store.etiquetaPasoLineas }} ({{ store.solicitud.menciones.length }})</span>
                 <span>S/ {{ store.totalMenciones.toFixed(2) }}</span>
               </div>
               <div class="text-xs text-gray-500 dark:text-gray-400 pl-2 space-y-1 max-h-20 overflow-y-auto">
@@ -218,6 +225,17 @@ import { registrarSolicitudCompleta } from '../../actions/registrarSolicitudComp
 
 const store = useSolicitudStore();
 
+const unitCostoLinea = computed(() =>
+  store.solicitud.costoMencion > 0 ? store.solicitud.costoMencion : COSTO_MENCION,
+);
+
+const etiquetaUnidad = computed(() => {
+  const m = store.modoRegistroLineas;
+  if (m === 'nino') return 'niño/a';
+  if (m === 'pareja') return 'pareja';
+  return 'mención';
+});
+
 // Refs
 const fileInput = ref<HTMLInputElement | null>(null);
 const archivoSeleccionado = ref<File | null>(null);
@@ -230,7 +248,7 @@ const fieldErrors = reactive<Record<string, string | undefined>>({});
 
 // Computed
 const totalPagar = computed(() => {
-  if (store.esMisaPrivada) {
+  if (store.esPagoSoloTarifaPlana) {
     return store.solicitud.montoTotal;
   }
   return store.totalMenciones;
@@ -324,6 +342,10 @@ const registrarSolicitud = async (): Promise<boolean> => {
       archivoSeleccionado.value
     );
     localStorage.setItem("solicitud_registered", "true");
+    archivoSeleccionado.value = null;
+    previewUrl.value = null;
+    if (fileInput.value) fileInput.value.value = "";
+    store.solicitud.voucherPago = "";
     return true;
   } catch (err) {
     submitError.value =

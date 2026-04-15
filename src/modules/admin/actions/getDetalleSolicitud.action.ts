@@ -12,7 +12,7 @@ export const getDetalleSolicitud = async (
 ): Promise<IDetalleSolicitud> => {
   try {
     const { data } = await apiClient.get<IDetalleSolicitud[]>(
-      `/solicitudes?idsolicitud=eq.${idSolicitud}&select=*`
+      `/solicitudes?idsolicitud=eq.${idSolicitud}&select=*,tipomisa(idtipomisa,nombre,precio),menciones(idmencion,descripcion,estado,fechacreacion)`
     );
     
     if (!Array.isArray(data) || data.length === 0) {

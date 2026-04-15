@@ -2,15 +2,17 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ISolicitud, ITipoDocumento, ITipoMisa, IHorario, IMencion } from '../interfaces/solicitud.interface';
 import { solicitudInicial, COSTO_MENCION } from '../interfaces/solicitud.interface';
+import {
+  getModoRegistroLineas,
+  omitePasoRegistroLineas,
+  etiquetaPasoRegistro,
+} from '../constants/tipoMisaRegistro';
 
 export const useSolicitudStore = defineStore('solicitud', () => {
-  // Estado de la solicitud
   const solicitud = ref<ISolicitud>({ ...solicitudInicial });
 
-  // Paso actual
   const currentStep = ref(0);
 
-  // Datos estáticos para selects
   const tiposDocumento = ref<ITipoDocumento[]>([
     { id: 1, nombre: 'DNI' },
     { id: 2, nombre: 'Carnet de Extranjería' },
@@ -33,7 +35,6 @@ export const useSolicitudStore = defineStore('solicitud', () => {
     { id: 5, hora: '19:00', descripcion: '7:00 PM' },
   ]);
 
-  // Getters
   const datosSolicitanteCompletos = computed(() => {
     return (
       solicitud.value.idTipoDocumento !== null &&
@@ -57,29 +58,39 @@ export const useSolicitudStore = defineStore('solicitud', () => {
     return tiposMisa.value.find(t => t.id === solicitud.value.idTipoMisa);
   });
 
-  // Verificar si es misa privada (por flag o por nombre del tipo)
-  const esMisaPrivada = computed(() => {
-    if (solicitud.value.esMisaPrivada === true) return true;
-    const tipo = tiposMisa.value.find(t => t.id === solicitud.value.idTipoMisa);
-    return tipo?.nombre?.toLowerCase().includes('privada') ?? false;
-  });
+  /** Un solo monto (sin paso de líneas): privada, funeral, etc. */
+  const esPagoSoloTarifaPlana = computed(() =>
+    omitePasoRegistroLineas(solicitud.value.idTipoMisa, solicitud.value.nombreTipoMisa),
+  );
 
-  // Actions
+  const etiquetaPasoLineas = computed(() =>
+    etiquetaPasoRegistro(solicitud.value.idTipoMisa, solicitud.value.nombreTipoMisa),
+  );
+
+  const modoRegistroLineas = computed(() =>
+    getModoRegistroLineas(solicitud.value.idTipoMisa, solicitud.value.nombreTipoMisa),
+  );
+
+  function recalcMontoTotalDesdeLineas() {
+    if (omitePasoRegistroLineas(solicitud.value.idTipoMisa, solicitud.value.nombreTipoMisa)) return;
+    solicitud.value.montoTotal = solicitud.value.menciones.reduce((s, m) => s + m.costo, 0);
+  }
+
   const updateDatosSolicitante = (datos: Partial<ISolicitud>) => {
     solicitud.value = { ...solicitud.value, ...datos };
   };
 
-  const updateDatosCelebracion = (datos: Partial<ISolicitud> & { esMisaPrivada?: boolean }) => {
+  const updateDatosCelebracion = (datos: Partial<ISolicitud>) => {
+    const idAnterior = solicitud.value.idTipoMisa;
     solicitud.value = { ...solicitud.value, ...datos };
-    // Si es misa privada: limpiar menciones y usar solo costo privada
-    if (datos.esMisaPrivada === true) {
+    if (datos.idTipoMisa !== undefined && datos.idTipoMisa !== idAnterior) {
       solicitud.value.menciones = [];
-      solicitud.value.montoTotal = 50; // PRECIO_MISA_PRIVADA
-    } else if (datos.idTipoMisa) {
-      const tipoMisa = tiposMisa.value.find(t => t.id === datos.idTipoMisa);
-      if (tipoMisa) {
-        solicitud.value.montoTotal = tipoMisa.precio;
-      }
+    }
+    if (omitePasoRegistroLineas(solicitud.value.idTipoMisa, solicitud.value.nombreTipoMisa)) {
+      const p = solicitud.value.costoMencion;
+      if (p > 0) solicitud.value.montoTotal = p;
+    } else {
+      recalcMontoTotalDesdeLineas();
     }
   };
 
@@ -87,18 +98,21 @@ export const useSolicitudStore = defineStore('solicitud', () => {
     solicitud.value = { ...solicitud.value, ...datos };
   };
 
-  // Menciones
   const agregarMencion = (descripcion: string) => {
+    const unit =
+      solicitud.value.costoMencion > 0 ? solicitud.value.costoMencion : COSTO_MENCION;
     const nuevaMencion: IMencion = {
-      id: Date.now(), // ID único basado en timestamp
+      id: Date.now(),
       descripcion,
-      costo: COSTO_MENCION,
+      costo: unit,
     };
     solicitud.value.menciones.push(nuevaMencion);
+    recalcMontoTotalDesdeLineas();
   };
 
   const eliminarMencion = (id: number) => {
     solicitud.value.menciones = solicitud.value.menciones.filter(m => m.id !== id);
+    recalcMontoTotalDesdeLineas();
   };
 
   const actualizarMencion = (id: number, descripcion: string) => {
@@ -121,24 +135,38 @@ export const useSolicitudStore = defineStore('solicitud', () => {
     currentStep.value = 0;
   };
 
+  /**
+   * Tras registro exitoso o al salir: borra el snapshot en localStorage (Pinia)
+   * y reinicia el estado. Evita que queden datos personales en el navegador (útil en equipos compartidos).
+   */
+  const limpiarDatosSolicitud = () => {
+    localStorage.removeItem('solicitud_registered');
+    resetSolicitud();
+    // El plugin de Pinia en main.ts vuelve a guardar tras reset; borrar en el siguiente microtask.
+    queueMicrotask(() => {
+      localStorage.removeItem('solicitud');
+    });
+  };
+
   const getSolicitudJSON = () => {
     return JSON.stringify(solicitud.value, null, 2);
   };
 
   return {
-    // State
     solicitud,
     currentStep,
     tiposDocumento,
     tiposMisa,
     horarios,
-    // Getters
     datosSolicitanteCompletos,
     datosCelebracionCompletos,
     tipoMisaSeleccionado,
-    esMisaPrivada,
+    /** @deprecated usar esPagoSoloTarifaPlana */
+    esMisaPrivada: esPagoSoloTarifaPlana,
+    esPagoSoloTarifaPlana,
+    etiquetaPasoLineas,
+    modoRegistroLineas,
     totalMenciones,
-    // Actions
     updateDatosSolicitante,
     updateDatosCelebracion,
     updatePago,
@@ -147,6 +175,7 @@ export const useSolicitudStore = defineStore('solicitud', () => {
     actualizarMencion,
     setCurrentStep,
     resetSolicitud,
+    limpiarDatosSolicitud,
     getSolicitudJSON,
   };
 });
