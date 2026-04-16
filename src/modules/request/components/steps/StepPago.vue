@@ -31,8 +31,55 @@
         </div>
       </div>
 
+      <!-- Método de pago -->
+      <div class="mb-6">
+        <p class="text-sm font-semibold text-[#4A4A4A] dark:text-gray-200 mb-3">Método de pago</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            class="rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C88A2A] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+            :class="
+              !esPagoEfectivo
+                ? 'border-[#C88A2A] bg-[#FFF5E6] dark:bg-amber-900/25 shadow-sm'
+                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/80 hover:border-[#C88A2A]/50'
+            "
+            @click="setMetodoPago('digital')"
+          >
+            <div class="flex items-start gap-3">
+              <Icon icon="mdi:bank-transfer" class="w-7 h-7 shrink-0 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
+              <div>
+                <p class="font-semibold text-[#4A4A4A] dark:text-gray-200">Yape o transferencia</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                  Paga con Yape o depósito y sube tu comprobante (captura o PDF).
+                </p>
+              </div>
+            </div>
+          </button>
+          <button
+            type="button"
+            class="rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C88A2A] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+            :class="
+              esPagoEfectivo
+                ? 'border-[#C88A2A] bg-[#FFF5E6] dark:bg-amber-900/25 shadow-sm'
+                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/80 hover:border-[#C88A2A]/50'
+            "
+            @click="setMetodoPago('efectivo')"
+          >
+            <div class="flex items-start gap-3">
+              <Icon icon="mdi:cash-multiple" class="w-7 h-7 shrink-0 text-[#C88A2A] dark:text-[#E5A84A]" aria-hidden="true" />
+              <div>
+                <p class="font-semibold text-[#4A4A4A] dark:text-gray-200">Pago en efectivo</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                  Pagará en la iglesia / secretaría. No se solicita comprobante digital; la parroquia gestionará el cobro.
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
       <!-- Contenido Principal -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div v-if="!esPagoEfectivo" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Instrucciones -->
         <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-5 border border-[#D39E3A]/30 dark:border-amber-700/30">
           <div class="flex items-center gap-2 mb-4">
@@ -77,7 +124,7 @@
       </div>
 
       <!-- Datos Bancarios -->
-      <div class="bg-[#4A4A4A] dark:bg-gray-700 rounded-xl p-4 mb-6">
+      <div v-if="!esPagoEfectivo" class="bg-[#4A4A4A] dark:bg-gray-700 rounded-xl p-4 mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
@@ -100,6 +147,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Upload Zone -->
         <div 
+          v-if="!esPagoEfectivo"
           class="border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer"
           :class="[
             archivoSeleccionado 
@@ -159,6 +207,20 @@
           </div>
         </div>
 
+        <div
+          v-else
+          class="rounded-xl border border-emerald-200 bg-emerald-50/90 dark:border-emerald-700/50 dark:bg-emerald-900/20 p-6 flex flex-col gap-3"
+        >
+          <div class="flex items-center gap-2 text-emerald-900 dark:text-emerald-100">
+            <Icon icon="mdi:cash-check" class="w-8 h-8 shrink-0" aria-hidden="true" />
+            <h4 class="font-semibold">Pago en efectivo en la iglesia</h4>
+          </div>
+          <p class="text-sm text-emerald-900/95 dark:text-emerald-100/90 leading-relaxed">
+            Al finalizar, la solicitud quedará registrada. El monto indicado lo cancelará directamente en la parroquia;
+            el personal de la iglesia llevará el registro del pago. No necesita adjuntar voucher ni captura.
+          </p>
+        </div>
+
         <!-- Resumen de precios -->
         <div class="bg-[#FFF5E6] dark:bg-amber-900/20 rounded-xl p-5 border border-[#D39E3A]/30 dark:border-amber-700/30">
           <h4 class="font-semibold text-[#4A4A4A] dark:text-gray-200 mb-4">Resumen de Pago</h4>
@@ -188,7 +250,7 @@
 
       <!-- Validation Message -->
       <div 
-        v-if="hasInteracted && hasErrors" 
+        v-if="hasInteracted && hasErrors && !esPagoEfectivo" 
         class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4 flex items-center gap-3"
       >
         <Icon icon="mdi:alert-outline" class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" aria-hidden="true" />
@@ -208,13 +270,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { COSTO_MENCION } from '../../interfaces/solicitud.interface';
 import { registrarSolicitudCompleta } from '../../actions/registrarSolicitudCompleta.action';
 
 const store = useSolicitudStore();
+
+const esPagoEfectivo = computed(
+  () => store.solicitud.metodoPago === 'efectivo',
+);
+
+function setMetodoPago(m: 'digital' | 'efectivo') {
+  store.updatePago({ metodoPago: m });
+}
+
+watch(
+  () => store.solicitud.metodoPago,
+  (m) => {
+    if (m === 'efectivo') {
+      archivoSeleccionado.value = null;
+      previewUrl.value = null;
+      fieldErrors.voucher = undefined;
+      store.solicitud.voucherPago = '';
+      if (fileInput.value) fileInput.value.value = '';
+    }
+  },
+);
 
 const unitCostoLinea = computed(() =>
   store.solicitud.costoMencion > 0 ? store.solicitud.costoMencion : COSTO_MENCION,
@@ -245,7 +328,10 @@ const totalPagar = computed(() => {
   return store.totalMenciones;
 });
 
-const hasErrors = computed(() => Object.values(fieldErrors).some(e => e));
+const hasErrors = computed(() => {
+  if (store.solicitud.metodoPago === 'efectivo') return false;
+  return Object.values(fieldErrors).some((e) => e);
+});
 
 // Métodos
 const triggerFileInput = () => {
@@ -312,6 +398,10 @@ const eliminarArchivo = () => {
 const validateForm = (): boolean => {
   fieldErrors.voucher = undefined;
 
+  if (store.solicitud.metodoPago === 'efectivo') {
+    return true;
+  }
+
   if (!archivoSeleccionado.value) {
     fieldErrors.voucher = 'Debe subir el comprobante de pago';
     return false;
@@ -322,7 +412,8 @@ const validateForm = (): boolean => {
 
 // Registrar solicitud en Supabase
 const registrarSolicitud = async (): Promise<boolean> => {
-  if (!archivoSeleccionado.value) return false;
+  const efectivo = store.solicitud.metodoPago === 'efectivo';
+  if (!efectivo && !archivoSeleccionado.value) return false;
 
   isSubmitting.value = true;
   submitError.value = null;
@@ -330,13 +421,15 @@ const registrarSolicitud = async (): Promise<boolean> => {
   try {
     await registrarSolicitudCompleta(
       { ...store.solicitud, montoTotal: totalPagar.value },
-      archivoSeleccionado.value
+      efectivo ? null : archivoSeleccionado.value,
     );
     localStorage.setItem("solicitud_registered", "true");
     archivoSeleccionado.value = null;
     previewUrl.value = null;
     if (fileInput.value) fileInput.value.value = "";
-    store.solicitud.voucherPago = "";
+    if (!efectivo) {
+      store.solicitud.voucherPago = "";
+    }
     return true;
   } catch (err) {
     submitError.value =

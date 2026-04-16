@@ -118,6 +118,7 @@ CREATE TABLE public.solicitudes (
   idtipomisa integer,
   idhorario integer,
   intencion character varying,
+  -- URL del comprobante digital, o el literal PAGO_EN_EFECTIVO_IGLESIA (pago en efectivo; ver front request/constants/pagoSolicitud.ts)
   voucherpago character varying,
   fechasolicitud date DEFAULT CURRENT_DATE,
   montototal numeric,
