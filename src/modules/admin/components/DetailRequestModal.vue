@@ -14,10 +14,12 @@
             enter-to-class="opacity-100 scale-100" leave-active-class="transition-all duration-200"
             leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
             <div v-if="isOpen"
-              class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[10000]" @click.stop>
+              class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[10000]"
+              :style="{ zoom: detailTextZoom }"
+              @click.stop>
               <!-- Modal Header -->
-              <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <div>
+              <div class="flex flex-wrap items-center justify-between gap-3 p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="min-w-0">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
                     Detalle de Solicitud
                   </h2>
@@ -25,7 +27,8 @@
                     Código: {{ solicitud.idsolicitud }}
                   </p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                  <DetailModalTextSizeControl v-model="detailTextZoom" :is-modal-open="isOpen" />
                   <!-- Botón Editar (solo cuando NO está en modo edición) -->
                   <button v-if="!modoEdicion && solicitud" @click="activarModoEdicion"
                     class="rounded-lg px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
@@ -460,6 +463,7 @@ import type { IDetalleSolicitud } from "../interfaces/detalleSolicitud.interface
 import type { ISelectOption } from "../interfaces/opcionLista.interface";
 import type { ITipoMisa } from "../interfaces/tipoMisa.interface";
 import ConfirmModal from "./ConfirmModal.vue";
+import DetailModalTextSizeControl from "./DetailModalTextSizeControl.vue";
 import { etiquetaPasoRegistro, requiereCampoIntencion } from "../../request/constants/tipoMisaRegistro";
 import { resolveTipoMisaNombre } from "../utils/resolveTipoMisaNombre";
 
@@ -482,6 +486,9 @@ const emit = defineEmits<{
 /* ================================
    STATE
 ================================ */
+
+/** Escala solo el panel de este modal (CSS zoom); preferencia en localStorage. */
+const detailTextZoom = ref(1.12);
 
 const solicitud = ref<IDetalleSolicitud | null>(null);
 const tiposMisa = ref<ITipoMisa[]>([]);
