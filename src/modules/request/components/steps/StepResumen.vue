@@ -106,7 +106,13 @@
             </div>
             <div>
               <h3 class="font-semibold text-[#4A4A4A] dark:text-gray-200 text-sm">Información de Pago</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Comprobante: {{ store.solicitud.voucherPago }}</p>
+              <p v-if="store.solicitud.metodoPago === 'efectivo'" class="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                Pago en efectivo en la iglesia. La parroquia registrará el cobro al momento del pago.
+              </p>
+              <p v-else-if="store.solicitud.voucherPago" class="text-xs text-gray-500 dark:text-gray-400">
+                Comprobante: {{ store.solicitud.voucherPago }}
+              </p>
+              <p v-else class="text-xs text-gray-500 dark:text-gray-400">Comprobante digital registrado.</p>
             </div>
           </div>
           

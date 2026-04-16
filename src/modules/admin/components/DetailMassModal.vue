@@ -22,19 +22,23 @@
             <div
               v-if="isOpen"
               class="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[100000]"
+              :style="{ zoom: detailTextZoom }"
               @click.stop
             >
               <!-- Header -->
-              <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <div>
+              <div class="flex flex-wrap items-center justify-between gap-3 p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="min-w-0">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Detalle de Misa</h2>
                 </div>
-                <button
-                  @click="closeModal"
-                  class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  <Icon icon="mdi:close" class="w-6 h-6" aria-hidden="true" />
-                </button>
+                <div class="flex items-center gap-2">
+                  <DetailModalTextSizeControl v-model="detailTextZoom" :is-modal-open="isOpen" />
+                  <button
+                    @click="closeModal"
+                    class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    <Icon icon="mdi:close" class="w-6 h-6" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
 
               <!-- Body -->
@@ -206,6 +210,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
+import DetailModalTextSizeControl from './DetailModalTextSizeControl.vue';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
 import type { IMisaDetalle } from '../interfaces/misa.interface';
 
@@ -216,6 +221,8 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits<{ close: [] }>();
+
+const detailTextZoom = ref(1.12);
 
 const misa = ref<IMisaDetalle | null>(null);
 const loading = ref(false);

@@ -1,4 +1,5 @@
 import type { ISolicitud, IMencion } from "../interfaces/solicitud.interface";
+import { VOUCHER_PAGO_EFECTIVO_MARKER } from "../constants/pagoSolicitud";
 import { createSolicitud } from "./createSolicitud.action";
 import { createMencion } from "./createMencion.action";
 import { uploadVoucher } from "./uploadVoucher.action";
@@ -9,14 +10,24 @@ export interface RegistrarSolicitudResult {
 }
 
 /**
- * Registra una solicitud completa: sube el voucher, crea la solicitud y sus menciones.
+ * Registra una solicitud completa: sube el voucher (si aplica) y crea la solicitud y sus menciones.
+ * Si `metodoPago === 'efectivo'`, no se sube archivo y `voucherpago` guarda un marcador acordado.
  */
 export const registrarSolicitudCompleta = async (
   solicitud: ISolicitud,
-  archivoVoucher: File
+  archivoVoucher: File | null,
 ): Promise<RegistrarSolicitudResult> => {
-  // 1. Subir voucher a Supabase Storage
-  const voucherUrl = await uploadVoucher(archivoVoucher);
+  const pagoEfectivo = solicitud.metodoPago === "efectivo";
+
+  const voucherUrl = pagoEfectivo
+    ? VOUCHER_PAGO_EFECTIVO_MARKER
+    : archivoVoucher
+      ? await uploadVoucher(archivoVoucher)
+      : null;
+
+  if (!voucherUrl) {
+    throw new Error("Debe adjuntar el comprobante de pago o elegir pago en efectivo.");
+  }
 
   // 2. Mapear y crear solicitud (schema: solicitudes)
   const celularNum =

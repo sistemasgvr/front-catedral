@@ -14,10 +14,12 @@
             enter-to-class="opacity-100 scale-100" leave-active-class="transition-all duration-200"
             leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
             <div v-if="isOpen"
-              class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[10000]" @click.stop>
+              class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[10000]"
+              :style="{ zoom: detailTextZoom }"
+              @click.stop>
               <!-- Modal Header -->
-              <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <div>
+              <div class="flex flex-wrap items-center justify-between gap-3 p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="min-w-0">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
                     Detalle de Solicitud
                   </h2>
@@ -25,7 +27,8 @@
                     Código: {{ solicitud.idsolicitud }}
                   </p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                  <DetailModalTextSizeControl v-model="detailTextZoom" :is-modal-open="isOpen" />
                   <!-- Botón Editar (solo cuando NO está en modo edición) -->
                   <button v-if="!modoEdicion && solicitud" @click="activarModoEdicion"
                     class="rounded-lg px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
@@ -316,20 +319,34 @@
                           </p>
                         </div>
                         <div>
-                          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Voucher de Pago</label>
+                          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Comprobante / pago</label>
 
                           <!-- Modo edición: input para URL -->
                           <div v-if="modoEdicion" class="space-y-2">
-                            <input v-model="formEdicion.voucherpago" type="url" placeholder="https://..."
+                            <input v-model="formEdicion.voucherpago" type="text" placeholder="URL del comprobante o marcador de efectivo"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent" />
-                            <button v-if="formEdicion.voucherpago" @click="abrirVoucher(formEdicion.voucherpago)" type="button"
+                            <button v-if="formEdicion.voucherpago && !esMarcadorPagoEfectivo(formEdicion.voucherpago)" @click="abrirVoucher(formEdicion.voucherpago)" type="button"
                               class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors">
                               <Icon icon="mdi:eye-outline" class="w-3 h-3 mr-1 shrink-0" aria-hidden="true" />
                               Vista previa
                             </button>
                           </div>
 
-                          <!-- Modo vista: mostrar imagen inline o botón ver -->
+                          <!-- Modo vista: pago en efectivo -->
+                          <div v-else-if="esMarcadorPagoEfectivo(solicitud.voucherpago)"
+                            class="rounded-lg border border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/90 dark:bg-emerald-900/25 px-4 py-3">
+                            <div class="flex items-start gap-2">
+                              <Icon icon="mdi:cash-multiple" class="w-5 h-5 text-emerald-700 dark:text-emerald-300 shrink-0 mt-0.5" aria-hidden="true" />
+                              <div>
+                                <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Pago en efectivo</p>
+                                <p class="text-xs text-emerald-800/90 dark:text-emerald-200/90 mt-1 leading-relaxed">
+                                  El solicitante indicó que pagará en la iglesia. No hay comprobante digital; la parroquia gestionará el cobro.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Modo vista: voucher digital -->
                           <div v-else>
                             <div v-if="solicitud.voucherpago" class="space-y-3">
                               <!-- Previsualización de imagen inline -->
@@ -460,7 +477,9 @@ import type { IDetalleSolicitud } from "../interfaces/detalleSolicitud.interface
 import type { ISelectOption } from "../interfaces/opcionLista.interface";
 import type { ITipoMisa } from "../interfaces/tipoMisa.interface";
 import ConfirmModal from "./ConfirmModal.vue";
+import DetailModalTextSizeControl from "./DetailModalTextSizeControl.vue";
 import { etiquetaPasoRegistro, requiereCampoIntencion } from "../../request/constants/tipoMisaRegistro";
+import { esMarcadorPagoEfectivo } from "../../request/constants/pagoSolicitud";
 import { resolveTipoMisaNombre } from "../utils/resolveTipoMisaNombre";
 
 /* ================================
@@ -482,6 +501,9 @@ const emit = defineEmits<{
 /* ================================
    STATE
 ================================ */
+
+/** Escala solo el panel de este modal (CSS zoom); preferencia en localStorage. */
+const detailTextZoom = ref(1.12);
 
 const solicitud = ref<IDetalleSolicitud | null>(null);
 const tiposMisa = ref<ITipoMisa[]>([]);
@@ -612,7 +634,7 @@ const getVoucherUrl = (url: string): string => {
  * Intenta la URL directa; si falla, no hay nada más que hacer del lado cliente.
  */
 const abrirVoucher = (url: string) => {
-  if (!url) return;
+  if (!url || esMarcadorPagoEfectivo(url)) return;
   window.open(getVoucherUrl(url), "_blank", "noopener,noreferrer");
 };
 

@@ -21,18 +21,24 @@
                     <div
                       class="flex min-w-0 flex-1 shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm sm:flex-initial sm:min-w-0">
                       <button type="button" @click="vistaCalendario = false"
-                        class="flex-1 px-4 py-2.5 text-sm font-semibold transition-colors min-h-[44px] sm:flex-initial sm:px-4"
+                        class="flex flex-1 items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold transition-colors min-h-[44px] sm:flex-initial sm:px-4"
                         :class="!vistaCalendario
                           ? 'bg-[#C88A2A] text-white'
-                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
-                        Lista
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        aria-label="Vista lista"
+                        title="Lista">
+                        <Icon icon="mdi:format-list-bulleted" class="h-5 w-5 shrink-0" aria-hidden="true" />
+                        <span class="hidden sm:inline">Lista</span>
                       </button>
                       <button type="button" @click="vistaCalendario = true"
-                        class="flex-1 px-4 py-2.5 text-sm font-semibold transition-colors min-h-[44px] border-l border-gray-300 dark:border-gray-600 sm:flex-initial"
+                        class="flex flex-1 items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold transition-colors min-h-[44px] border-l border-gray-300 dark:border-gray-600 sm:flex-initial sm:px-4"
                         :class="vistaCalendario
                           ? 'bg-[#C88A2A] text-white'
-                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'">
-                        Calendario
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                        aria-label="Vista calendario"
+                        title="Calendario">
+                        <Icon icon="mdi:calendar-month-outline" class="h-5 w-5 shrink-0" aria-hidden="true" />
+                        <span class="hidden sm:inline">Calendario</span>
                       </button>
                     </div>
                     <button type="button" @click="toggleFiltrosPanel"

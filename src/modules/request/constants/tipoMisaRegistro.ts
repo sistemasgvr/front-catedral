@@ -89,7 +89,7 @@ export function etiquetaPasoRegistro(
   nombreTipoMisa?: string | null,
 ): string {
   const modo = getModoRegistroLineas(idTipoMisa, nombreTipoMisa);
-  if (modo === 'nino') return 'Niños';
+  if (modo === 'nino') return 'Bautizando';
   if (modo === 'pareja') return 'Parejas';
   return 'Menciones';
 }

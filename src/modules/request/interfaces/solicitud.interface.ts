@@ -22,6 +22,8 @@ export interface ISolicitud {
   esMisaPrivada?: boolean;
 
   // Pago (Paso 4)
+  /** `digital`: sube comprobante; `efectivo`: sin voucher, la iglesia gestiona el cobro. */
+  metodoPago: "digital" | "efectivo";
   voucherPago: string;
   montoTotal: number;
 
@@ -74,6 +76,7 @@ export const solicitudInicial: ISolicitud = {
   idHorario: null,
   intencion: '',
   menciones: [],
+  metodoPago: "digital",
   voucherPago: '',
   montoTotal: 0,
   fechaSolicitud: new Date().toISOString().split('T')[0] || '',

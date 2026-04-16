@@ -140,6 +140,9 @@
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                         Monto
                       </th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                        Pago
+                      </th>
                       <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                         Acciones
                       </th>
@@ -184,6 +187,24 @@
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span class="text-sm font-semibold text-gray-900 dark:text-white">
                           S/ {{ Number(solicitud.montototal ?? 0).toFixed(2) }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span
+                          v-if="solicitudEsPagoEfectivo(solicitud)"
+                          class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:border-emerald-700/50 dark:bg-emerald-900/30 dark:text-emerald-200"
+                          title="El solicitante pagará en la iglesia; la parroquia gestiona el cobro."
+                        >
+                          <Icon icon="mdi:cash" class="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          Efectivo
+                        </span>
+                        <span
+                          v-else
+                          class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300"
+                          title="Comprobante digital (Yape / transferencia)"
+                        >
+                          <Icon icon="mdi:receipt-text-outline" class="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          Digital
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -251,6 +272,19 @@
                         </span>
                       </div>
                     </div>
+
+                    <div class="flex items-start">
+                      <Icon icon="mdi:wallet-outline" class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 mt-0.5 shrink-0" aria-hidden="true" />
+                      <div class="flex-1">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Medio de pago:</span>
+                        <span
+                          class="text-sm font-medium text-gray-900 dark:text-white ml-1"
+                          :class="solicitudEsPagoEfectivo(solicitud) ? 'text-emerald-700 dark:text-emerald-300' : ''"
+                        >
+                          {{ solicitudEsPagoEfectivo(solicitud) ? 'Efectivo (iglesia)' : 'Digital' }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <button 
@@ -290,9 +324,14 @@ import type { ISelectOption } from "../../interfaces/opcionLista.interface";
 import type { ISolicitudDb } from "../../interfaces/listSolicitudes.interface";
 import type { ITipoMisa } from "../../interfaces/tipoMisa.interface";
 import { resolveTipoMisaNombre } from "../../utils/resolveTipoMisaNombre";
+import { esMarcadorPagoEfectivo } from "../../../request/constants/pagoSolicitud";
 
 /** Mismo valor que `revision` en cambiarEstadoSolicitud.action (lista estados, id opción). */
 const ID_ESTADO_EN_REVISION = 17;
+
+function solicitudEsPagoEfectivo(s: ISolicitudDb): boolean {
+  return esMarcadorPagoEfectivo(s.voucherpago);
+}
 
 /* ================================
    STATE

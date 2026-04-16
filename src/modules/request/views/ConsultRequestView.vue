@@ -156,6 +156,25 @@
                     <span class="text-gray-500 font-medium">Horario</span>
                     <span class="text-gray-800">{{ solicitud.horario?.nombre || "-" }}</span>
                   </div>
+                  <div v-if="solicitud.voucherpago" class="flex flex-col col-span-2 md:col-span-1">
+                    <span class="text-gray-500 font-medium">Pago</span>
+                    <span
+                      v-if="esMarcadorPagoEfectivo(solicitud.voucherpago)"
+                      class="text-emerald-700 font-medium"
+                    >
+                      Efectivo en iglesia (sin comprobante digital)
+                    </span>
+                    <a
+                      v-else
+                      :href="solicitud.voucherpago"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-[#8C1D40] hover:underline font-medium inline-flex items-center gap-1"
+                    >
+                      Ver comprobante
+                      <Icon icon="mdi:open-in-new" class="w-3 h-3 shrink-0" aria-hidden="true" />
+                    </a>
+                  </div>
                   <!-- <div class="flex flex-col">
                     <span class="text-gray-500 font-medium">Monto</span>
                     <span class="text-[#8C1D40] font-bold">S/ {{ formatMoney(solicitud.montototal) }}</span>
@@ -214,6 +233,7 @@ import { ref } from "vue";
 import { Icon } from "@iconify/vue";
 import { InputText } from "@/components/inputs";
 import { getSolicitudesByDocumento } from "../actions/getSolicitudesByDocumento.action";
+import { esMarcadorPagoEfectivo } from "../constants/pagoSolicitud";
 import type { ISolicitudDb } from "../interfaces/solicitudDb.interface";
 import HeaderSolicitud from "../components/HeaderSolicitud.vue";
 import FooterSolicitud from "../components/FooterSolicitud.vue";
