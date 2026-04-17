@@ -155,43 +155,15 @@ import {
   omitePasoRegistroLineas,
   requiereCampoIntencion,
 } from "../../constants/tipoMisaRegistro";
+import {
+  esFechaCelebracionPasada,
+  fechaHoyLocalYYYYMMDD,
+} from "../../utils/fechaMisaSolicitud";
 
 const store = useSolicitudStore();
 const route = useRoute();
 
 const ID_LISTA_HORARIOS = 5;
-
-/** Fecha de hoy en zona local YYYY-MM-DD (evita desfase de `toISOString()` UTC). */
-function fechaHoyLocalYYYYMMDD(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function parseYyyyMmDdLocal(s: string): Date | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const parts = s.split("-").map(Number);
-  const y = parts[0];
-  const mo = parts[1];
-  const da = parts[2];
-  if (y == null || mo == null || da == null) return null;
-  const d = new Date(y, mo - 1, da);
-  if (d.getFullYear() !== y || d.getMonth() !== mo - 1 || d.getDate() !== da) return null;
-  return d;
-}
-
-/** true si la fecha (solo día) es estrictamente anterior a hoy en calendario local. */
-function esFechaCelebracionPasada(yyyyMmDd: string): boolean {
-  if (!yyyyMmDd) return false;
-  const selected = parseYyyyMmDdLocal(yyyyMmDd);
-  if (!selected) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  selected.setHours(0, 0, 0, 0);
-  return selected.getTime() < today.getTime();
-}
 
 const loadingTiposMisa = ref(false);
 const loadingHorarios = ref(true);
@@ -274,7 +246,9 @@ const cargarHorarios = async () => {
 const cargarMisas = async () => {
   try {
     loadingMisas.value = true;
-    const misas = await getMisas(idTipoMisa.value ?? undefined);
+    const misas = await getMisas(idTipoMisa.value ?? undefined, {
+      fechacelebracionDesde: fechaHoyLocalYYYYMMDD(),
+    });
     misasDisponibles.value = misas.map(mapMisaToListItem);
   } catch (error) {
     console.error("Error al cargar misas:", error);
