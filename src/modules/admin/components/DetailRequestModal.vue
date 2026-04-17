@@ -366,66 +366,64 @@
                         </div>
                         <div>
                           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Comprobante / pago</label>
+                          <p
+                            v-if="modoEdicion"
+                            class="mb-3 rounded-md border border-amber-200/80 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100"
+                          >
+                            La ruta o URL del comprobante <strong>no es editable</strong> desde este detalle (solo lectura).
+                          </p>
 
-                          <!-- Modo edición: input para URL -->
-                          <div v-if="modoEdicion" class="space-y-2">
-                            <input v-model="formEdicion.voucherpago" type="text" placeholder="URL del comprobante o marcador de efectivo"
-                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent" />
-                            <button v-if="formEdicion.voucherpago && !esMarcadorPagoEfectivo(formEdicion.voucherpago)" @click="abrirVoucher(formEdicion.voucherpago)" type="button"
-                              class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors">
-                              <Icon icon="mdi:eye-outline" class="w-3 h-3 mr-1 shrink-0" aria-hidden="true" />
-                              Vista previa
-                            </button>
-                          </div>
-
-                          <!-- Modo vista: pago en efectivo -->
-                          <div v-else-if="esMarcadorPagoEfectivo(solicitud.voucherpago)"
+                          <!-- Pago en efectivo (solo lectura; igual en edición) -->
+                          <div v-if="esMarcadorPagoEfectivo(solicitud.voucherpago)"
                             class="rounded-lg border border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/90 dark:bg-emerald-900/25 px-4 py-3">
                             <div class="flex items-start gap-2">
                               <Icon icon="mdi:cash-multiple" class="w-5 h-5 text-emerald-700 dark:text-emerald-300 shrink-0 mt-0.5" aria-hidden="true" />
-                              <div>
+                              <div class="min-w-0 flex-1">
                                 <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Pago en efectivo</p>
                                 <p class="text-xs text-emerald-800/90 dark:text-emerald-200/90 mt-1 leading-relaxed">
                                   El solicitante indicó que pagará en la iglesia. No hay comprobante digital; la parroquia gestionará el cobro.
                                 </p>
+                                <p class="mt-2 text-xs font-medium text-emerald-900/80 dark:text-emerald-200/90">Valor registrado en <code class="font-mono">voucherpago</code></p>
+                                <p class="mt-1 break-all font-mono text-xs text-emerald-950 dark:text-emerald-50 select-text">{{ solicitud.voucherpago }}</p>
                               </div>
                             </div>
                           </div>
 
-                          <!-- Modo vista: voucher digital -->
-                          <div v-else>
-                            <div v-if="solicitud.voucherpago" class="space-y-3">
-                              <!-- Previsualización de imagen inline -->
-                              <div v-if="voucherCargado && !voucherError"
-                                class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-48">
-                                <img
-                                  :src="getVoucherUrl(solicitud.voucherpago)"
-                                  :alt="'Voucher de pago'"
-                                  class="w-full object-contain max-h-48 bg-white"
-                                  @load="voucherCargado = true; voucherError = false"
-                                  @error="voucherError = true"
-                                />
-                              </div>
-
-                              <!-- Estado de carga o error del voucher -->
-                              <div v-else-if="voucherError"
-                                class="flex items-center gap-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                                <Icon icon="mdi:alert-outline" class="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" aria-hidden="true" />
-                                <span class="text-xs text-yellow-700 dark:text-yellow-300">
-                                  No se pudo cargar la imagen del voucher
-                                </span>
-                              </div>
-
-                              <!-- Botón para abrir en nueva pestaña (siempre visible si hay URL) -->
-                              <button @click="abrirVoucher(solicitud.voucherpago)" type="button"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                <Icon icon="mdi:open-in-new" class="w-4 h-4 mr-2 shrink-0" aria-hidden="true" />
-                                Abrir Voucher
-                              </button>
+                          <!-- Voucher digital (solo lectura) -->
+                          <div v-else-if="solicitud.voucherpago" class="space-y-3">
+                            <div class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-600 dark:bg-gray-900/50">
+                              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">URL o ruta del comprobante</p>
+                              <p class="select-text break-all font-mono text-xs leading-relaxed text-gray-900 dark:text-gray-100">
+                                {{ solicitud.voucherpago }}
+                              </p>
+                            </div>
+                            <div v-if="voucherCargado && !voucherError"
+                              class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-48">
+                              <img
+                                :src="getVoucherUrl(solicitud.voucherpago)"
+                                :alt="'Voucher de pago'"
+                                class="w-full object-contain max-h-48 bg-white"
+                                @load="voucherCargado = true; voucherError = false"
+                                @error="voucherError = true"
+                              />
                             </div>
 
-                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">No disponible</p>
+                            <div v-else-if="voucherError"
+                              class="flex items-center gap-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                              <Icon icon="mdi:alert-outline" class="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" aria-hidden="true" />
+                              <span class="text-xs text-yellow-700 dark:text-yellow-300">
+                                No se pudo cargar la imagen del voucher
+                              </span>
+                            </div>
+
+                            <button @click="abrirVoucher(solicitud.voucherpago)" type="button"
+                              class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                              <Icon icon="mdi:open-in-new" class="w-4 h-4 mr-2 shrink-0" aria-hidden="true" />
+                              Abrir Voucher
+                            </button>
                           </div>
+
+                          <p v-else class="text-sm text-gray-500 dark:text-gray-400">No disponible</p>
                         </div>
                       </div>
                     </div>
@@ -870,7 +868,10 @@ const guardarCambios = async () => {
   error.value = null;
 
   try {
-    await actualizarSolicitud(solicitud.value.idsolicitud, formEdicion.value);
+    await actualizarSolicitud(solicitud.value.idsolicitud, {
+      ...formEdicion.value,
+      voucherpago: String(solicitud.value.voucherpago ?? ""),
+    });
     await cargarDetalle();
     modoEdicion.value = false;
     confirmGuardar.value.visible = false;
