@@ -29,7 +29,9 @@
             label="Número de Documento"
             placeholder="12345678"
             :required="true"
-            :maxlength="12"
+            :maxlength="nroDocumentoMaxLength"
+            :inputmode="esDniSeleccionado ? 'numeric' : undefined"
+            :integer-only="esDniSeleccionado"
             :error-message="getFieldError('nroDocumento')"
             @blur="validateField('nroDocumento')"
           />
@@ -95,8 +97,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useField, useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/yup';
 import * as yup from 'yup';
 import { useSolicitudStore } from '../../stores/solicitud.store';
 import { getOpcionesLista } from '../../actions/getOpcionesLista.action';
@@ -106,9 +109,40 @@ import { Icon } from '@iconify/vue';
 
 const store = useSolicitudStore();
 
+/** Reconoce DNI según el nombre devuelto por la lista (API), sin depender del id fijo. */
+function esNombreTipoDni(nombre: string | undefined): boolean {
+  if (!nombre) return false;
+  const n = nombre.trim().toUpperCase();
+  if (n === 'DNI' || n.startsWith('DNI ') || n.includes('DOCUMENTO NACIONAL DE IDENTIDAD')) return true;
+  if (/\bDNI\b/.test(n)) return true;
+  const compact = n.replace(/[\s.]/g, '');
+  return compact === 'DNI';
+}
+
+function esDniPorIdTipo(id: number | string | null | undefined): boolean {
+  if (id == null || id === '') return false;
+  const idNum = typeof id === 'number' ? id : Number(id);
+  if (Number.isNaN(idNum)) return false;
+  const opt = tiposDocumento.value.find((o) => Number(o.id) === idNum);
+  return esNombreTipoDni(opt?.nombre);
+}
+
 // Estado para tipos de documento
 const tiposDocumento = ref<ISelectOption[]>([]);
 const loadingTiposDocumento = ref(true);
+
+function soloDigitos(s: string): string {
+  return s.replace(/\D/g, '');
+}
+
+/** Misma regla que el `transform` de Yup: el valor guardado nunca lleva basura si es DNI. */
+function normalizarNroDocumento(
+  nro: string | undefined | null,
+  idTipo: number | string | null | undefined,
+): string {
+  if (!esDniPorIdTipo(idTipo)) return nro == null ? '' : String(nro);
+  return soloDigitos(String(nro ?? '')).slice(0, 8);
+}
 
 // Cargar tipos de documento desde la API
 const cargarTiposDocumento = async () => {
@@ -123,15 +157,34 @@ const cargarTiposDocumento = async () => {
   }
 };
 
-// Schema de validación con Yup
+// Schema de validación con Yup (transform = fuente de verdad al validar / castear)
 const validationSchema = yup.object({
   idTipoDocumento: yup
     .number()
     .required('Seleccione un tipo de documento'),
   nroDocumento: yup
     .string()
+    .transform((value, _originalValue, _schema, options) => {
+      const id = (options as { parent?: { idTipoDocumento?: number | string | null } })?.parent
+        ?.idTipoDocumento;
+      return normalizarNroDocumento(String(value ?? ''), id);
+    })
     .required('El número de documento es requerido')
-    .min(8, 'Mínimo 8 caracteres'),
+    .test('doc-format', function (value) {
+      const id = this.parent.idTipoDocumento as number | string | null | undefined;
+      if (esDniPorIdTipo(id)) {
+        if (!value || !/^\d{8}$/.test(value)) {
+          return this.createError({
+            message: 'El DNI solo permite números y debe tener exactamente 8 dígitos',
+          });
+        }
+        return true;
+      }
+      if (!value || value.length < 8) {
+        return this.createError({ message: 'Mínimo 8 caracteres' });
+      }
+      return true;
+    }),
   nombres: yup
     .string()
     .required('Los nombres son requeridos')
@@ -153,7 +206,7 @@ const validationSchema = yup.object({
 type FormFields = 'idTipoDocumento' | 'nroDocumento' | 'nombres' | 'apellidos' | 'celular' | 'correo';
 
 const { errors, validate, validateField: validateFieldForm } = useForm<Record<FormFields, unknown>>({
-  validationSchema,
+  validationSchema: toTypedSchema(validationSchema),
   initialValues: {
     idTipoDocumento: store.solicitud.idTipoDocumento,
     nroDocumento: store.solicitud.nroDocumento,
@@ -172,6 +225,21 @@ const { value: apellidos } = useField<string>('apellidos');
 const { value: celular } = useField<string>('celular');
 const { value: correo } = useField<string>('correo');
 
+const esDniSeleccionado = computed(() => esDniPorIdTipo(idTipoDocumento.value));
+
+const nroDocumentoMaxLength = computed(() => (esDniSeleccionado.value ? 8 : 20));
+
+/** Sincroniza el modelo con la misma regla que el `transform` de Yup (DNI = solo dígitos). */
+watch(
+  () => [nroDocumento.value, idTipoDocumento.value] as const,
+  ([nro, id]) => {
+    const next = normalizarNroDocumento(nro, id);
+    if (next !== nro) {
+      nroDocumento.value = next;
+    }
+  },
+);
+
 const isValid = ref(true);
 const hasInteracted = ref(false);
 const touchedFields = ref<Set<FormFields>>(new Set());
@@ -179,6 +247,12 @@ const touchedFields = ref<Set<FormFields>>(new Set());
 const validateField = async (fieldName: FormFields) => {
   touchedFields.value.add(fieldName);
   hasInteracted.value = true;
+  if (fieldName === 'nroDocumento') {
+    const next = normalizarNroDocumento(nroDocumento.value, idTipoDocumento.value);
+    if (next !== nroDocumento.value) {
+      nroDocumento.value = next;
+    }
+  }
   await validateFieldForm(fieldName);
 };
 
@@ -227,7 +301,12 @@ defineExpose({
     const allFields: FormFields[] = ['idTipoDocumento', 'nroDocumento', 'nombres', 'apellidos', 'celular', 'correo'];
     allFields.forEach(field => touchedFields.value.add(field));
     hasInteracted.value = true;
-    
+
+    const nroNorm = normalizarNroDocumento(nroDocumento.value, idTipoDocumento.value);
+    if (nroNorm !== nroDocumento.value) {
+      nroDocumento.value = nroNorm;
+    }
+
     const result = await validate();
     isValid.value = result.valid;
     return result.valid;
