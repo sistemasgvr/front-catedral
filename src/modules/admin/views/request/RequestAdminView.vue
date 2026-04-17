@@ -150,7 +150,7 @@
                   </thead>
                   <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <tr 
-                      v-for="solicitud in solicitudesFiltradas" 
+                      v-for="solicitud in solicitudesPagina" 
                       :key="solicitud.idsolicitud"
                       class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
@@ -224,7 +224,7 @@
               <!-- Mobile Cards -->
               <div class="md:hidden space-y-4">
                 <div 
-                  v-for="solicitud in solicitudesFiltradas" 
+                  v-for="solicitud in solicitudesPagina" 
                   :key="solicitud.idsolicitud"
                   class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm transition-colors"
                 >
@@ -296,6 +296,13 @@
                   </button>
                 </div>
               </div>
+
+              <PaginationBar
+                v-model:page="solicitudesListadoPage"
+                v-model:page-size="solicitudesListadoPageSize"
+                :total="solicitudesListadoTotal"
+                item-label="solicitudes"
+              />
             </div>
           </div>
         </main>
@@ -316,6 +323,8 @@ import { ref, computed, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import AdminLayout from "../../layouts/AdminLayout.vue";
 import DetailRequestModal from "../../components/DetailRequestModal.vue";
+import PaginationBar from "@/components/pagination/PaginationBar.vue";
+import { useClientPagination } from "@/composables/useClientPagination";
 import { getOpcionesLista } from "../../actions/getOpcionesLista.action";
 import { listarSolicitudes } from "../../actions/listSolicitudes.action";
 import { listarTiposMisa } from '../../actions/tipoMisa.action';
@@ -404,6 +413,13 @@ const solicitudesFiltradas = computed(() => {
 
   return resultado;
 });
+
+const {
+  page: solicitudesListadoPage,
+  pageSize: solicitudesListadoPageSize,
+  total: solicitudesListadoTotal,
+  paginatedItems: solicitudesPagina,
+} = useClientPagination(solicitudesFiltradas, { initialPageSize: 10 });
 
 /* ================================
    METHODS
