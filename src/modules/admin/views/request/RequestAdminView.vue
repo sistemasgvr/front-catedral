@@ -314,6 +314,7 @@
       :is-open="modalDetalle.isOpen"
       :solicitud-id="modalDetalle.solicitudId"
       @close="cerrarModalDetalle"
+      @updated="cargarSolicitudes"
     />
   </AdminLayout>
 </template>
@@ -334,9 +335,7 @@ import type { ISolicitudDb } from "../../interfaces/listSolicitudes.interface";
 import type { ITipoMisa } from "../../interfaces/tipoMisa.interface";
 import { resolveTipoMisaNombre } from "../../utils/resolveTipoMisaNombre";
 import { esMarcadorPagoEfectivo } from "../../../request/constants/pagoSolicitud";
-
-/** Mismo valor que `revision` en cambiarEstadoSolicitud.action (lista estados, id opción). */
-const ID_ESTADO_EN_REVISION = 17;
+import { ID_ESTADO_SOLICITUD_EN_REVISION } from "../../constants/solicitudEstadoProceso";
 
 function solicitudEsPagoEfectivo(s: ISolicitudDb): boolean {
   return esMarcadorPagoEfectivo(s.voucherpago);
@@ -400,8 +399,8 @@ const solicitudesFiltradas = computed(() => {
   }
 
   resultado.sort((a, b) => {
-    const aRevision = a.idestadoproceso === ID_ESTADO_EN_REVISION;
-    const bRevision = b.idestadoproceso === ID_ESTADO_EN_REVISION;
+    const aRevision = a.idestadoproceso === ID_ESTADO_SOLICITUD_EN_REVISION;
+    const bRevision = b.idestadoproceso === ID_ESTADO_SOLICITUD_EN_REVISION;
     if (aRevision !== bRevision) return aRevision ? -1 : 1;
 
     const ta = Date.parse(a.fechacreacion) || 0;

@@ -3,9 +3,9 @@ import apiClient from "../../../api/apiClient";
 import type { ISolicitudDb } from "../interfaces/listSolicitudes.interface";
 
 /**
- * Obtiene las opciones de una lista según su ID
- * @returns Array de opciones de la lista
- * 
+ * Listado de solicitudes para administración (orden recientes primero).
+ * No filtra por estado de proceso: las denegadas deben seguir apareciendo;
+ * si no se ven, revisar políticas RLS o triggers en la base de datos.
  */
 export const listarSolicitudes = async (): Promise<ISolicitudDb[]> => {
   try {

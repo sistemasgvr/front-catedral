@@ -1,5 +1,10 @@
 import { isAxiosError } from "axios";
 import apiClient from "../../../api/apiClient";
+import {
+  ID_ESTADO_SOLICITUD_APROBADA,
+  ID_ESTADO_SOLICITUD_DENEGADA,
+  ID_ESTADO_SOLICITUD_EN_REVISION,
+} from "../constants/solicitudEstadoProceso";
 import { crearMisaDesdeSolicitud } from "./crudMisa.action";
 import {
   crearMencion,
@@ -27,9 +32,9 @@ export const cambiarEstadoSolicitud = async (
 ): Promise<void> => {
   try {
     const estadosMap: Record<AccionEstado, number> = {
-      aprobar: 18,
-      denegar: 19,
-      revision: 17,
+      aprobar: ID_ESTADO_SOLICITUD_APROBADA,
+      denegar: ID_ESTADO_SOLICITUD_DENEGADA,
+      revision: ID_ESTADO_SOLICITUD_EN_REVISION,
     };
 
     const nuevoEstado = estadosMap[accion];
@@ -56,7 +61,7 @@ export const cambiarEstadoSolicitud = async (
     );
 
     // 3. Si se aprueba por primera vez → proceso automático
-    if (accion === "aprobar" && estadoAnterior !== 18) {
+    if (accion === "aprobar" && estadoAnterior !== ID_ESTADO_SOLICITUD_APROBADA) {
       console.log("Solicitud aprobada, iniciando proceso automático...");
 
       try {
