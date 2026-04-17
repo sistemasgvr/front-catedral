@@ -161,6 +161,38 @@ const route = useRoute();
 
 const ID_LISTA_HORARIOS = 5;
 
+/** Fecha de hoy en zona local YYYY-MM-DD (evita desfase de `toISOString()` UTC). */
+function fechaHoyLocalYYYYMMDD(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function parseYyyyMmDdLocal(s: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const parts = s.split("-").map(Number);
+  const y = parts[0];
+  const mo = parts[1];
+  const da = parts[2];
+  if (y == null || mo == null || da == null) return null;
+  const d = new Date(y, mo - 1, da);
+  if (d.getFullYear() !== y || d.getMonth() !== mo - 1 || d.getDate() !== da) return null;
+  return d;
+}
+
+/** true si la fecha (solo día) es estrictamente anterior a hoy en calendario local. */
+function esFechaCelebracionPasada(yyyyMmDd: string): boolean {
+  if (!yyyyMmDd) return false;
+  const selected = parseYyyyMmDdLocal(yyyyMmDd);
+  if (!selected) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  selected.setHours(0, 0, 0, 0);
+  return selected.getTime() < today.getTime();
+}
+
 const loadingTiposMisa = ref(false);
 const loadingHorarios = ref(true);
 const loadingMisas = ref(false);
@@ -181,7 +213,7 @@ const hasInteracted = ref(false);
 const touchedFields = ref<Set<string>>(new Set());
 const fieldErrors = reactive<Record<string, string | undefined>>({});
 
-const fechaMinima = computed(() => new Date().toISOString().split("T")[0]);
+const fechaMinima = computed(() => fechaHoyLocalYYYYMMDD());
 
 const esMisaPrivada = computed(() => {
   const tipo = tiposMisa.value.find((t) => t.id === idTipoMisa.value);
@@ -267,9 +299,14 @@ const validateField = (fieldName: string) => {
       break;
     case "fechaCelebracion":
       if (esMisaPrivada.value) {
-        fieldErrors.fechaCelebracion = !fechaCelebracion.value
-          ? "La fecha es requerida"
-          : undefined;
+        if (!fechaCelebracion.value) {
+          fieldErrors.fechaCelebracion = "La fecha es requerida";
+        } else if (esFechaCelebracionPasada(fechaCelebracion.value)) {
+          fieldErrors.fechaCelebracion =
+            "La fecha de celebración no puede ser anterior a hoy";
+        } else {
+          fieldErrors.fechaCelebracion = undefined;
+        }
       }
       break;
     case "idHorario":
@@ -314,6 +351,9 @@ const validateAll = (): boolean => {
   if (esMisaPrivada.value) {
     if (!fechaCelebracion.value) {
       fieldErrors.fechaCelebracion = "La fecha es requerida";
+    } else if (esFechaCelebracionPasada(fechaCelebracion.value)) {
+      fieldErrors.fechaCelebracion =
+        "La fecha de celebración no puede ser anterior a hoy";
     }
     if (!idHorario.value) {
       fieldErrors.idHorario = "Seleccione un horario";
@@ -338,6 +378,12 @@ const validateAll = (): boolean => {
   } else if (idTipoMisa.value) {
     if (!idMisaSeleccionada.value) {
       fieldErrors.idMisaSeleccionada = "Seleccione una misa";
+    } else if (
+      fechaCelebracion.value &&
+      esFechaCelebracionPasada(fechaCelebracion.value)
+    ) {
+      fieldErrors.idMisaSeleccionada =
+        "La misa seleccionada tiene una fecha pasada. Elija otra misa.";
     }
     store.solicitud.costoMencion = precioTipoMisa.value;
   }
@@ -346,6 +392,11 @@ const validateAll = (): boolean => {
 };
 
 const seleccionarMisa = (misa: IMisaListItem) => {
+  if (esFechaCelebracionPasada(misa.fecha)) {
+    fieldErrors.idMisaSeleccionada =
+      "No se puede elegir una misa con fecha pasada. Seleccione otra.";
+    return;
+  }
   idMisaSeleccionada.value = misa.id;
   fechaCelebracion.value = misa.fecha;
   horarioMisaSeleccionada.value = misa.horario;
@@ -422,6 +473,13 @@ onMounted(async () => {
   idHorario.value = store.solicitud.idHorario;
   intencion.value = store.solicitud.intencion;
 
+  if (fechaCelebracion.value && esFechaCelebracionPasada(fechaCelebracion.value)) {
+    fechaCelebracion.value = "";
+    idMisaSeleccionada.value = null;
+    horarioMisaSeleccionada.value = "";
+    idHorario.value = null;
+  }
+
   if (idTipoMisa.value && !esMisaPrivada.value) {
     await cargarMisas();
 
@@ -432,6 +490,12 @@ onMounted(async () => {
       }
     }
   }
+});
+
+watch(fechaCelebracion, () => {
+  if (!esMisaPrivada.value) return;
+  if (!touchedFields.value.has("fechaCelebracion") && !hasInteracted.value) return;
+  validateField("fechaCelebracion");
 });
 
 defineExpose({
