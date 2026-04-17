@@ -29,7 +29,7 @@
                     Calendario de Misas
                   </h2>
                   <p class="text-xs sm:text-sm text-[#6B6B6B] leading-relaxed">
-                    Misas comunitarias disponibles • Misas privadas solo informativas.
+                    Solo misas comunitarias permiten solicitud en línea; matrimonio, bautizo, privadas y demás tipos son solo referencia.
                     Si hay varias misas el mismo día, desplácese dentro de la celda.
                   </p>
                 </div>
@@ -135,28 +135,27 @@
                       type="button"
                       class="w-full text-left px-1.5 sm:px-2 py-1 sm:py-1.5 rounded border transition-all duration-200 group shrink-0 min-h-[2.25rem] sm:min-h-[2.5rem] min-w-0"
                       :class="
-                        misa.esPrivada
+                        misa.soloInformativaCalendario
                           ? 'bg-gray-50/80 border-gray-200/60 text-gray-500 cursor-default'
                           : !misa.puedeSolicitar
                             ? 'bg-stone-100/90 border-stone-200/80 text-stone-500 cursor-not-allowed opacity-90'
                             : 'bg-[#FFF5E6]/80 border-[#D39E3A]/30 text-[#8C1D40] hover:bg-[#FFF5E6] hover:border-[#8C1D40]/60 hover:shadow-sm cursor-pointer active:scale-[0.98]'
                       "
                       :title="
-                        misa.esPrivada
-                          ? 'Misa privada — solo informativa'
+                        misa.soloInformativaCalendario
+                          ? 'Sin solicitud en línea — contacte a la parroquia'
                           : !misa.puedeSolicitar
                             ? 'Fecha pasada — no disponible para nueva solicitud'
                             : 'Ir a solicitud de menciones'
                       "
                       @click="onSelectMisa(misa)"
-                      :disabled="misa.esPrivada || !misa.puedeSolicitar"
+                      :disabled="misa.soloInformativaCalendario || !misa.puedeSolicitar"
                     >
                       <div class="flex items-center justify-between gap-1 mb-0.5 min-w-0">
                         <span class="text-[9px] sm:text-[10px] font-semibold truncate min-w-0">
                           {{ misa.horario }}
                         </span>
                         <span
-                          v-if="!misa.esPrivada"
                           class="text-[8px] sm:text-[9px] font-bold px-1 py-0.5 bg-white/60 rounded shrink-0"
                         >
                           {{ misa.menciones }}
@@ -196,7 +195,7 @@
                   </div>
                   <div class="flex items-center gap-2">
                     <div class="w-3 h-3 sm:w-4 sm:h-4 rounded border border-gray-200/60 bg-gray-50/80"></div>
-                    <span class="text-gray-600">Privada</span>
+                    <span class="text-gray-600">Matrimonio, bautizo, privada… (sin solicitud en línea)</span>
                   </div>
                   <div class="flex items-center gap-2">
                     <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#8C1D40] flex items-center justify-center text-[10px] text-white font-bold">
@@ -230,6 +229,7 @@ import {
   fechaHoyLocalYYYYMMDD,
   toYYYYMMDDLocal,
 } from "../utils/fechaMisaSolicitud";
+import { esTipoMisaComunitariaCalendarioPublico } from "../constants/tipoMisaRegistro";
 
 interface IMisaCalendarItem {
   id: number;
@@ -238,8 +238,9 @@ interface IMisaCalendarItem {
   titulo: string;
   tipoMisa: string;
   precio: number;
-  esPrivada: boolean;
-  /** Comunitaria con fecha >= hoy: se puede ir a solicitud. */
+  /** Matrimonio, bautizo, privada, funeral, etc.: no hay solicitud pública desde este calendario. */
+  soloInformativaCalendario: boolean;
+  /** Solo misa comunitaria y fecha no pasada. */
   puedeSolicitar: boolean;
   menciones: number;
   idTipoMisa: number;
@@ -295,8 +296,10 @@ const daysInMonth = computed(() => {
 });
 
 const mapMisa = (misa: IMisaCalendario): IMisaCalendarItem => {
-  const esPrivada =
-    misa.tipomisa?.nombre?.toLowerCase().includes("privada") ?? false;
+  const esComunitaria = esTipoMisaComunitariaCalendarioPublico(
+    misa.idtipomisa,
+    misa.tipomisa?.nombre,
+  );
   const mencionesCount = misa.mencionesmisa?.[0]?.count ?? 0;
   const pasada = esFechaCelebracionPasada(misa.fechacelebracion);
   return {
@@ -306,8 +309,8 @@ const mapMisa = (misa: IMisaCalendario): IMisaCalendarItem => {
     titulo: misa.titulo || "Misa programada",
     tipoMisa: misa.tipomisa?.nombre || "-",
     precio: misa.tipomisa?.precio ?? 0,
-    esPrivada,
-    puedeSolicitar: !esPrivada && !pasada,
+    soloInformativaCalendario: !esComunitaria,
+    puedeSolicitar: esComunitaria && !pasada,
     menciones: mencionesCount,
     idTipoMisa: misa.idtipomisa,
   };
@@ -342,7 +345,11 @@ const loadMisas = async () => {
 };
 
 const onSelectMisa = (misa: IMisaCalendarItem) => {
-  if (misa.esPrivada) return;
+  if (misa.soloInformativaCalendario) {
+    errorMessage.value =
+      "Esta misa no admite solicitud en línea desde el calendario (matrimonio, bautizo, privada u otro tipo reservado). Comuníquese con la parroquia.";
+    return;
+  }
   if (!misa.puedeSolicitar) {
     errorMessage.value =
       "No se pueden crear solicitudes para misas con fecha pasada. Elija una misa desde hoy en adelante.";
