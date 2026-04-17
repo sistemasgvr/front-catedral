@@ -203,9 +203,9 @@
                 </div>
                 -->
 
-                <!-- Menciones (si existen) -->
+                <!-- Líneas registradas (menciones, niños/as o parejas según tipo de misa) -->
                 <div v-if="solicitud.menciones && solicitud.menciones.length > 0" class="mt-3 pt-3 border-t border-[#E0D5C5]">
-                  <p class="text-xs text-gray-500 font-medium mb-2">Menciones</p>
+                  <p class="text-xs text-gray-500 font-medium mb-2">{{ etiquetaBloqueLineas(solicitud) }}</p>
                   <div class="flex flex-wrap gap-1.5">
                     <span
                       v-for="mencion in solicitud.menciones"
@@ -234,6 +234,7 @@ import { Icon } from "@iconify/vue";
 import { InputText } from "@/components/inputs";
 import { getSolicitudesByDocumento } from "../actions/getSolicitudesByDocumento.action";
 import { esMarcadorPagoEfectivo } from "../constants/pagoSolicitud";
+import { etiquetaPasoRegistro } from "../constants/tipoMisaRegistro";
 import type { ISolicitudDb } from "../interfaces/solicitudDb.interface";
 import HeaderSolicitud from "../components/HeaderSolicitud.vue";
 import FooterSolicitud from "../components/FooterSolicitud.vue";
@@ -276,6 +277,10 @@ const onLimpiar = () => {
   fetchError.value = "";
   hasSearched.value = false;
 };
+
+/** No usar «Menciones» para bautizo/matrimonio; alinea con el flujo de solicitud. */
+const etiquetaBloqueLineas = (s: ISolicitudDb): string =>
+  etiquetaPasoRegistro(s.idtipomisa ?? undefined, s.tipomisa?.nombre);
 
 const formatDateShort = (value: string | null): string => {
   if (!value) return "-";
