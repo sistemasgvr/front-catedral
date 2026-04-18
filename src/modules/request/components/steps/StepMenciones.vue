@@ -20,6 +20,17 @@
           <span class="font-semibold text-[#C88A2A] dark:text-[#E5A84A]">S/ {{ COSTO_UNITARIO.toFixed(2) }}</span>.
         </template>
       </p>
+      <p
+        v-if="modoLineas === 'nino' || modoLineas === 'pareja'"
+        class="mx-auto max-w-xl text-center text-xs sm:text-sm text-amber-900 dark:text-amber-100/95 bg-amber-50/90 dark:bg-amber-950/35 border border-amber-200/90 dark:border-amber-800/50 rounded-lg px-3 py-2.5 mb-5"
+      >
+        <template v-if="modoLineas === 'nino'">
+          Cada registro corresponde a <strong>un solo niño o niña</strong>. Use «Nuevo» por cada bautizado adicional. En el formulario se le recordará qué datos conviene incluir.
+        </template>
+        <template v-else>
+          Cada registro corresponde a <strong>una sola pareja</strong>. Use «Nuevo» por cada matrimonio adicional. En el formulario se le recordará qué datos conviene incluir.
+        </template>
+      </p>
       
       <!-- Botón Agregar -->
       <div class="flex justify-end mb-4">
@@ -122,11 +133,41 @@
             </button>
           </div>
 
+          <!-- Aviso: un solo niño/a o una sola pareja por registro (evita varios nombres en un campo) -->
+          <div
+            v-if="modoLineas === 'nino'"
+            class="mb-4 rounded-lg border border-amber-200 bg-amber-50/95 dark:border-amber-700/50 dark:bg-amber-950/30 p-3 text-sm text-amber-950 dark:text-amber-100"
+            role="note"
+          >
+            <p class="font-semibold flex items-center gap-1.5">
+              <Icon icon="mdi:alert-circle-outline" class="w-5 h-5 shrink-0" aria-hidden="true" />
+              Un solo bautizado por registro
+            </p>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-xs sm:text-sm leading-relaxed opacity-95">
+              <li>No escriba varios nombres ni varios niños/as en este cuadro. Si debe registrar a más de uno, guarde este registro y use el botón «Nuevo» para cada niño/a adicional.</li>
+              <li>Incluya los datos de <strong>esa única persona</strong>, por ejemplo: nombre completo, fecha de nacimiento, nombres de padres y de padrinos/madrinas, u otra información que le haya pedido la parroquia.</li>
+            </ul>
+          </div>
+          <div
+            v-else-if="modoLineas === 'pareja'"
+            class="mb-4 rounded-lg border border-amber-200 bg-amber-50/95 dark:border-amber-700/50 dark:bg-amber-950/30 p-3 text-sm text-amber-950 dark:text-amber-100"
+            role="note"
+          >
+            <p class="font-semibold flex items-center gap-1.5">
+              <Icon icon="mdi:alert-circle-outline" class="w-5 h-5 shrink-0" aria-hidden="true" />
+              Una sola pareja por registro
+            </p>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-xs sm:text-sm leading-relaxed opacity-95">
+              <li>No agrupe varias parejas en un solo texto. Si hay más de una pareja para la misa, guarde este registro y pulse «Nuevo» por cada pareja adicional.</li>
+              <li>Escriba los datos referentes a <strong>esa única pareja</strong>, por ejemplo: nombres completos de ambos contrayentes y cualquier dato que la parroquia haya solicitado.</li>
+            </ul>
+          </div>
+
           <!-- Form -->
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-[#4A4A4A] dark:text-gray-300 mb-1">
-                Datos <span class="text-red-500">*</span>
+                {{ etiquetaCampoDatosModal }} <span class="text-red-500">*</span>
               </label>
               <textarea
                 v-model="nuevaDescripcion"
@@ -199,6 +240,17 @@ const etiquetaLinea = computed(() =>
 const placeholderLineaVal = computed(() =>
   placeholderLinea(store.solicitud.idTipoMisa, store.solicitud.nombreTipoMisa),
 );
+
+const modoLineas = computed(() =>
+  getModoRegistroLineas(store.solicitud.idTipoMisa, store.solicitud.nombreTipoMisa),
+);
+
+const etiquetaCampoDatosModal = computed(() => {
+  if (modoLineas.value === 'nino') return 'Datos del niño/a (una sola persona)';
+  if (modoLineas.value === 'pareja') return 'Datos de la pareja (un solo matrimonio)';
+  return 'Datos';
+});
+
 const COSTO_UNITARIO = computed(() =>
   store.solicitud.costoMencion > 0 ? store.solicitud.costoMencion : COSTO_MENCION,
 );

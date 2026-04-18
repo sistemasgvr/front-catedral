@@ -98,6 +98,34 @@
                         Agregar
                       </button>
                     </div>
+                    <div
+                      v-if="modoRegistroLineas === 'nino'"
+                      class="mb-3 rounded-lg border border-amber-200 bg-amber-50/95 p-3 text-sm text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-100"
+                      role="note"
+                    >
+                      <p class="font-semibold flex items-center gap-1.5">
+                        <Icon icon="mdi:alert-circle-outline" class="h-4 w-4 shrink-0" aria-hidden="true" />
+                        Un solo bautizado por fila
+                      </p>
+                      <ul class="mt-2 list-disc space-y-1 pl-5 text-xs leading-relaxed opacity-95">
+                        <li>No registre varios niños/as en un mismo cuadro. Use «Agregar» para cada persona adicional.</li>
+                        <li>En cada fila indique los datos de <strong>una sola persona</strong> (nombre completo, fecha de nacimiento, padres, padrinos/madrinas, etc.).</li>
+                      </ul>
+                    </div>
+                    <div
+                      v-else-if="modoRegistroLineas === 'pareja'"
+                      class="mb-3 rounded-lg border border-amber-200 bg-amber-50/95 p-3 text-sm text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-100"
+                      role="note"
+                    >
+                      <p class="font-semibold flex items-center gap-1.5">
+                        <Icon icon="mdi:alert-circle-outline" class="h-4 w-4 shrink-0" aria-hidden="true" />
+                        Una sola pareja por fila
+                      </p>
+                      <ul class="mt-2 list-disc space-y-1 pl-5 text-xs leading-relaxed opacity-95">
+                        <li>No agrupe varias parejas en un solo texto. Use «Agregar» por cada matrimonio adicional.</li>
+                        <li>En cada fila consigne los datos de <strong>esa única pareja</strong> (nombres de ambos contrayentes y lo que corresponda).</li>
+                      </ul>
+                    </div>
                     <p class="mb-3 text-xs text-amber-800 dark:text-amber-200/90">
                       Cada ítem válido (mín. 5 caracteres): S/ {{ precioTipoSeleccionado.toFixed(2) }} — total estimado: S/
                       {{ (precioTipoSeleccionado * lineasCelebrantesValidasCount).toFixed(2) }}
@@ -109,7 +137,15 @@
                         class="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-900/40"
                       >
                         <div class="mb-1 flex items-center justify-between">
-                          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ etiquetaLineaSingularComputed }} {{ idx + 1 }}</span>
+                          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            {{ etiquetaLineaSingularComputed }} {{ idx + 1 }}
+                            <span v-if="modoRegistroLineas === 'nino'" class="block font-normal text-gray-500 dark:text-gray-400 sm:inline sm:ml-1">
+                              — una sola persona en este campo
+                            </span>
+                            <span v-else-if="modoRegistroLineas === 'pareja'" class="block font-normal text-gray-500 dark:text-gray-400 sm:inline sm:ml-1">
+                              — una sola pareja en este campo
+                            </span>
+                          </span>
                           <button
                             v-if="lineasCelebrantes.length > 1"
                             type="button"
