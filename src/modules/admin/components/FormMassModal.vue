@@ -26,7 +26,8 @@
           >
             <div
               v-if="isOpen"
-              class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-[100000]"
+              class="relative w-full rounded-xl shadow-2xl z-[100000] bg-white dark:bg-gray-800 max-h-[90vh] overflow-y-auto"
+              :class="mostrarBloqueCelebrantes ? 'max-w-4xl' : 'max-w-2xl'"
               @click.stop
             >
               <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -57,6 +58,77 @@
                     </option>
                   </select>
                 </div>
+
+                <!-- Bautizo / Matrimonio: niños/as o parejas (crear o editar; varios celebrantes por misa) -->
+                <template v-if="mostrarBloqueCelebrantes">
+                  <p
+                    v-if="modoEdicion"
+                    class="rounded-md border border-blue-200 bg-blue-50/80 px-3 py-2 text-xs text-blue-900 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-100"
+                  >
+                    Puede editar cada registro, agregar nuevos celebrantes o quitar los que ya no correspondan. Los cambios se guardan al pulsar «Actualizar».
+                  </p>
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Horario (lista) <span class="text-red-500">*</span>
+                    </label>
+                    <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                      Debe coincidir con el horario de la misa (vinculación con solicitud en sistema).
+                    </p>
+                    <select
+                      v-model.number="idHorarioLista"
+                      class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                    >
+                      <option :value="0">Seleccione horario…</option>
+                      <option v-for="h in opcionesHorario" :key="h.id" :value="Number(h.id)">{{ h.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+                    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ etiquetaCelebrantes }}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ descripcionCelebrantes }}</p>
+                      </div>
+                      <button
+                        type="button"
+                        class="inline-flex items-center gap-1 rounded-lg bg-[#3B5998] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#344e86]"
+                        @click="agregarLineaCelebrante"
+                      >
+                        <Icon icon="mdi:plus" class="h-4 w-4" aria-hidden="true" />
+                        Agregar
+                      </button>
+                    </div>
+                    <p class="mb-3 text-xs text-amber-800 dark:text-amber-200/90">
+                      Cada ítem válido (mín. 5 caracteres): S/ {{ precioTipoSeleccionado.toFixed(2) }} — total estimado: S/
+                      {{ (precioTipoSeleccionado * lineasCelebrantesValidasCount).toFixed(2) }}
+                    </p>
+                    <div class="space-y-3">
+                      <div
+                        v-for="(linea, idx) in lineasCelebrantes"
+                        :key="linea.idmencion ?? `nueva-${idx}`"
+                        class="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-900/40"
+                      >
+                        <div class="mb-1 flex items-center justify-between">
+                          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ etiquetaLineaSingularComputed }} {{ idx + 1 }}</span>
+                          <button
+                            v-if="lineasCelebrantes.length > 1"
+                            type="button"
+                            class="text-xs text-red-600 hover:underline dark:text-red-400"
+                            @click="quitarLineaCelebrante(idx)"
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                        <textarea
+                          v-model="linea.descripcion"
+                          rows="3"
+                          :placeholder="placeholderCelebrante"
+                          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </template>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -183,8 +255,24 @@ import { ref, watch, computed, onUnmounted } from 'vue';
 import { Icon } from '@iconify/vue';
 import { crearMisa, actualizarMisa, obtenerDetalleMisa } from '../actions/crudMisa.action';
 import { listarTiposMisa } from '../actions/tipoMisa.action';
+import { registrarMisaAdminConSolicitud } from '../actions/registrarMisaAdminConSolicitud.action';
+import {
+  sincronizarCelebrantesMisaEnEdicion,
+  type LineaCelebranteEdicion,
+} from '../actions/sincronizarCelebrantesMisaEnEdicion.action';
+import { getOpcionesLista } from '../actions/getOpcionesLista.action';
+import { mapOpcionToSelect, type ISelectOption } from '../interfaces/opcionLista.interface';
 import type { ICrearMisaForm } from '../interfaces/misa.interface';
 import type { ITipoMisa } from '../interfaces/tipoMisa.interface';
+import {
+  descripcionPasoRegistro,
+  etiquetaLineaSingular,
+  etiquetaPasoRegistro,
+  getModoRegistroLineas,
+  placeholderLinea,
+} from '../../request/constants/tipoMisaRegistro';
+import { VOUCHER_PAGO_EFECTIVO_MARKER } from '../../request/constants/pagoSolicitud';
+import { ID_ESTADO_SOLICITUD_APROBADA } from '../constants/solicitudEstadoProceso';
 
 interface Props {
   isOpen: boolean;
@@ -196,6 +284,14 @@ const emit = defineEmits<{
   close: [];
   saved: [];
 }>();
+
+function emptyLineaCelebrante(): LineaCelebranteEdicion {
+  return { idmencion: null, idmencionmisa: null, descripcion: '' };
+}
+
+function clonarLineasCelebrantes(src: LineaCelebranteEdicion[]): LineaCelebranteEdicion[] {
+  return src.map((l) => ({ ...l }));
+}
 
 // --- ESTADO ---
 const tiposMisa = ref<ITipoMisa[]>([]);
@@ -215,6 +311,56 @@ const form = ref<ICrearMisaForm>({
   estado: true,
 });
 
+/** Solo para generar solicitud mínima en BD (no se muestra al usuario). */
+const opcionesTipoDocumento = ref<ISelectOption[]>([]);
+const opcionesHorario = ref<ISelectOption[]>([]);
+const idHorarioLista = ref(0);
+
+/** Filas de celebrantes (crear o editar); ids vienen del detalle al editar. */
+const lineasCelebrantes = ref<LineaCelebranteEdicion[]>([emptyLineaCelebrante()]);
+/** Solicitud asociada a las menciones cargadas (si existe). */
+const idsolicitudRef = ref<number | null>(null);
+/** Copia al abrir / tras guardar, para diff al sincronizar. */
+const snapshotCelebrantes = ref<LineaCelebranteEdicion[]>([]);
+
+const tipoSeleccionado = computed(() =>
+  tiposMisa.value.find((t) => t.idtipomisa === form.value.idtipomisa),
+);
+
+const modoRegistroLineas = computed(() =>
+  getModoRegistroLineas(form.value.idtipomisa, tipoSeleccionado.value?.nombre),
+);
+
+const requiereDatosCelebrantes = computed(
+  () => modoRegistroLineas.value === 'nino' || modoRegistroLineas.value === 'pareja',
+);
+
+const mostrarBloqueCelebrantes = computed(() => requiereDatosCelebrantes.value);
+
+const lineasCelebrantesValidasCount = computed(
+  () => lineasCelebrantes.value.filter((l) => l.descripcion.trim().length >= 5).length,
+);
+
+const precioTipoSeleccionado = computed(() =>
+  Number(tipoSeleccionado.value?.precio ?? 0),
+);
+
+const etiquetaCelebrantes = computed(() =>
+  etiquetaPasoRegistro(form.value.idtipomisa, tipoSeleccionado.value?.nombre),
+);
+
+const descripcionCelebrantes = computed(() =>
+  descripcionPasoRegistro(form.value.idtipomisa, tipoSeleccionado.value?.nombre),
+);
+
+const placeholderCelebrante = computed(() =>
+  placeholderLinea(form.value.idtipomisa, tipoSeleccionado.value?.nombre),
+);
+
+const etiquetaLineaSingularComputed = computed(() =>
+  etiquetaLineaSingular(form.value.idtipomisa, tipoSeleccionado.value?.nombre),
+);
+
 const minFecha = computed(() => new Date().toISOString().split('T')[0]);
 
 // --- MÉTODOS ---
@@ -226,7 +372,35 @@ const mostrarToast = (mensaje: string, tipo: 'success' | 'error') => {
 
 const resetForm = () => {
   form.value = { idtipomisa: 0, titulo: '', fechacelebracion: '', horainicio: '', horafin: '', estado: true };
+  idHorarioLista.value = 0;
+  lineasCelebrantes.value = [emptyLineaCelebrante()];
+  idsolicitudRef.value = null;
+  snapshotCelebrantes.value = [];
   validationError.value = null;
+};
+
+const agregarLineaCelebrante = () => {
+  lineasCelebrantes.value.push(emptyLineaCelebrante());
+};
+
+const quitarLineaCelebrante = (idx: number) => {
+  if (lineasCelebrantes.value.length <= 1) return;
+  lineasCelebrantes.value.splice(idx, 1);
+};
+
+const cargarOpcionesListas = async () => {
+  try {
+    const [doc, hor] = await Promise.all([
+      getOpcionesLista(1),
+      getOpcionesLista(5),
+    ]);
+    opcionesTipoDocumento.value = doc.map(mapOpcionToSelect);
+    opcionesHorario.value = hor.map(mapOpcionToSelect);
+  } catch (e) {
+    console.error('Error cargando listas para nueva misa:', e);
+    opcionesTipoDocumento.value = [];
+    opcionesHorario.value = [];
+  }
 };
 
 const cargarTiposMisa = async () => {
@@ -249,6 +423,32 @@ const cargarMisa = async () => {
       horafin: misa.horafin,
       estado: misa.estado,
     };
+
+    const modo = getModoRegistroLineas(misa.idtipomisa, misa.tipomisa?.nombre);
+    const menciones = Array.isArray(misa.menciones) ? misa.menciones : [];
+
+    if (modo === 'nino' || modo === 'pareja') {
+      if (menciones.length > 0) {
+        lineasCelebrantes.value = menciones.map((m) => ({
+          idmencion: m.mencion.idmencion,
+          idmencionmisa: m.idmencionmisa,
+          descripcion: m.mencion.descripcion ?? '',
+        }));
+        const sol0 = menciones[0]?.mencion.solicitud;
+        idsolicitudRef.value = sol0?.idsolicitud ?? null;
+        idHorarioLista.value = Number(sol0?.idhorario ?? 0) || 0;
+      } else {
+        lineasCelebrantes.value = [emptyLineaCelebrante()];
+        idsolicitudRef.value = null;
+        idHorarioLista.value = 0;
+      }
+      snapshotCelebrantes.value = clonarLineasCelebrantes(lineasCelebrantes.value);
+    } else {
+      lineasCelebrantes.value = [emptyLineaCelebrante()];
+      idsolicitudRef.value = null;
+      idHorarioLista.value = 0;
+      snapshotCelebrantes.value = [];
+    }
   } catch (error) {
     console.error('Error cargando misa:', error);
   }
@@ -261,6 +461,31 @@ const validarFormulario = (): boolean => {
   if (!form.value.fechacelebracion) { validationError.value = 'La fecha de celebración es requerida'; return false; }
   if (!form.value.horainicio || !form.value.horafin) { validationError.value = 'Debe especificar el horario'; return false; }
   if (form.value.horainicio >= form.value.horafin) { validationError.value = 'La hora de fin debe ser posterior'; return false; }
+
+  if (mostrarBloqueCelebrantes.value) {
+    if (!idHorarioLista.value) {
+      validationError.value = 'Seleccione el horario de la lista';
+      return false;
+    }
+    if (opcionesTipoDocumento.value.length === 0) {
+      validationError.value = 'No hay tipos de documento configurados; no se puede registrar la misa.';
+      return false;
+    }
+    const lineasOk = lineasCelebrantes.value
+      .map((l) => l.descripcion.trim())
+      .filter((t) => t.length > 0);
+    if (lineasOk.length < 1) {
+      validationError.value = `Debe registrar al menos un ${etiquetaLineaSingularComputed.value.toLowerCase()}`;
+      return false;
+    }
+    for (let i = 0; i < lineasOk.length; i++) {
+      if (lineasOk[i]!.length < 5) {
+        validationError.value = `Cada ${etiquetaLineaSingularComputed.value.toLowerCase()} debe tener al menos 5 caracteres`;
+        return false;
+      }
+    }
+  }
+
   return true;
 };
 
@@ -271,7 +496,63 @@ const handleSubmit = async () => {
   try {
     if (modoEdicion.value && props.misaId) {
       await actualizarMisa({ idmisa: props.misaId, ...form.value });
+
+      if (mostrarBloqueCelebrantes.value) {
+        const primeraDoc = opcionesTipoDocumento.value[0];
+        if (!primeraDoc) {
+          mostrarToast('No hay tipos de documento en el sistema', 'error');
+          return;
+        }
+        const { idsolicitud } = await sincronizarCelebrantesMisaEnEdicion({
+          idMisa: props.misaId,
+          idTipoMisa: form.value.idtipomisa,
+          fechacelebracion: form.value.fechacelebracion,
+          precioUnitario: precioTipoSeleccionado.value,
+          idTipoDocumentoSistema: Number(primeraDoc.id),
+          idsolicitudInicial: idsolicitudRef.value,
+          idHorarioLista: idHorarioLista.value,
+          lineas: clonarLineasCelebrantes(lineasCelebrantes.value),
+          snapshot: clonarLineasCelebrantes(snapshotCelebrantes.value),
+        });
+        if (idsolicitudRef.value == null) idsolicitudRef.value = idsolicitud;
+        await cargarMisa();
+      }
+
       mostrarToast('Misa actualizada correctamente', 'success');
+    } else if (mostrarBloqueCelebrantes.value) {
+      const primeraDoc = opcionesTipoDocumento.value[0];
+      if (!primeraDoc) {
+        mostrarToast('No hay tipos de documento en el sistema', 'error');
+        return;
+      }
+      const lineasOk = lineasCelebrantes.value
+        .map((l) => l.descripcion.trim())
+        .filter((t) => t.length >= 5);
+      const monto = precioTipoSeleccionado.value * lineasOk.length;
+
+      await registrarMisaAdminConSolicitud({
+        misa: { ...form.value },
+        solicitud: {
+          idtipodocumento: Number(primeraDoc.id),
+          nrodocumento: '00000000',
+          nombres: 'Parroquia',
+          apellidos: 'Registro interno',
+          celular: null,
+          correo: null,
+          fechacelebracion: form.value.fechacelebracion,
+          idtipomisa: form.value.idtipomisa,
+          idhorario: idHorarioLista.value,
+          intencion: null,
+          voucherpago: VOUCHER_PAGO_EFECTIVO_MARKER,
+          montototal: monto,
+          fechamisadeseada: form.value.fechacelebracion,
+          estado: true,
+          idusuariocreacion: null,
+          idestadoproceso: ID_ESTADO_SOLICITUD_APROBADA,
+        },
+        descripcionesLineas: lineasOk,
+      });
+      mostrarToast('Misa creada con celebrantes registrados', 'success');
     } else {
       await crearMisa(form.value);
       mostrarToast('Misa creada con éxito', 'success');
@@ -305,11 +586,24 @@ const handleClose = () => {
 // --- WATCHERS Y LIFECYCLE ---
 watch(() => props.isOpen, async (newValue) => {
   if (newValue) {
-    await cargarTiposMisa();
+    await Promise.all([cargarTiposMisa(), cargarOpcionesListas()]);
     if (modoEdicion.value) await cargarMisa();
     else resetForm();
   }
 });
+
+watch(
+  () => form.value.idtipomisa,
+  () => {
+    const nombre = tiposMisa.value.find((t) => t.idtipomisa === form.value.idtipomisa)?.nombre;
+    const modo = getModoRegistroLineas(form.value.idtipomisa, nombre);
+    if (modo !== 'nino' && modo !== 'pareja') {
+      lineasCelebrantes.value = [emptyLineaCelebrante()];
+      idsolicitudRef.value = null;
+      snapshotCelebrantes.value = [];
+    }
+  },
+);
 
 onUnmounted(() => { if (toastTimer) clearTimeout(toastTimer); });
 </script>

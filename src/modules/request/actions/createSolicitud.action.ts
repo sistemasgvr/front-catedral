@@ -23,6 +23,8 @@ export interface CreateSolicitudPayload {
   fechamisadeseada: string | null;
   estado: boolean;
   idusuariocreacion: number | null;
+  /** Si se omite, la BD usa el valor por defecto (p. ej. en revisión). */
+  idestadoproceso?: number | null;
 }
 
 /**

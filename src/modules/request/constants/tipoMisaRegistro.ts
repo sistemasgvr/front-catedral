@@ -52,6 +52,17 @@ export function getModoRegistroLineas(
   return getModoRegistroLineasPorNombre(nombreTipoMisa);
 }
 
+/**
+ * Solo misa comunitaria: en el calendario público se permite «nueva solicitud» de menciones.
+ * Matrimonio, bautizo, privada, funeral u otros no usan ese flujo (solo referencia / gestión interna).
+ */
+export function esTipoMisaComunitariaCalendarioPublico(
+  idTipoMisa: number | null | undefined,
+  nombreTipoMisa?: string | null,
+): boolean {
+  return getModoRegistroLineas(idTipoMisa, nombreTipoMisa) === 'mencion';
+}
+
 export function omitePasoRegistroLineas(
   idTipoMisa: number | null | undefined,
   nombreTipoMisa?: string | null,

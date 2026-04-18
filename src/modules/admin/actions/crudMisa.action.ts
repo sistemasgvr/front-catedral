@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 import apiClient from "../../../api/apiClient";
-import type { IMisaDetalle, ICrearMisaForm, IEditarMisaForm } from "../interfaces/misa.interface";
+import type { IMisa, IMisaDetalle, ICrearMisaForm, IEditarMisaForm } from "../interfaces/misa.interface";
 
 /**
  * Obtiene el detalle completo de una misa
@@ -8,7 +8,7 @@ import type { IMisaDetalle, ICrearMisaForm, IEditarMisaForm } from "../interface
 export const obtenerDetalleMisa = async (idMisa: number): Promise<IMisaDetalle> => {
   try {
     const { data } = await apiClient.get<IMisaDetalle[]>(
-      `/misas?select=*,tipomisa:idtipomisa(*),menciones:mencionesmisa(idmencionmisa,mencion:idmencion(idmencion,descripcion,solicitud:idsolicitud(idsolicitud,idestadoproceso,nombres,apellidos,celular,correo,nrodocumento,intencion)))&idmisa=eq.${idMisa}`
+      `/misas?select=*,tipomisa:idtipomisa(*),menciones:mencionesmisa(idmencionmisa,mencion:idmencion(idmencion,descripcion,solicitud:idsolicitud(idsolicitud,idhorario,idestadoproceso,nombres,apellidos,celular,correo,nrodocumento,intencion)))&idmisa=eq.${idMisa}`
     );
 
     if (!Array.isArray(data) || data.length === 0) throw new Error("No se encontró la misa");
@@ -23,15 +23,35 @@ export const obtenerDetalleMisa = async (idMisa: number): Promise<IMisaDetalle> 
   }
 };
 
+function horaConSegundos(hora: string): string {
+  if (!hora) return hora;
+  return hora.length === 5 ? `${hora}:00` : hora;
+}
+
 /**
- * Crea una nueva misa
+ * Crea una nueva misa y devuelve su `idmisa` (cabecera `Prefer: return=representation`).
  */
-export const crearMisa = async (data: ICrearMisaForm): Promise<void> => {
+export const crearMisa = async (data: ICrearMisaForm): Promise<number> => {
   try {
-    await apiClient.post("/misas", {
-      ...data,
-      fechacreacion: new Date().toISOString(),
-    });
+    const { data: rows } = await apiClient.post<IMisa[]>(
+      "/misas",
+      {
+        ...data,
+        horainicio: horaConSegundos(data.horainicio),
+        horafin: horaConSegundos(data.horafin),
+        fechacreacion: new Date().toISOString(),
+      },
+      {
+        headers: {
+          Prefer: "return=representation",
+        },
+      },
+    );
+    const row = Array.isArray(rows) ? rows[0] : rows;
+    if (!row?.idmisa) {
+      throw new Error("No se recibió el id de la misa creada");
+    }
+    return row.idmisa;
   } catch (error) {
     if (
       isAxiosError(error) &&

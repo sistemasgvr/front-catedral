@@ -279,7 +279,7 @@
                     </tr>
                   </thead>
                   <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    <tr v-for="misa in misasFiltradas" :key="misa.idmisa"
+                    <tr v-for="misa in misasPagina" :key="misa.idmisa"
                       class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ misa.idmisa }}</span>
@@ -347,7 +347,7 @@
 
               <!-- Mobile Cards -->
               <div class="lg:hidden p-4 space-y-4">
-                <div v-for="misa in misasFiltradas" :key="misa.idmisa"
+                <div v-for="misa in misasPagina" :key="misa.idmisa"
                   class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm">
                   <div class="flex justify-between items-start mb-3">
                     <div>
@@ -390,6 +390,13 @@
                   </div>
                 </div>
               </div>
+
+              <PaginationBar
+                v-model:page="misasListadoPage"
+                v-model:page-size="misasListadoPageSize"
+                :total="misasListadoTotal"
+                item-label="misas"
+              />
             </div>
 
           </div>
@@ -428,6 +435,8 @@ import ConfirmModal from '../components/ConfirmModal.vue';
 import DetailMassModal from '../components/DetailMassModal.vue';
 import FormMassModal from '../components/FormMassModal.vue';
 import MassCalendarPanel, { type AccionMisaCalendario } from '../components/MassCalendarPanel.vue';
+import PaginationBar from '@/components/pagination/PaginationBar.vue';
+import { useClientPagination } from '@/composables/useClientPagination';
 import { obtenerDetalleMisa } from '../actions/crudMisa.action';
 import {
   generarYDescargarReporteMisasExcel,
@@ -542,6 +551,13 @@ const misasFiltradas = computed(() => {
 
   return resultado;
 });
+
+const {
+  page: misasListadoPage,
+  pageSize: misasListadoPageSize,
+  total: misasListadoTotal,
+  paginatedItems: misasPagina,
+} = useClientPagination(misasFiltradas, { initialPageSize: 10 });
 
 const estadisticas = computed(() => {
   const hoy = new Date();

@@ -90,6 +90,48 @@ export const obtenerMencionesPorSolicitud = async (idsolicitud: number): Promise
 /**
  * Obtiene las misas asociadas a una mención
  */
+export const actualizarMencionDescripcion = async (
+  idmencion: number,
+  descripcion: string,
+): Promise<void> => {
+  try {
+    await apiClient.patch(`/menciones?idmencion=eq.${idmencion}`, {
+      descripcion,
+      fechamodificacion: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (
+      isAxiosError(error) &&
+      [400, 401, 422].includes(error.response?.status ?? 0)
+    ) {
+      throw new Error(
+        error.response?.data?.error || "Error al actualizar la mención",
+      );
+    }
+    throw new Error("No se pudo actualizar la mención");
+  }
+};
+
+/** Quita la mención de esta misa (enlace en `mencionesmisa`, sin borrar la fila de `menciones`). */
+export const desactivarMencionMisa = async (idmencionmisa: number): Promise<void> => {
+  try {
+    await apiClient.patch(`/mencionesmisa?idmencionmisa=eq.${idmencionmisa}`, {
+      estado: false,
+      fechamodificacion: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (
+      isAxiosError(error) &&
+      [400, 401, 422].includes(error.response?.status ?? 0)
+    ) {
+      throw new Error(
+        error.response?.data?.error || "Error al desvincular la mención de la misa",
+      );
+    }
+    throw new Error("No se pudo desvincular la mención");
+  }
+};
+
 export const obtenerMisasPorMencion = async (idmencion: number): Promise<any[]> => {
   try {
     const { data } = await apiClient.get(

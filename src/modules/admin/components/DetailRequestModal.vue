@@ -29,8 +29,8 @@
                 </div>
                 <div class="flex flex-wrap items-center justify-end gap-2">
                   <DetailModalTextSizeControl v-model="detailTextZoom" :is-modal-open="isOpen" />
-                  <!-- Botón Editar (solo cuando NO está en modo edición) -->
-                  <button v-if="!modoEdicion && solicitud" @click="activarModoEdicion"
+                  <!-- Botón Editar (no disponible si la solicitud está denegada) -->
+                  <button v-if="!modoEdicion && solicitud && !esSolicitudDenegada" @click="activarModoEdicion"
                     class="rounded-lg px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
                     title="Editar">
                     <Icon icon="mdi:pencil-outline" class="w-5 h-5 shrink-0" aria-hidden="true" />
@@ -83,13 +83,59 @@
 
                 <!-- Content -->
                 <div v-else-if="solicitud" class="space-y-6">
-                  <!-- Botón de Contacto WhatsApp -->
-                  <div class="flex flex-wrap gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
-                    <a :href="getWhatsAppLink()" target="_blank" rel="noopener noreferrer"
-                      class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                  <div
+                    v-if="esSolicitudDenegada"
+                    class="rounded-lg border border-red-300/80 bg-red-50 p-4 dark:border-red-800/70 dark:bg-red-950/35"
+                    role="status"
+                  >
+                    <div class="flex gap-3">
+                      <Icon icon="mdi:file-cancel-outline" class="h-6 w-6 shrink-0 text-red-600 dark:text-red-400 mt-0.5" aria-hidden="true" />
+                      <div class="min-w-0 text-sm text-red-950 dark:text-red-100">
+                        <p class="font-semibold">Solicitud denegada</p>
+                        <p class="mt-2 leading-relaxed">
+                          El registro permanece en el listado para consulta. El solicitante debe
+                          <strong>crear una nueva solicitud</strong> en el portal si desea continuar.
+                          Indíquele por WhatsApp (o copie el celular) que debe iniciar el trámite de nuevo.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Contacto: WhatsApp + número siempre visible -->
+                  <div
+                    class="flex flex-col gap-3 pb-4 border-b border-gray-200 dark:border-gray-700 sm:flex-row sm:flex-wrap sm:items-center"
+                  >
+                    <a
+                      v-if="whatsappHref"
+                      :href="whatsappHref"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                    >
                       <Icon icon="mdi:whatsapp" class="w-5 h-5 mr-2 shrink-0" aria-hidden="true" />
                       Contactar por WhatsApp
                     </a>
+                    <div
+                      v-else
+                      class="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+                    >
+                      <Icon icon="mdi:whatsapp" class="h-5 w-5 shrink-0 opacity-60" aria-hidden="true" />
+                      <span>Celular no válido para abrir WhatsApp automáticamente</span>
+                    </div>
+                    <div
+                      v-if="celularDisplay"
+                      class="flex flex-wrap items-center gap-2 text-sm text-gray-800 dark:text-gray-100"
+                    >
+                      <span class="text-gray-500 dark:text-gray-400">Número:</span>
+                      <span class="font-mono font-semibold tabular-nums">{{ celularDisplay }}</span>
+                      <button
+                        type="button"
+                        class="rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+                        @click="copiarCelular"
+                      >
+                        {{ copiadoCelular ? "Copiado" : "Copiar" }}
+                      </button>
+                    </div>
                   </div>
 
                   <!-- Información del Solicitante -->
@@ -278,8 +324,8 @@
                           </p>
                         </div>
 
-                        <!-- Botones de Cambio de Estado Rápido (solo cuando NO está en modo edición) -->
-                        <div v-if="!modoEdicion" class="pt-3 space-y-2">
+                        <!-- Cambio rápido de estado: no aplica si ya está denegada (solo lectura) -->
+                        <div v-if="!modoEdicion && !esSolicitudDenegada" class="pt-3 space-y-2">
                           <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Cambio Rápido de Estado</p>
                           <button @click="solicitarCambioEstado('aprobar')" :disabled="cambiandoEstado"
                             class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
@@ -320,66 +366,64 @@
                         </div>
                         <div>
                           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Comprobante / pago</label>
+                          <p
+                            v-if="modoEdicion"
+                            class="mb-3 rounded-md border border-amber-200/80 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100"
+                          >
+                            La ruta o URL del comprobante <strong>no es editable</strong> desde este detalle (solo lectura).
+                          </p>
 
-                          <!-- Modo edición: input para URL -->
-                          <div v-if="modoEdicion" class="space-y-2">
-                            <input v-model="formEdicion.voucherpago" type="text" placeholder="URL del comprobante o marcador de efectivo"
-                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#C88A2A] focus:border-transparent" />
-                            <button v-if="formEdicion.voucherpago && !esMarcadorPagoEfectivo(formEdicion.voucherpago)" @click="abrirVoucher(formEdicion.voucherpago)" type="button"
-                              class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors">
-                              <Icon icon="mdi:eye-outline" class="w-3 h-3 mr-1 shrink-0" aria-hidden="true" />
-                              Vista previa
-                            </button>
-                          </div>
-
-                          <!-- Modo vista: pago en efectivo -->
-                          <div v-else-if="esMarcadorPagoEfectivo(solicitud.voucherpago)"
+                          <!-- Pago en efectivo (solo lectura; igual en edición) -->
+                          <div v-if="esMarcadorPagoEfectivo(solicitud.voucherpago)"
                             class="rounded-lg border border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/90 dark:bg-emerald-900/25 px-4 py-3">
                             <div class="flex items-start gap-2">
                               <Icon icon="mdi:cash-multiple" class="w-5 h-5 text-emerald-700 dark:text-emerald-300 shrink-0 mt-0.5" aria-hidden="true" />
-                              <div>
+                              <div class="min-w-0 flex-1">
                                 <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Pago en efectivo</p>
                                 <p class="text-xs text-emerald-800/90 dark:text-emerald-200/90 mt-1 leading-relaxed">
                                   El solicitante indicó que pagará en la iglesia. No hay comprobante digital; la parroquia gestionará el cobro.
                                 </p>
+                                <p class="mt-2 text-xs font-medium text-emerald-900/80 dark:text-emerald-200/90">Valor registrado en <code class="font-mono">voucherpago</code></p>
+                                <p class="mt-1 break-all font-mono text-xs text-emerald-950 dark:text-emerald-50 select-text">{{ solicitud.voucherpago }}</p>
                               </div>
                             </div>
                           </div>
 
-                          <!-- Modo vista: voucher digital -->
-                          <div v-else>
-                            <div v-if="solicitud.voucherpago" class="space-y-3">
-                              <!-- Previsualización de imagen inline -->
-                              <div v-if="voucherCargado && !voucherError"
-                                class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-48">
-                                <img
-                                  :src="getVoucherUrl(solicitud.voucherpago)"
-                                  :alt="'Voucher de pago'"
-                                  class="w-full object-contain max-h-48 bg-white"
-                                  @load="voucherCargado = true; voucherError = false"
-                                  @error="voucherError = true"
-                                />
-                              </div>
-
-                              <!-- Estado de carga o error del voucher -->
-                              <div v-else-if="voucherError"
-                                class="flex items-center gap-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                                <Icon icon="mdi:alert-outline" class="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" aria-hidden="true" />
-                                <span class="text-xs text-yellow-700 dark:text-yellow-300">
-                                  No se pudo cargar la imagen del voucher
-                                </span>
-                              </div>
-
-                              <!-- Botón para abrir en nueva pestaña (siempre visible si hay URL) -->
-                              <button @click="abrirVoucher(solicitud.voucherpago)" type="button"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                <Icon icon="mdi:open-in-new" class="w-4 h-4 mr-2 shrink-0" aria-hidden="true" />
-                                Abrir Voucher
-                              </button>
+                          <!-- Voucher digital (solo lectura) -->
+                          <div v-else-if="solicitud.voucherpago" class="space-y-3">
+                            <div class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-600 dark:bg-gray-900/50">
+                              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">URL o ruta del comprobante</p>
+                              <p class="select-text break-all font-mono text-xs leading-relaxed text-gray-900 dark:text-gray-100">
+                                {{ solicitud.voucherpago }}
+                              </p>
+                            </div>
+                            <div v-if="voucherCargado && !voucherError"
+                              class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-48">
+                              <img
+                                :src="getVoucherUrl(solicitud.voucherpago)"
+                                :alt="'Voucher de pago'"
+                                class="w-full object-contain max-h-48 bg-white"
+                                @load="voucherCargado = true; voucherError = false"
+                                @error="voucherError = true"
+                              />
                             </div>
 
-                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">No disponible</p>
+                            <div v-else-if="voucherError"
+                              class="flex items-center gap-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                              <Icon icon="mdi:alert-outline" class="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" aria-hidden="true" />
+                              <span class="text-xs text-yellow-700 dark:text-yellow-300">
+                                No se pudo cargar la imagen del voucher
+                              </span>
+                            </div>
+
+                            <button @click="abrirVoucher(solicitud.voucherpago)" type="button"
+                              class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                              <Icon icon="mdi:open-in-new" class="w-4 h-4 mr-2 shrink-0" aria-hidden="true" />
+                              Abrir Voucher
+                            </button>
                           </div>
+
+                          <p v-else class="text-sm text-gray-500 dark:text-gray-400">No disponible</p>
                         </div>
                       </div>
                     </div>
@@ -481,6 +525,7 @@ import DetailModalTextSizeControl from "./DetailModalTextSizeControl.vue";
 import { etiquetaPasoRegistro, requiereCampoIntencion } from "../../request/constants/tipoMisaRegistro";
 import { esMarcadorPagoEfectivo } from "../../request/constants/pagoSolicitud";
 import { resolveTipoMisaNombre } from "../utils/resolveTipoMisaNombre";
+import { ID_ESTADO_SOLICITUD_DENEGADA } from "../constants/solicitudEstadoProceso";
 
 /* ================================
    PROPS & EMITS
@@ -520,6 +565,7 @@ const cambiandoEstado = ref(false);
 // Estado para voucher
 const voucherCargado = ref(false);
 const voucherError = ref(false);
+const copiadoCelular = ref(false);
 
 // Estado para modales de confirmación
 const confirmEstado = ref<{
@@ -564,9 +610,65 @@ const formEdicion = ref({
    COMPUTED
 ================================ */
 
+function normalizarCelularPeru(
+  raw: number | string | null | undefined,
+): string | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const digits = String(raw).replace(/\D/g, "");
+  if (digits.length < 9) return null;
+  const nine =
+    digits.length === 9
+      ? digits
+      : digits.length >= 11 && digits.startsWith("51")
+        ? digits.slice(-9)
+        : digits.slice(-9);
+  if (nine.length !== 9 || /^0+$/.test(nine)) return null;
+  return nine;
+}
+
+const esSolicitudDenegada = computed(() => {
+  const s = solicitud.value;
+  if (!s) return false;
+  if (s.idestadoproceso === ID_ESTADO_SOLICITUD_DENEGADA) return true;
+  if (s.idestadoproceso == null) return false;
+  const nombre =
+    opcionesCache.value.get(s.idestadoproceso)?.nombre?.toUpperCase() ?? "";
+  return nombre.includes("DENEG") || nombre.includes("RECHAZ");
+});
+
+const celularDigitos = computed(() =>
+  normalizarCelularPeru(solicitud.value?.celular),
+);
+
 const mensajeWhatsApp = computed(() => {
   if (!solicitud.value) return "";
-  return `Hola ${solicitud.value.nombres}, te contacto respecto a tu solicitud de misa #${solicitud.value.idsolicitud}.`;
+  const nombreCorto =
+    solicitud.value.nombres?.trim().split(/\s+/)[0] ??
+    solicitud.value.nombres;
+  if (esSolicitudDenegada.value) {
+    return `Hola ${nombreCorto}, tu solicitud de misa #${solicitud.value.idsolicitud} fue denegada. Para continuar debes registrar una nueva solicitud en el portal de la Catedral.`;
+  }
+  return `Hola ${nombreCorto}, te contacto respecto a tu solicitud de misa #${solicitud.value.idsolicitud}.`;
+});
+
+const whatsappHref = computed(() => {
+  if (!solicitud.value) return null;
+  const d = celularDigitos.value;
+  if (!d) return null;
+  return `https://wa.me/51${d}?text=${encodeURIComponent(mensajeWhatsApp.value)}`;
+});
+
+const celularDisplay = computed(() => {
+  const s = solicitud.value;
+  if (!s) return null;
+  const d = celularDigitos.value;
+  if (d) {
+    return `+51 ${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
+  }
+  if (s.celular != null && String(s.celular).trim() !== "") {
+    return String(s.celular);
+  }
+  return null;
 });
 
 const nombreTipoDisplay = computed(() => {
@@ -642,10 +744,19 @@ const abrirVoucher = (url: string) => {
    METHODS
 ================================ */
 
-const getWhatsAppLink = (): string => {
-  if (!solicitud.value) return "";
-  const mensaje = encodeURIComponent(mensajeWhatsApp.value);
-  return `https://wa.me/51${solicitud.value.celular}?text=${mensaje}`;
+const copiarCelular = async () => {
+  const text = celularDisplay.value;
+  if (!text) return;
+  const plain = text.replace(/\s+/g, "");
+  try {
+    await navigator.clipboard.writeText(plain);
+    copiadoCelular.value = true;
+    window.setTimeout(() => {
+      copiadoCelular.value = false;
+    }, 2000);
+  } catch {
+    /* ignore */
+  }
 };
 
 const cargarOpcionesPorLista = async (idLista: number) => {
@@ -710,14 +821,14 @@ const cargarDetalle = async () => {
 };
 
 const activarModoEdicion = () => {
-  if (!solicitud.value) return;
+  if (!solicitud.value || esSolicitudDenegada.value) return;
 
   formEdicion.value = {
     nombres: solicitud.value.nombres,
     apellidos: solicitud.value.apellidos,
     idtipodocumento: solicitud.value.idtipodocumento,
     nrodocumento: solicitud.value.nrodocumento,
-    celular: solicitud.value.celular,
+    celular: Number(solicitud.value.celular) || 0,
     correo: solicitud.value.correo,
     idtipomisa: solicitud.value.idtipomisa ?? 0,
     idhorario: solicitud.value.idhorario ?? 0,
@@ -757,7 +868,10 @@ const guardarCambios = async () => {
   error.value = null;
 
   try {
-    await actualizarSolicitud(solicitud.value.idsolicitud, formEdicion.value);
+    await actualizarSolicitud(solicitud.value.idsolicitud, {
+      ...formEdicion.value,
+      voucherpago: String(solicitud.value.voucherpago ?? ""),
+    });
     await cargarDetalle();
     modoEdicion.value = false;
     confirmGuardar.value.visible = false;
@@ -898,7 +1012,15 @@ watch(
       cargarDetalle();
     } else if (!newValue) {
       modoEdicion.value = false;
+      copiadoCelular.value = false;
     }
-  }
+  },
+);
+
+watch(
+  () => solicitud.value?.idestadoproceso,
+  () => {
+    if (esSolicitudDenegada.value) modoEdicion.value = false;
+  },
 );
 </script>

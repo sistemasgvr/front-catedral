@@ -31,6 +31,7 @@ export interface IMencionMisa {
     descripcion: string | null;
     solicitud: {
       idsolicitud: number;
+      idhorario?: number | null;
       idestadoproceso?: number;
       nombres: string;
       apellidos: string;

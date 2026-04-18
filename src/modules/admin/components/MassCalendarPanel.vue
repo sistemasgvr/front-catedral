@@ -110,7 +110,7 @@
               type="button"
               class="w-full text-left px-1.5 sm:px-2 py-1 sm:py-1.5 rounded border transition-all duration-200 shrink-0 min-h-[2.25rem] sm:min-h-[2.5rem]"
               :class="
-                misa.esPrivada
+                misa.soloInformativaCalendario
                   ? 'bg-gray-50 dark:bg-gray-800/80 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400'
                   : 'bg-amber-50/80 dark:bg-amber-900/20 border-[#C88A2A]/30 text-gray-800 dark:text-gray-100 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 cursor-pointer'
               "
@@ -146,11 +146,11 @@
         <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded border border-[#C88A2A]/40 bg-amber-50 dark:bg-amber-900/30"></div>
-            <span>Comunitaria / editable</span>
+            <span>Comunitaria</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"></div>
-            <span>Privada (informativa)</span>
+            <span>Matrimonio, bautizo, privada… (reservada / informativa)</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="w-5 h-5 rounded-full bg-[#C88A2A]"></div>
@@ -206,6 +206,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { getMisasCalendario } from '../../request/actions/getMisasCalendario.action';
 import type { IMisaCalendario } from '../../request/interfaces/misa.interface';
+import { esTipoMisaComunitariaCalendarioPublico } from '../../request/constants/tipoMisaRegistro';
 
 export interface FiltrosCalendarioMisa {
   busqueda: string;
@@ -222,7 +223,8 @@ interface CalendarMisaItem {
   titulo: string;
   tipoMisa: string;
   precio: number;
-  esPrivada: boolean;
+  /** No es comunitaria: matrimonio, bautizo, privada, funeral, etc. */
+  soloInformativaCalendario: boolean;
   menciones: number;
   idTipoMisa: number;
   estado: boolean;
@@ -377,8 +379,10 @@ function horaCorta(hora: string | undefined): string {
 }
 
 function mapMisa(misa: IMisaCalendario): CalendarMisaItem {
-  const esPrivada =
-    misa.tipomisa?.nombre?.toLowerCase().includes('privada') ?? false;
+  const esComunitaria = esTipoMisaComunitariaCalendarioPublico(
+    misa.idtipomisa,
+    misa.tipomisa?.nombre,
+  );
   const mencionesCount = misa.mencionesmisa?.[0]?.count ?? 0;
   const hi = horaCorta(misa.horainicio);
   const hf = horaCorta(misa.horafin);
@@ -389,7 +393,7 @@ function mapMisa(misa: IMisaCalendario): CalendarMisaItem {
     titulo: misa.titulo || 'Misa programada',
     tipoMisa: misa.tipomisa?.nombre || '-',
     precio: misa.tipomisa?.precio ?? 0,
-    esPrivada,
+    soloInformativaCalendario: !esComunitaria,
     menciones: mencionesCount,
     idTipoMisa: misa.idtipomisa,
     estado: misa.estado,

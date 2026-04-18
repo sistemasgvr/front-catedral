@@ -17,7 +17,8 @@ export interface IDetalleSolicitud {
   nrodocumento: string;
   nombres: string;
   apellidos: string;
-  celular: number;
+  /** Puede venir como número o string según el origen JSON. */
+  celular: number | string | null;
   correo: string;
   fechacelebracion: string;
   idtipomisa: number | null;
